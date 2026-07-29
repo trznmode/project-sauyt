@@ -1,0 +1,2577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Sauyt — увеличим бронирования вашего объекта</title>
+  <meta name="description" content="Консалтинг и настройка OTA для отелей: Booking.com, Ostrovok, Bronevik. Казахстан и СНГ. Заявка в WhatsApp.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-soft: #f4f8fc;
+      --bg-muted: #eef4fa;
+      --primary: #1a56db;
+      --primary-hover: #1648c0;
+      --primary-soft: #e8f0fe;
+      --primary-light: #3b82f6;
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow: 0 8px 30px rgba(26, 86, 219, 0.08);
+      --shadow-lg: 0 20px 50px rgba(26, 86, 219, 0.12);
+      --wa: #25d366;
+      --wa-hover: #1fb855;
+      --radius: 16px;
+      --radius-lg: 24px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --header-h: 72px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; }
+
+    .container { width: min(1140px, 92%); margin: 0 auto; }
+
+    /* Header */
+    .header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: var(--header-h);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      transition: box-shadow 0.3s;
+    }
+    .header.scrolled { box-shadow: var(--shadow-sm); }
+    .header__inner {
+      height: 100%; display: flex; align-items: center;
+      justify-content: space-between; gap: 1rem;
+    }
+    .logo {
+      font-weight: 700; font-size: 1.125rem;
+      text-decoration: none; color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .logo span { color: var(--primary); }
+    .nav { display: none; gap: 1.75rem; list-style: none; }
+    .nav a {
+      text-decoration: none; font-size: 0.875rem; font-weight: 500;
+      color: var(--text-secondary); transition: color 0.2s;
+    }
+    .nav a:hover { color: var(--primary); }
+    .header__actions { display: flex; align-items: center; gap: 0.75rem; }
+    .burger {
+      display: flex; width: 44px; height: 44px; border: 1px solid var(--border);
+      border-radius: 12px; background: var(--bg); align-items: center;
+      justify-content: center; cursor: pointer; color: var(--text);
+    }
+    @media (min-width: 960px) {
+      .nav { display: flex; }
+      .burger { display: none; }
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 0.5rem; padding: 0.875rem 1.5rem;
+      font-family: inherit; font-size: 0.9375rem; font-weight: 600;
+      border-radius: 12px; text-decoration: none; border: none;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn--wa {
+      background: var(--wa); color: #fff;
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+    }
+    .btn--wa:hover {
+      background: var(--wa-hover);
+      box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+    }
+    .btn--primary {
+      background: var(--primary); color: #fff;
+      box-shadow: 0 4px 14px rgba(26, 86, 219, 0.25);
+    }
+    .btn--primary:hover { background: var(--primary-hover); }
+    .btn--outline {
+      background: var(--bg); color: var(--primary);
+      border: 1px solid var(--border);
+    }
+    .btn--outline:hover {
+      background: var(--primary-soft); border-color: var(--primary-light);
+    }
+    .btn--sm { padding: 0.625rem 1.125rem; font-size: 0.8125rem; }
+    .btn--lg { padding: 1.05rem 2rem; font-size: 1rem; }
+    .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .mobile-menu {
+      display: none; position: fixed; top: var(--header-h); left: 0; right: 0;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      padding: 1.25rem; flex-direction: column; gap: 0.5rem; z-index: 99;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      padding: 0.75rem 1rem; text-decoration: none; font-weight: 500;
+      color: var(--text-secondary); border-radius: 10px;
+    }
+    .mobile-menu a:hover { background: var(--bg-soft); color: var(--primary); }
+
+    /* Sections */
+    section { padding: clamp(4rem, 8vw, 6rem) 0; }
+    .section-label {
+      display: inline-block; font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--primary); margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      font-weight: 700; letter-spacing: -0.03em;
+      line-height: 1.2; margin-bottom: 1rem;
+    }
+    .section-desc {
+      font-size: 1.0625rem; color: var(--text-secondary);
+      max-width: 560px; line-height: 1.7;
+    }
+    .section-head { margin-bottom: 3rem; }
+    .section-head--center { text-align: center; }
+    .section-head--center .section-desc { margin: 0 auto; }
+
+    [data-reveal] {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    }
+    [data-reveal].visible {
+      opacity: 1; transform: translateY(0);
+    }
+
+    /* Hero */
+    .hero {
+      padding-top: calc(var(--header-h) + 3rem);
+      padding-bottom: 4rem;
+      background: linear-gradient(180deg, var(--bg-soft) 0%, var(--bg) 100%);
+      overflow: hidden;
+    }
+    .hero__grid {
+      display: grid; gap: 3rem; align-items: start;
+    }
+    @media (min-width: 900px) {
+      .hero__grid { grid-template-columns: 1.05fr 0.95fr; }
+    }
+    .hero__badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 0.9rem; background: var(--primary-soft);
+      border-radius: 100px; font-size: 0.8125rem; font-weight: 600;
+      color: var(--primary); margin-bottom: 1.25rem;
+    }
+    .hero__badge::before {
+      content: ''; width: 6px; height: 6px; background: var(--primary);
+      border-radius: 50%;
+    }
+    .hero__title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700; letter-spacing: -0.03em;
+      line-height: 1.1; margin-bottom: 1.25rem;
+    }
+    .hero__title em {
+      font-style: normal; color: var(--primary);
+    }
+    .hero__subtitle {
+      font-size: 1.125rem; color: var(--text-secondary);
+      margin-bottom: 2rem; max-width: 520px; line-height: 1.7;
+    }
+    .hero__btns { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .hero__stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1rem; margin-top: 2.5rem;
+    }
+    .hero__stat {
+      padding: 1rem; background: var(--bg);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+    .hero__stat b {
+      display: block; font-size: 1.25rem; font-weight: 700;
+      color: var(--primary); margin-bottom: 0.15rem;
+    }
+    .hero__stat span { font-size: 0.75rem; color: var(--text-muted); }
+
+    .hero__perks {
+      margin-top: 2rem;
+      padding: 1.35rem 1.4rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+    .hero__perks-title {
+      font-size: 0.8125rem; font-weight: 700; margin-bottom: 0.9rem;
+      color: var(--text);
+    }
+    .hero__perks-list {
+      list-style: none; display: flex; flex-direction: column; gap: 0.7rem;
+    }
+    .hero__perks-list li {
+      display: flex; align-items: flex-start; gap: 0.65rem;
+      font-size: 0.875rem; color: var(--text-secondary); line-height: 1.45;
+    }
+    .hero__perks-list li::before {
+      content: '✓'; flex-shrink: 0; margin-top: 0.1rem;
+      width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--primary-soft); color: var(--primary);
+      border-radius: 50%; font-size: 0.625rem; font-weight: 800;
+    }
+    .hero__otas { margin-top: 1.25rem; }
+    .hero__otas > span {
+      display: block; font-size: 0.6875rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--text-muted); margin-bottom: 0.55rem;
+    }
+    .hero__otas-pills {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+    }
+    .hero__otas-pills i {
+      font-style: normal; font-size: 0.75rem; font-weight: 600;
+      padding: 0.38rem 0.7rem; background: var(--bg-soft);
+      border: 1px solid var(--border); border-radius: 100px;
+      color: var(--text-secondary);
+    }
+    .hero__mini-case {
+      margin-top: 1.25rem;
+      padding: 1.25rem 1.35rem;
+      background: linear-gradient(135deg, #f0fdf4 0%, var(--bg) 55%);
+      border: 1px solid #bbf7d0;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+    .hero__mini-case-head {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 0.5rem; margin-bottom: 0.65rem;
+    }
+    .hero__mini-case-label {
+      font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: #047857;
+    }
+    .hero__mini-case-link {
+      font-size: 0.75rem; font-weight: 600; color: var(--primary);
+      text-decoration: none; white-space: nowrap;
+    }
+    .hero__mini-case-link:hover { text-decoration: underline; }
+    .hero__mini-case-type {
+      font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.4rem;
+    }
+    .hero__mini-case-result {
+      font-size: 0.875rem; color: var(--text-secondary); line-height: 1.45;
+      margin-bottom: 1rem;
+    }
+    .hero__mini-case-metrics {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem;
+    }
+    .hero__mini-case-metrics > div {
+      padding: 0.75rem 0.85rem;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .hero__mini-case-metrics b {
+      display: block; font-size: 1.125rem; font-weight: 700;
+      color: #059669; line-height: 1.1;
+    }
+    .hero__mini-case-metrics span {
+      display: block; font-size: 0.6875rem; font-weight: 600;
+      color: var(--text-muted); margin-top: 0.15rem;
+    }
+    .hero__mini-case-metrics small {
+      display: block; font-size: 0.6875rem; color: var(--text-secondary);
+      margin-top: 0.2rem; line-height: 1.3;
+    }
+    .hero__bridge {
+      display: grid; gap: 1rem;
+      grid-template-columns: repeat(4, 1fr);
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    .hero__bridge-item {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      padding: 1rem 1.1rem;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    }
+    .hero__bridge-icon {
+      width: 40px; height: 40px; flex-shrink: 0;
+      border-radius: 11px; background: var(--primary-soft);
+      color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.125rem; line-height: 1;
+    }
+    .hero__bridge-item b {
+      display: block; font-size: 0.875rem; font-weight: 700;
+      margin-bottom: 0.15rem; line-height: 1.3;
+    }
+    .hero__bridge-item span {
+      font-size: 0.75rem; color: var(--text-muted); line-height: 1.4;
+    }
+
+    .hero__visual {
+      position: relative; background: var(--bg);
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 1.75rem; box-shadow: var(--shadow-lg);
+    }
+    .hero-forecast__float-tag {
+      position: absolute; top: -0.65rem; right: 1.25rem; z-index: 2;
+      font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.02em;
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: #fff; padding: 0.38rem 0.75rem; border-radius: 100px;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+    }
+    .hero__visual::before {
+      content: ''; position: absolute; inset: -1px; border-radius: inherit;
+      padding: 1px; background: linear-gradient(135deg, var(--primary-light), transparent 50%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+    }
+    .hero-forecast { display: flex; flex-direction: column; gap: 1rem; }
+    .hero-forecast__banner {
+      display: flex; gap: 1rem; align-items: flex-start;
+      margin: -1.75rem -1.75rem 0;
+      padding: 1.35rem 1.75rem 1.4rem;
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 55%, #e8f0fe 100%);
+      border-bottom: 1px solid rgba(26, 86, 219, 0.12);
+      border-radius: calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0 0;
+    }
+    .hero-forecast__banner-icon {
+      width: 46px; height: 46px; flex-shrink: 0;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 22px rgba(26, 86, 219, 0.28);
+    }
+    .hero-forecast__banner-icon svg {
+      width: 22px; height: 22px; stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .hero-forecast__banner-tag {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--primary);
+      background: rgba(255, 255, 255, 0.82);
+      padding: 0.28rem 0.6rem; border-radius: 100px;
+      margin-bottom: 0.45rem;
+    }
+    .hero-forecast__banner-title {
+      font-size: 1.0625rem; font-weight: 700; letter-spacing: -0.02em;
+      line-height: 1.3; margin-bottom: 0.35rem; color: var(--text);
+    }
+    .hero-forecast__banner-desc {
+      font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.55;
+    }
+    .hero-forecast__steps {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem;
+    }
+    .hero-forecast__step {
+      display: flex; align-items: flex-start; gap: 0.4rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-secondary);
+      padding: 0.5rem 0.55rem; background: var(--bg-soft);
+      border-radius: 10px; border: 1px solid var(--border);
+      line-height: 1.35;
+    }
+    .hero-forecast__step i {
+      width: 18px; height: 18px; flex-shrink: 0; margin-top: 0.05rem;
+      display: flex; align-items: center; justify-content: center;
+      font-style: normal; font-size: 0.625rem; font-weight: 800;
+      background: var(--primary); color: #fff; border-radius: 50%;
+    }
+    .hero-forecast__section-label {
+      display: block;
+      font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--text-muted);
+      margin-bottom: 0.55rem;
+    }
+    .hero-forecast__mode-hint {
+      font-size: 0.8125rem; font-weight: 600; color: var(--primary);
+      padding: 0.6rem 0.8rem; margin: 0.65rem 0 0;
+      background: var(--primary-soft); border-radius: 10px;
+      border-left: 3px solid var(--primary); line-height: 1.45;
+    }
+    .hero-forecast__results-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+      margin-bottom: 0.55rem;
+    }
+    .hero-forecast__results-head .hero-forecast__section-label { margin-bottom: 0; }
+    .hero-forecast__live {
+      font-size: 0.6875rem; font-weight: 700; color: #059669;
+      display: inline-flex; align-items: center; gap: 0.35rem;
+    }
+    .hero-forecast__live::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: #059669; box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+      animation: hfPulse 2s ease-in-out infinite;
+    }
+    @keyframes hfPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.65; transform: scale(0.92); }
+    }
+    .hero-forecast__head span {
+      display: inline-block;
+      font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--primary); margin-bottom: 0.35rem;
+    }
+    .hero-forecast__head h3 {
+      font-size: 1.125rem; font-weight: 700; letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+    }
+    .hero-forecast__head p {
+      font-size: 0.8125rem; color: var(--text-muted); line-height: 1.45;
+    }
+    .hero-forecast__fields {
+      display: grid; gap: 0.75rem;
+    }
+    .hero-forecast__mode {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;
+    }
+    .hero-forecast__mode-btn {
+      position: relative; cursor: pointer;
+      display: flex; flex-direction: column; gap: 0.15rem;
+      padding: 0.75rem 0.85rem;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 12px; transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    .hero-forecast__mode-btn input {
+      position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
+    }
+    .hero-forecast__mode-btn span {
+      font-size: 0.8125rem; font-weight: 700; color: var(--text); line-height: 1.25;
+    }
+    .hero-forecast__mode-btn small {
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); line-height: 1.3;
+    }
+    .hero-forecast__mode-btn:has(input:checked) {
+      background: var(--primary-soft); border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+    }
+    .hero-forecast__mode-btn:has(input:checked) span { color: var(--primary); }
+    .hero-forecast__mode-btn:has(input:checked) small { color: var(--primary); opacity: 0.85; }
+    .hero-forecast__field label {
+      display: block;
+      font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);
+      margin-bottom: 0.35rem;
+    }
+    .hero-forecast__field input {
+      width: 100%; padding: 0.7rem 0.85rem;
+      font-family: inherit; font-size: 0.9375rem; font-weight: 600;
+      color: var(--text); background: var(--bg-soft);
+      border: 1px solid var(--border); border-radius: 10px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .hero-forecast__field input:focus {
+      outline: none; border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.12);
+    }
+    .hero-forecast__rows { display: flex; flex-direction: column; gap: 0.5rem; }
+    .hero-forecast__row {
+      display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+      padding: 0.85rem 1rem; background: var(--bg-soft);
+      border-radius: 10px; border: 1px solid var(--border);
+    }
+    .hero-forecast__row strong {
+      font-size: 0.8125rem; font-weight: 600; color: var(--text-secondary);
+    }
+    .hero-forecast__row span {
+      font-size: 0.8125rem; font-weight: 700; color: var(--text);
+      text-align: right;
+    }
+    .hero-forecast__row em {
+      font-style: normal; color: #059669; font-weight: 700;
+    }
+    .hero-forecast__conditions {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+    }
+    .hero-forecast__conditions span {
+      font-size: 0.6875rem; font-weight: 600; color: var(--primary);
+      background: var(--primary-soft); padding: 0.3rem 0.55rem;
+      border-radius: 100px; line-height: 1.2;
+    }
+    .hero-forecast__occ-bar { display: flex; flex-direction: column; gap: 0.45rem; }
+    .hero-forecast__occ-bar-top {
+      display: flex; justify-content: space-between; gap: 0.5rem;
+      font-size: 0.75rem; color: var(--text-muted);
+    }
+    .hero-forecast__occ-bar-top b { color: var(--text); font-weight: 700; }
+    .hero-forecast__occ-track {
+      position: relative; height: 10px;
+      background: #e5e7eb; border-radius: 100px; overflow: visible;
+    }
+    .hero-forecast__occ-now {
+      height: 100%; border-radius: 100px;
+      background: linear-gradient(90deg, #93c5fd 0%, var(--primary) 100%);
+      transition: width 0.45s var(--ease);
+      max-width: 100%;
+    }
+    .hero-forecast__occ-goal {
+      position: absolute; top: -4px; bottom: -4px; width: 3px;
+      left: 80%; transform: translateX(-50%);
+      background: #059669; border-radius: 2px;
+      box-shadow: 0 0 0 2px var(--bg);
+      transition: left 0.45s var(--ease);
+    }
+    .hero-forecast__payback { display: block; }
+    .hero-forecast__payback.is-hidden { display: none; }
+    .hero-forecast__occ-gap {
+      font-size: 0.75rem; font-weight: 600; color: #059669;
+    }
+    .hero-forecast__highlight {
+      text-align: center; padding: 1.25rem 1rem;
+      background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%);
+      border-radius: 14px; color: #fff;
+    }
+    .hero-forecast__highlight b {
+      font-size: 2.5rem; font-weight: 700; display: block; line-height: 1;
+    }
+    .hero-forecast__highlight small {
+      font-size: 0.8125rem; opacity: 0.92; display: block; margin-top: 0.35rem;
+    }
+    .hero-forecast__highlight-extra {
+      margin-top: 0.9rem; padding-top: 0.9rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      font-size: 1.0625rem; font-weight: 700; letter-spacing: -0.01em;
+    }
+    .hero-forecast__row--accent {
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+      border-color: #bbf7d0;
+    }
+    .hero-forecast__row--accent strong { color: #047857; }
+    .hero-forecast__row--payback {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border-color: #bfdbfe;
+    }
+    .hero-forecast__row--payback strong { color: var(--primary); }
+    .hero-forecast__cta {
+      width: 100%; margin-top: 0.15rem;
+      font-size: 0.875rem; padding: 0.85rem 1.25rem;
+    }
+    .hero-forecast__note {
+      font-size: 0.6875rem; color: var(--text-muted); line-height: 1.45;
+    }
+
+    /* Problem */
+    .problem { background: var(--bg); }
+    .cards-4 {
+      display: grid; gap: 1.25rem;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.3s var(--ease), box-shadow 0.3s;
+    }
+    .card:hover {
+      transform: translateY(-4px); box-shadow: var(--shadow);
+    }
+    /* Unified SaaS icons */
+    .icon-box {
+      --icon-bg: linear-gradient(135deg, #e8f0fe 0%, #dbeafe 100%);
+      --icon-color: #1a56db;
+      --icon-shadow: 0 8px 20px rgba(26, 86, 219, 0.12);
+      width: 56px; height: 56px; border-radius: 16px;
+      background: var(--icon-bg); color: var(--icon-color);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.25rem; flex-shrink: 0;
+      box-shadow: var(--icon-shadow);
+      transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+    }
+    .icon-box svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .card:hover .icon-box,
+    .solution-item:hover .icon-box,
+    .service-card:hover .icon-box { transform: translateY(-3px) scale(1.04); box-shadow: 0 12px 28px rgba(26, 86, 219, 0.18); }
+    .icon-box--danger {
+      --icon-bg: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      --icon-color: #dc2626;
+      --icon-shadow: 0 8px 20px rgba(220, 38, 38, 0.12);
+    }
+    .icon-box--success {
+      --icon-bg: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      --icon-color: #059669;
+      --icon-shadow: 0 8px 20px rgba(5, 150, 105, 0.12);
+    }
+    .icon-box--violet {
+      --icon-bg: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+      --icon-color: #6d28d9;
+      --icon-shadow: 0 8px 20px rgba(109, 40, 217, 0.12);
+    }
+    .icon-box--amber {
+      --icon-bg: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      --icon-color: #d97706;
+      --icon-shadow: 0 8px 20px rgba(217, 119, 6, 0.12);
+    }
+    .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .card p { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; }
+
+    /* Solution */
+    .solution { background: var(--bg-soft); }
+    .solution-grid {
+      display: grid; gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    .solution-item {
+      display: flex; gap: 1.25rem; padding: 1.5rem;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .solution-item:hover {
+      border-color: var(--primary-light); box-shadow: var(--shadow);
+    }
+    .solution-item .icon-box { margin-bottom: 0; }
+    .solution-item h3 { font-size: 0.9375rem; font-weight: 600; margin-bottom: 0.35rem; }
+    .solution-item p { font-size: 0.8125rem; color: var(--text-secondary); }
+
+    /* Services */
+    .services-grid {
+      display: grid; gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    .service-card {
+      position: relative; overflow: hidden;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 2rem;
+      display: flex; flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      transition:
+        transform 0.35s var(--ease),
+        box-shadow 0.35s var(--ease),
+        border-color 0.35s var(--ease),
+        background 0.35s var(--ease);
+    }
+    .service-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary) 0%, #3b82f6 100%);
+      opacity: 0;
+      transform: scaleX(0.4);
+      transform-origin: center;
+      transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+    }
+    .service-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(26, 86, 219, 0.35);
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 55%);
+      box-shadow: 0 16px 44px rgba(26, 86, 219, 0.14);
+    }
+    .service-card:hover::before {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+    .service-card:hover .service-card__tag { color: var(--primary); }
+    .service-card:hover .icon-box {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 12px 28px rgba(26, 86, 219, 0.18);
+    }
+    .services-grid .service-card[data-reveal]:nth-child(1) { transition-delay: 0s; }
+    .services-grid .service-card[data-reveal]:nth-child(2) { transition-delay: 0.08s; }
+    .services-grid .service-card[data-reveal]:nth-child(3) { transition-delay: 0.16s; }
+    .service-card__head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 1rem; margin-bottom: 0.5rem;
+    }
+    .service-card__head .icon-box { margin-bottom: 0; }
+    .service-card__tag {
+      font-size: 0.75rem; font-weight: 600; color: var(--primary);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;
+    }
+    .service-card h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
+    .service-card__meta {
+      font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.25rem;
+    }
+    .service-card ul {
+      list-style: none; flex-grow: 1; margin-bottom: 1.5rem;
+    }
+    .service-card li {
+      font-size: 0.875rem; color: var(--text-secondary);
+      padding: 0.4rem 0 0.4rem 1.25rem; position: relative;
+    }
+    .service-card li::before {
+      content: ''; position: absolute; left: 0; top: 0.7em;
+      width: 5px; height: 5px; background: var(--primary); border-radius: 50%;
+    }
+    .service-card__price {
+      font-size: 1.75rem; font-weight: 700; color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+    .service-card__price span { font-size: 0.9375rem; font-weight: 500; color: var(--text-muted); }
+    .service-card__note { font-size: 0.875rem; color: var(--text-muted); font-style: italic; }
+
+    /* Platforms */
+    .platforms {
+      background: var(--bg-soft); padding: 3rem 0 4rem;
+    }
+    .platforms__list {
+      display: flex; flex-wrap: wrap; gap: 0.65rem; justify-content: center;
+      margin-bottom: 2rem;
+    }
+    .platform-pill {
+      font-family: inherit;
+      padding: 0.75rem 1.35rem; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 100px;
+      font-size: 0.9375rem; font-weight: 600; color: var(--text);
+      box-shadow: var(--shadow-sm); cursor: pointer;
+      transition: all 0.28s var(--ease);
+    }
+    .platform-pill:hover {
+      border-color: var(--primary-light); color: var(--primary);
+      box-shadow: var(--shadow); transform: translateY(-2px);
+    }
+    .platform-pill.active {
+      background: var(--primary); color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 6px 20px rgba(26, 86, 219, 0.3);
+    }
+    .platforms__detail {
+      max-width: 720px; margin: 0 auto;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+    }
+    .platforms__detail.is-switching {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    .platforms__detail-inner {
+      display: grid; gap: 0;
+    }
+    @media (min-width: 640px) {
+      .platforms__detail-inner {
+        grid-template-columns: minmax(340px, 36%) 1fr;
+      }
+    }
+    .platforms__logo-box {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 0.75rem;
+      padding: 2.25rem 1.75rem;
+      background: var(--bg-muted);
+      border-bottom: 1px solid var(--border);
+      min-height: 240px;
+    }
+    @media (min-width: 640px) {
+      .platforms__logo-box {
+        border-bottom: none;
+        border-right: 1px solid var(--border);
+      }
+    }
+    .platforms__logo {
+      width: 100%;
+      max-width: 340px;
+      min-height: 64px;
+      height: auto;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      font-size: clamp(1.125rem, 2.8vw, 1.625rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      text-align: center;
+      color: #fff;
+      box-shadow: var(--shadow-sm);
+    }
+    .platforms__logo--image {
+      background: transparent;
+      box-shadow: none;
+      width: 100%;
+      max-width: 340px;
+      height: auto;
+      min-height: 64px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .platforms__logo--image img {
+      display: block;
+      width: 100%;
+      max-width: 340px;
+      height: auto;
+      object-fit: contain;
+      margin: 0 auto;
+    }
+    .platforms__logo-note {
+      font-size: 0.6875rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--text-muted);
+    }
+    .platforms__body { padding: 1.75rem 2rem; text-align: left; }
+    .platforms__body h3 {
+      font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .platforms__body .platforms__role {
+      font-size: 0.875rem; color: var(--primary); font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .platforms__body p {
+      font-size: 0.9375rem; color: var(--text-secondary);
+      line-height: 1.65; margin-bottom: 1.25rem;
+    }
+    .platforms__benefits {
+      list-style: none; display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .platforms__benefits li {
+      font-size: 0.875rem; color: var(--text-secondary);
+      padding-left: 1.35rem; position: relative; line-height: 1.5;
+    }
+    .platforms__benefits li::before {
+      content: '';
+      position: absolute; left: 0; top: 0.55em;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--primary);
+    }
+
+    /* Cases carousel */
+    .cases-carousel {
+      position: relative;
+      margin-top: 0.5rem;
+    }
+    .cases-nav {
+      flex-shrink: 0; width: 44px; height: 44px;
+      border: 2px solid var(--border); border-radius: 12px;
+      background: var(--bg); color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.25s var(--ease);
+      box-shadow: var(--shadow-sm);
+    }
+    .cases-nav:hover:not(:disabled) {
+      border-color: var(--primary); background: var(--primary-soft);
+      transform: scale(1.05);
+    }
+    .cases-nav:disabled {
+      opacity: 0.35; cursor: not-allowed;
+    }
+    .cases-nav svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; }
+    .cases-track-wrap {
+      flex: 1; min-width: 0;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      background: var(--bg-soft);
+      border: 2px solid var(--border);
+      padding: 1.25rem 0;
+    }
+    .cases-track {
+      display: flex; gap: 1.25rem;
+      overflow-x: auto; scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      padding: 0.25rem 1.25rem 0.75rem;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary-light) transparent;
+    }
+    .cases-track::-webkit-scrollbar { height: 6px; }
+    .cases-track::-webkit-scrollbar-thumb {
+      background: var(--primary-light); border-radius: 100px;
+    }
+    .case-card {
+      flex: 0 0 min(100%, 360px);
+      scroll-snap-align: center;
+      background: var(--bg);
+      border: 2px solid rgba(26, 86, 219, 0.2);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    @media (min-width: 640px) {
+      .case-card { flex: 0 0 380px; }
+    }
+    .case-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 12px 36px rgba(26, 86, 219, 0.12);
+    }
+    .case-card__head {
+      padding: 1.25rem 1.5rem;
+      background: linear-gradient(180deg, var(--primary-soft) 0%, var(--bg-muted) 100%);
+      border-bottom: 2px solid var(--border);
+    }
+    .case-card__type {
+      font-size: 0.8125rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--primary); margin-bottom: 0.4rem;
+    }
+    .case-card__city {
+      font-size: 0.9375rem; font-weight: 600; color: var(--text);
+    }
+    .case-card__body { padding: 1.5rem 1.5rem 1.75rem; }
+    .case-card__block {
+      margin-bottom: 1.15rem;
+      padding-bottom: 1.15rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .case-card__block:last-of-type {
+      border-bottom: none; padding-bottom: 0; margin-bottom: 0;
+    }
+    .case-card__label {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--primary); margin-bottom: 0.5rem;
+    }
+    .case-card__block p {
+      font-size: 0.9375rem; color: var(--text);
+      line-height: 1.65;
+    }
+    .case-metrics {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.65rem;
+      margin-top: 1.35rem; padding-top: 1.35rem;
+      border-top: 2px solid var(--border);
+    }
+    .case-metric {
+      padding: 0.75rem; background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px; text-align: center;
+    }
+    .case-metric__val {
+      font-size: 1.25rem; font-weight: 700; color: var(--primary);
+      display: block; margin-bottom: 0.2rem; line-height: 1.2;
+    }
+    .case-metric__lbl {
+      font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);
+      display: block;
+    }
+    .case-metric__change {
+      font-size: 0.8125rem; font-weight: 600; color: #059669;
+      margin-top: 0.35rem; display: block;
+    }
+    .cases-footer {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 1rem; margin-top: 1.25rem;
+    }
+    .cases-controls {
+      display: flex; align-items: center; justify-content: center;
+      gap: 1rem; width: 100%; max-width: 320px;
+    }
+    .cases-dots-wrap {
+      width: 100%; overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      display: flex; justify-content: center;
+      padding: 0.25rem 0;
+      scrollbar-width: none;
+    }
+    .cases-dots-wrap::-webkit-scrollbar { display: none; }
+    .cases-dots {
+      display: flex; gap: 0.5rem; align-items: center;
+      flex-shrink: 0;
+    }
+    .cases-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      border: none; padding: 0; background: var(--border);
+      cursor: pointer; transition: all 0.25s;
+    }
+    .cases-dot.active {
+      width: 24px; border-radius: 100px; background: var(--primary);
+    }
+    .cases-counter {
+      font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);
+      min-width: 4rem; text-align: center;
+    }
+
+    /* Trust marquee */
+    .trust { background: var(--bg-soft); overflow: hidden; }
+    .trust__marquee {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      padding: 0.75rem 0 1.5rem;
+      mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+    }
+    .trust__track {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      width: max-content;
+      gap: 1rem;
+      padding: 0.25rem 0.5rem;
+      will-change: transform;
+      animation: trustMarquee 55s linear infinite;
+    }
+    .trust__track:hover { animation-play-state: paused; }
+    @keyframes trustMarquee {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-50%, 0, 0); }
+    }
+    .trust__item {
+      flex: 0 0 auto;
+      width: 240px;
+      padding: 1rem 1.25rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .trust__item:hover {
+      border-color: var(--primary-light);
+      box-shadow: var(--shadow);
+    }
+    .trust__item-name {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      line-height: 1.35;
+    }
+    .trust__item-city {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .trust__item-rooms {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-top: 0.15rem;
+    }
+
+    /* Geo — cards */
+    .geo-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1rem; margin-bottom: 1.75rem;
+    }
+    .geo-stat {
+      text-align: center; padding: 1.15rem 1rem;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    }
+    .geo-stat b {
+      display: block; font-size: 1.5rem; font-weight: 700;
+      color: var(--primary); line-height: 1.1; margin-bottom: 0.2rem;
+    }
+    .geo-stat span { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+    .geo-cards {
+      display: grid; gap: 1rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 640px) {
+      .geo-cards { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1100px) {
+      .geo-cards { grid-template-columns: repeat(3, 1fr); }
+      .geo-card--featured { grid-column: span 2; }
+    }
+    .geo-card {
+      display: flex; flex-direction: column; gap: 0.85rem;
+      padding: 1.35rem 1.4rem;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+    }
+    .geo-card:hover {
+      border-color: var(--primary-light);
+      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+    }
+    .geo-card--featured {
+      background: linear-gradient(135deg, #f8fbff 0%, var(--bg) 55%);
+      border-color: rgba(26, 86, 219, 0.22);
+    }
+    .geo-card__head {
+      display: flex; align-items: flex-start; gap: 0.85rem;
+    }
+    .geo-card__flag {
+      width: 44px; height: 44px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; line-height: 1;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .geo-card__head-text { flex: 1; min-width: 0; }
+    .geo-card__head-text h3 {
+      font-size: 1rem; font-weight: 700; letter-spacing: -0.02em;
+      margin-bottom: 0.25rem; line-height: 1.25;
+    }
+    .geo-card__badge {
+      display: inline-block;
+      font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--primary);
+      background: var(--primary-soft); padding: 0.22rem 0.5rem;
+      border-radius: 100px;
+    }
+    .geo-card__count {
+      flex-shrink: 0; font-size: 0.8125rem; font-weight: 700;
+      color: #059669; background: #ecfdf5;
+      border: 1px solid #bbf7d0; padding: 0.35rem 0.6rem;
+      border-radius: 100px; white-space: nowrap;
+    }
+    .geo-card__desc {
+      font-size: 0.8125rem; color: var(--text-muted); line-height: 1.45;
+    }
+    .geo-card__cities {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+    }
+    .geo-card__cities span {
+      font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);
+      background: var(--bg-soft); border: 1px solid var(--border);
+      padding: 0.35rem 0.65rem; border-radius: 100px; line-height: 1.2;
+    }
+    .geo-foot {
+      margin-top: 1.5rem; text-align: center;
+    }
+    .geo-foot a {
+      font-size: 0.9375rem; font-weight: 600; color: var(--primary);
+      text-decoration: none;
+    }
+    .geo-foot a:hover { text-decoration: underline; }
+
+    /* Instagram */
+    .instagram {
+      background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+      color: #fff; text-align: center;
+    }
+    .instagram .section-title { color: #fff; }
+    .instagram .section-desc { color: rgba(255,255,255,0.9); margin: 0 auto 2rem; }
+    .instagram__handle {
+      font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;
+      display: block; text-decoration: none; color: #fff;
+    }
+    .instagram__handle:hover { text-decoration: underline; }
+    .btn--white {
+      background: #fff; color: #833ab4;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .btn--white:hover { transform: translateY(-2px); }
+
+    /* CTA */
+    .cta {
+      background: var(--primary); color: #fff; text-align: center;
+    }
+    .cta .section-title { color: #fff; max-width: 640px; margin: 0 auto 1rem; }
+    .cta .section-desc { color: rgba(255,255,255,0.85); margin: 0 auto 2rem; max-width: 480px; }
+
+    /* Footer */
+    .footer {
+      background: var(--text); color: rgba(255,255,255,0.75);
+      padding: 3rem 0 2rem; font-size: 0.875rem;
+    }
+    .footer__grid {
+      display: grid; gap: 2rem;
+      grid-template-columns: 1fr;
+      margin-bottom: 2.5rem;
+    }
+    @media (min-width: 700px) {
+      .footer__grid { grid-template-columns: 1.5fr 1fr 1fr; }
+    }
+    .footer__brand { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem; }
+    .footer__brand span { color: var(--primary-light); }
+    .footer__links { list-style: none; }
+    .footer__links li { margin-bottom: 0.5rem; }
+    .footer__links a {
+      color: rgba(255,255,255,0.75); text-decoration: none; transition: color 0.2s;
+    }
+    .footer__links a:hover { color: #fff; }
+    .footer__bottom {
+      padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);
+      text-align: center; font-size: 0.8125rem; color: rgba(255,255,255,0.5);
+    }
+
+    /* Floating WA */
+    .fab-wa {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 90;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--wa); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 24px rgba(37, 211, 102, 0.45);
+      text-decoration: none; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .fab-wa:hover {
+      transform: scale(1.06);
+      box-shadow: 0 8px 28px rgba(37, 211, 102, 0.5);
+    }
+    .fab-wa svg { width: 28px; height: 28px; }
+
+    /* Mobile: кейсы и география */
+    @media (max-width: 767px) {
+      #cases,
+      #geo {
+        padding: clamp(2.5rem, 6vw, 3.5rem) 0;
+        overflow-x: hidden;
+      }
+      #cases .section-head,
+      #geo .section-head {
+        margin-bottom: 1.5rem;
+      }
+      #cases .section-title,
+      #geo .section-title {
+        font-size: clamp(1.35rem, 5.5vw, 1.65rem);
+        line-height: 1.25;
+      }
+      #cases .section-desc,
+      #geo .section-desc {
+        font-size: 0.9375rem;
+        line-height: 1.55;
+      }
+      #geo .container,
+      #cases .container {
+        width: min(100% - 1.5rem, 1140px);
+      }
+
+      /* Кейсы */
+      .cases-track-wrap {
+        padding: 0.75rem 0;
+        border-width: 1px;
+        border-radius: var(--radius);
+      }
+      .cases-track {
+        gap: 0.875rem;
+        padding: 0.25rem 0.875rem 0.875rem;
+        scroll-padding-inline: 0.875rem;
+      }
+      .case-card {
+        flex: 0 0 var(--case-slide-w, 100%);
+        scroll-snap-align: start;
+        max-width: none;
+      }
+      .case-card__head { padding: 1rem 1.125rem; }
+      .case-card__body { padding: 1.125rem; }
+      .case-card__block p { font-size: 0.9375rem; }
+      .case-metrics {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+      }
+      .case-metric { padding: 0.65rem 0.5rem; }
+      .case-metric__val { font-size: 1.125rem; }
+      .case-metric__change { font-size: 0.75rem; word-break: break-word; }
+      .cases-controls { max-width: none; gap: 0.75rem; }
+      .cases-nav { width: 48px; height: 48px; }
+      .cases-counter { font-size: 1rem; min-width: 5rem; }
+      .cases-dots-wrap { justify-content: flex-start; }
+
+      .geo-stats { gap: 0.65rem; }
+      .geo-stat { padding: 0.9rem 0.5rem; }
+      .geo-stat b { font-size: 1.25rem; }
+      .geo-card__head { flex-wrap: wrap; }
+      .geo-card__count { margin-left: auto; }
+
+    }
+
+    @media (max-width: 380px) {
+      .case-metrics { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .hero__stats { grid-template-columns: 1fr; }
+      .hero__btns .btn { width: 100%; }
+      .hero-forecast__mode { grid-template-columns: 1fr; }
+      .hero-forecast__steps { grid-template-columns: 1fr; }
+      .hero-forecast__banner { flex-direction: column; gap: 0.85rem; }
+      .hero-forecast__float-tag { right: 50%; transform: translateX(50%); white-space: nowrap; }
+      .hero__bridge { grid-template-columns: 1fr; margin-top: 2rem; padding-top: 1.5rem; }
+    }
+    @media (min-width: 601px) and (max-width: 899px) {
+      .hero__bridge { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-forecast__live::before { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="#" class="logo">Project <span>Sauyt</span></a>
+      <nav>
+        <ul class="nav">
+          <li><a href="#problem">Проблема</a></li>
+          <li><a href="#solution">Решение</a></li>
+          <li><a href="#services">Услуги</a></li>
+          <li><a href="#cases">Кейсы</a></li>
+          <li><a href="#geo">География</a></li>
+        </ul>
+      </nav>
+      <div class="header__actions">
+        <a href="#" class="btn btn--wa btn--sm" data-wa>WhatsApp</a>
+        <button class="burger" id="burger" aria-label="Меню">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#problem">Проблема</a>
+    <a href="#solution">Решение</a>
+    <a href="#services">Услуги</a>
+    <a href="#cases">Кейсы</a>
+    <a href="#geo">География</a>
+    <a href="#" class="btn btn--wa" data-wa>Написать в WhatsApp</a>
+  </div>
+
+  <!-- 1. HERO -->
+  <section class="hero" id="top">
+    <div class="container">
+      <div class="hero__grid">
+        <div data-reveal>
+          <div class="hero__badge">B2B · OTA для объектов размещения</div>
+          <h1 class="hero__title">Увеличим <em>количество бронирований</em> вашего объекта</h1>
+          <p class="hero__subtitle">
+            Project Sauyt настраивает и оптимизирует OTA-платформы, повышает эффективность карточек объектов и помогает расти по доходу — без лишней теории, с фокусом на результат.
+          </p>
+          <div class="hero__btns">
+            <a href="#" class="btn btn--wa" data-wa>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Написать в WhatsApp
+            </a>
+            <a href="#services" class="btn btn--outline">Подробнее</a>
+          </div>
+          <div class="hero__stats">
+            <div class="hero__stat"><b>50 000 ₸</b><span>обучение OTA</span></div>
+            <div class="hero__stat"><b>от 60 000 ₸</b><span>настройка под ключ</span></div>
+            <div class="hero__stat"><b>6 OTA</b><span>платформ в работе</span></div>
+          </div>
+          <div class="hero__perks" data-reveal>
+            <p class="hero__perks-title">Что получаете с Project Sauyt</p>
+            <ul class="hero__perks-list">
+              <li>Настройка и оптимизация карточек на ведущих OTA</li>
+              <li>Рост загрузки до 60% после настройки · до 80% при сопровождении</li>
+              <li>Обучение команды работе в Extranet — без «чёрного ящика»</li>
+              <li>25+ объектов в портфеле · Казахстан и СНГ</li>
+            </ul>
+          </div>
+          <div class="hero__otas" data-reveal>
+            <span>Работаем с платформами</span>
+            <div class="hero__otas-pills">
+              <i>Booking.com</i>
+              <i>Ostrovok</i>
+              <i>Bronevik</i>
+              <i>Trip.com</i>
+              <i>Airbnb</i>
+              <i>Expedia</i>
+            </div>
+          </div>
+          <article class="hero__mini-case" data-reveal>
+            <div class="hero__mini-case-head">
+              <span class="hero__mini-case-label">Мини-кейс · обезличено</span>
+              <a href="#cases" class="hero__mini-case-link">Все кейсы →</a>
+            </div>
+            <p class="hero__mini-case-type">Отель · 32 номера · 🇰🇿 Алматы</p>
+            <p class="hero__mini-case-result">+31% бронирований за 60 дней после аудита и настройки Booking.com — тарифы, контент и работа с отзывами.</p>
+            <div class="hero__mini-case-metrics">
+              <div>
+                <b>+18%</b>
+                <span>RevPAR</span>
+                <small>41 500 → 48 970 ₸</small>
+              </div>
+              <div>
+                <b>+24%</b>
+                <span>Загрузка</span>
+                <small>58% → 72%</small>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div class="hero__visual" data-reveal>
+          <span class="hero-forecast__float-tag">Попробуйте сами ↓</span>
+          <div class="hero-forecast" id="heroForecast">
+            <div class="hero-forecast__banner">
+              <div class="hero-forecast__banner-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M8 14h2M12 14h2M8 18h2M12 18h4"/></svg>
+              </div>
+              <div>
+                <span class="hero-forecast__banner-tag">Бесплатный расчёт · за 30 секунд</span>
+                <p class="hero-forecast__banner-title">Узнайте, сколько может зарабатывать ваш объект</p>
+                <p class="hero-forecast__banner-desc">Калькулятор покажет прогноз загрузки и доп. дохода по вашим цифрам. Меняйте данные — результат обновится сразу. Готовый расчёт можно отправить нам в WhatsApp.</p>
+              </div>
+            </div>
+            <div class="hero-forecast__steps" aria-hidden="true">
+              <div class="hero-forecast__step"><i>1</i> Выберите услугу</div>
+              <div class="hero-forecast__step"><i>2</i> Введите данные объекта</div>
+              <div class="hero-forecast__step"><i>3</i> Получите прогноз</div>
+            </div>
+            <div>
+              <span class="hero-forecast__section-label">Шаг 1 · Формат работы</span>
+              <div class="hero-forecast__mode" role="radiogroup" aria-label="Формат услуги">
+                <label class="hero-forecast__mode-btn">
+                  <input type="radio" name="hfMode" value="setup" checked>
+                  <span>Настройка под ключ</span>
+                  <small>от 60 000 ₸ · рост до 60%</small>
+                </label>
+                <label class="hero-forecast__mode-btn">
+                  <input type="radio" name="hfMode" value="care">
+                  <span>Ежемесячное сопровождение</span>
+                  <small>обслуживание · рост до 80%</small>
+                </label>
+              </div>
+              <p class="hero-forecast__mode-hint" id="hfModeHint">Настройка под ключ: разовый запуск OTA — ориентир роста загрузки до 60%.</p>
+            </div>
+            <div>
+              <span class="hero-forecast__section-label">Шаг 2 · Данные вашего объекта</span>
+              <div class="hero-forecast__fields">
+              <div class="hero-forecast__field">
+                <label for="hfRooms">Количество номеров</label>
+                <input type="number" id="hfRooms" min="1" max="999" value="32" inputmode="numeric">
+              </div>
+              <div class="hero-forecast__field">
+                <label for="hfOccupancy">Средняя загрузка сейчас, %</label>
+                <input type="number" id="hfOccupancy" min="5" max="100" value="52" inputmode="decimal">
+              </div>
+              <div class="hero-forecast__field">
+                <label for="hfAdr">Средний тариф за ночь, ₸</label>
+                <input type="number" id="hfAdr" min="1000" step="500" value="42000" inputmode="numeric">
+              </div>
+            </div>
+            </div>
+            <div class="hero-forecast__occ-bar">
+              <div class="hero-forecast__occ-bar-top">
+                <span>Сейчас <b id="hfOccNowLbl">52%</b></span>
+                <span>Цель <b id="hfOccGoalLbl">60%</b></span>
+              </div>
+              <div class="hero-forecast__occ-track" aria-hidden="true">
+                <div class="hero-forecast__occ-now" id="hfOccNowBar" style="width:52%"></div>
+                <div class="hero-forecast__occ-goal" id="hfOccGoalBar" style="left:60%"></div>
+              </div>
+              <p class="hero-forecast__occ-gap" id="hfOccGap">+8 п.п. до цели 60%</p>
+            </div>
+            <div class="hero-forecast__conditions" id="hfConditions">
+              <span>OTA под ключ</span>
+              <span>Аудит и запуск</span>
+              <span>Стратегия продаж</span>
+            </div>
+            <div>
+              <div class="hero-forecast__results-head">
+                <span class="hero-forecast__section-label">Шаг 3 · Ваш прогноз</span>
+                <span class="hero-forecast__live">Обновляется live</span>
+              </div>
+            <div class="hero-forecast__highlight">
+              <b id="hfOccTarget">60%</b>
+              <small id="hfOccTargetLbl">целевая загрузка после настройки OTA</small>
+              <div class="hero-forecast__highlight-extra" id="hfAnnualGain">+63,6 млн ₸/год</div>
+            </div>
+            <div class="hero-forecast__rows" aria-live="polite">
+              <div class="hero-forecast__row">
+                <strong>Загрузка</strong>
+                <span id="hfOccRow">52% → <em>60%</em></span>
+              </div>
+              <div class="hero-forecast__row">
+                <strong>RevPAR</strong>
+                <span id="hfRevparRow">21 840 → <em>27 216 ₸</em> · <em>+25%</em></span>
+              </div>
+              <div class="hero-forecast__row">
+                <strong>Доп. ночей / мес.</strong>
+                <span id="hfNightsRow"><em>+77</em></span>
+              </div>
+              <div class="hero-forecast__row">
+                <strong>Доход / мес.</strong>
+                <span id="hfRevenueTotalRow">21,0 млн → <em>26,3 млн ₸</em></span>
+              </div>
+              <div class="hero-forecast__row">
+                <strong>Доп. доход / мес.</strong>
+                <span id="hfRevenueRow"><em>+5,3 млн ₸</em></span>
+              </div>
+              <div class="hero-forecast__row hero-forecast__row--payback hero-forecast__payback" id="hfPaybackWrap">
+                <strong id="hfPaybackLabel">Окупаемость настройки · от 60 000 ₸</strong>
+                <span id="hfPaybackRow"><em>менее 1 дня</em> · <em>88×</em> за 1 мес.</span>
+              </div>
+              <div class="hero-forecast__row hero-forecast__row--accent">
+                <strong>Доп. доход / год</strong>
+                <span id="hfAnnualRow"><em>+63,6 млн ₸</em></span>
+              </div>
+            </div>
+            </div>
+            <a href="#" class="btn btn--wa hero-forecast__cta" id="hfWaBtn" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Отправить расчёт в WhatsApp
+            </a>
+            <p class="hero-forecast__note" id="hfNote">* Прогноз для «Настройки под ключ»: рост загрузки до 60% после аудита, настройки карточек и запуска стратегии. Не является публичной офертой.</p>
+          </div>
+        </div>
+      </div>
+      <div class="hero__bridge" data-reveal>
+        <div class="hero__bridge-item">
+          <div class="hero__bridge-icon" aria-hidden="true">📈</div>
+          <div>
+            <b>До 80% загрузки</b>
+            <span>При ежемесячном сопровождении и соблюдении условий</span>
+          </div>
+        </div>
+        <div class="hero__bridge-item">
+          <div class="hero__bridge-icon" aria-hidden="true">🏨</div>
+          <div>
+            <b>25+ объектов</b>
+            <span>Отели и апартаменты в Казахстане и СНГ</span>
+          </div>
+        </div>
+        <div class="hero__bridge-item">
+          <div class="hero__bridge-icon" aria-hidden="true">⚡</div>
+          <div>
+            <b>Быстрый старт</b>
+            <span>Аудит и план работ — после первого контакта</span>
+          </div>
+        </div>
+        <div class="hero__bridge-item">
+          <div class="hero__bridge-icon" aria-hidden="true">💬</div>
+          <div>
+            <b>WhatsApp · без форм</b>
+            <span>Обсудим объект и отправим расчёт из калькулятора</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. PROBLEM -->
+  <section class="problem" id="problem">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="section-label">Проблема</span>
+        <h2 class="section-title">Почему объект теряет бронирования</h2>
+        <p class="section-desc">Чаще всего дело не в качестве номеров, а в слабой работе с OTA и продажами онлайн.</p>
+      </div>
+      <div class="cards-4">
+        <article class="card" data-reveal>
+          <div class="icon-box icon-box--danger">
+            <svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-10"/><path d="M17 7h4v4"/></svg>
+          </div>
+          <h3>Низкое количество бронирований</h3>
+          <p>Объект есть на платформах, но гости выбирают конкурентов с лучше настроенными карточками.</p>
+        </article>
+        <article class="card" data-reveal>
+          <div class="icon-box icon-box--danger">
+            <svg viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <h3>Слабая видимость на OTA</h3>
+          <p>Профиль не попадает в топ выдачи — алгоритмы не продвигают ваш объект.</p>
+        </article>
+        <article class="card" data-reveal>
+          <div class="icon-box icon-box--danger">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </div>
+          <h3>Неправильная настройка профиля</h3>
+          <p>Тарифы, фото, описание и политики настроены хаотично или устарели.</p>
+        </article>
+        <article class="card" data-reveal>
+          <div class="icon-box icon-box--danger">
+            <svg viewBox="0 0 24 24"><path d="M22 12H2"/><path d="M5 12v4a2 2 0 002 2h2"/><path d="M9 8V6a2 2 0 012-2h0a2 2 0 012 2v6"/><path d="M17 12v4a2 2 0 01-2 2h-2"/><path d="M13 8V6a2 2 0 012-2h0a2 2 0 012 2v2"/></svg>
+          </div>
+          <h3>Низкая конверсия</h3>
+          <p>Много просмотров карточки, но мало бронирований — теряете на каждом этапе воронки.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. SOLUTION -->
+  <section class="solution" id="solution">
+    <div class="container">
+      <div class="section-head section-head--center" data-reveal>
+        <span class="section-label">Решение</span>
+        <h2 class="section-title">Project Sauyt — системный рост через OTA</h2>
+        <p class="section-desc">Консалтинг и сервис для отелей, гостиниц, апартаментов и хостелов в Казахстане и СНГ.</p>
+      </div>
+      <div class="solution-grid">
+        <div class="solution-item" data-reveal>
+          <div class="icon-box"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+          <div><h3>Оптимизация OTA-профилей</h3><p>Booking, Ostrovok, Bronevik и другие — под ваш объект и рынок.</p></div>
+        </div>
+        <div class="solution-item" data-reveal>
+          <div class="icon-box icon-box--violet"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+          <div><h3>Структура продаж объекта</h3><p>Тарифы, ограничения, промо и позиционирование без потери маржи.</p></div>
+        </div>
+        <div class="solution-item" data-reveal>
+          <div class="icon-box icon-box--success"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div><h3>Эффективность карточек</h3><p>Контент, рейтинг, отзывы — всё, что влияет на конверсию.</p></div>
+        </div>
+        <div class="solution-item" data-reveal>
+          <div class="icon-box icon-box--amber"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+          <div><h3>Обучение персонала</h3><p>Администраторы и управляющие работают в Extranet уверенно.</p></div>
+        </div>
+        <div class="solution-item" data-reveal>
+          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/></svg></div>
+          <div><h3>Сопровождение и настройка</h3><p>От разовой настройки до ежемесячного ведения OTA.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. SERVICES -->
+  <section id="services">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="section-label">Услуги</span>
+        <h2 class="section-title">Форматы работы</h2>
+        <p class="section-desc">Выберите подходящий пакет или обсудите индивидуальные условия в WhatsApp.</p>
+      </div>
+      <div class="services-grid">
+        <article class="service-card" data-reveal>
+          <div class="service-card__head">
+            <span class="service-card__tag">Обучение</span>
+            <div class="icon-box icon-box--amber"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/></svg></div>
+          </div>
+          <h3>Обучение OTA</h3>
+          <p class="service-card__meta">Индивидуально · 3 дня × 2 часа · 1 платформа</p>
+          <ul>
+            <li>Разбор вашего объекта на выбранной OTA</li>
+            <li>Практика в Extranet</li>
+            <li>Рекомендации по росту бронирований</li>
+          </ul>
+          <div class="service-card__price">50 000 <span>₸</span></div>
+          <a href="#" class="btn btn--wa" style="width:100%" data-wa data-wa-msg="Обучение OTA">Записаться</a>
+        </article>
+        <article class="service-card" data-reveal>
+          <div class="service-card__head">
+            <span class="service-card__tag">Сервис</span>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>
+          </div>
+          <h3>Настройка под ключ</h3>
+          <p class="service-card__meta">Полная настройка OTA-профиля и оптимизация объекта</p>
+          <ul>
+            <li>Аудит текущего состояния</li>
+            <li>Настройка карточки и тарифов</li>
+            <li>Запуск стратегии продаж</li>
+          </ul>
+          <div class="service-card__price">от 60 000 <span>₸</span></div>
+          <a href="#" class="btn btn--wa" style="width:100%" data-wa data-wa-msg="Настройка под ключ">Записаться</a>
+        </article>
+        <article class="service-card" data-reveal>
+          <div class="service-card__head">
+            <span class="service-card__tag">Сопровождение</span>
+            <div class="icon-box icon-box--success"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-9-9"/><path d="M21 3v6h-6"/><path d="M12 7v5l3 3"/></svg></div>
+          </div>
+          <h3>Ежемесячное сопровождение</h3>
+          <p class="service-card__meta">Индивидуально · зависит от платформ и задач</p>
+          <ul>
+            <li>Ведение OTA на постоянной основе</li>
+            <li>Мониторинг и корректировки</li>
+            <li>Отчётность и рост показателей</li>
+          </ul>
+          <p class="service-card__note">Стоимость рассчитывается после брифа</p>
+          <a href="#" class="btn btn--outline" style="width:100%" data-wa data-wa-msg="Ежемесячное сопровождение">Обсудить условия</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLATFORMS -->
+  <section class="platforms" id="platforms">
+    <div class="container section-head--center" data-reveal>
+      <span class="section-label">Платформы</span>
+      <h2 class="section-title" style="margin-bottom:0.5rem">Работаем с ведущими OTA</h2>
+      <p class="section-desc" style="margin:0 auto 1.75rem">Выберите платформу — ниже появится описание и ключевые преимущества для вашего объекта</p>
+      <div class="platforms__list" id="platformTabs" role="tablist" aria-label="OTA платформы"></div>
+      <div class="platforms__detail" id="platformDetail" role="tabpanel" aria-live="polite">
+        <div class="platforms__detail-inner" id="platformDetailInner"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. CASES -->
+  <section id="cases">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="section-label">Результаты</span>
+        <h2 class="section-title">Кейсы и результаты</h2>
+        <p class="section-desc">Обезличенные примеры. Данные приведены для иллюстрации эффективности подхода.</p>
+      </div>
+      <div class="cases-carousel" data-reveal aria-label="Кейсы клиентов">
+        <div class="cases-track-wrap">
+          <div class="cases-track" id="casesTrack" role="list"></div>
+        </div>
+      </div>
+      <div class="cases-footer" data-reveal>
+        <div class="cases-controls">
+          <button type="button" class="cases-nav cases-nav--prev" id="casesPrev" aria-label="Предыдущий кейс">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <span class="cases-counter" id="casesCounter" aria-live="polite">1 / 7</span>
+          <button type="button" class="cases-nav cases-nav--next" id="casesNext" aria-label="Следующий кейс">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="cases-dots-wrap">
+          <div class="cases-dots" id="casesDots" role="tablist" aria-label="Номер кейса"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. TRUST -->
+  <section class="trust" id="trust">
+    <div class="container">
+      <div class="section-head section-head--center" data-reveal>
+        <span class="section-label">Доверие</span>
+        <h2 class="section-title">Нам доверяют</h2>
+        <p class="section-desc">Объекты размещения в Казахстане и СНГ — от мини-отелей до апарт-комплексов.</p>
+      </div>
+    </div>
+    <div class="trust__marquee" id="trustMarquee" aria-label="Клиенты Project Sauyt"></div>
+  </section>
+
+  <!-- 7. GEO -->
+  <section id="geo">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="section-label">География</span>
+        <h2 class="section-title">География клиентов</h2>
+        <p class="section-desc">Отели и апартаменты в Казахстане, СНГ и за рубежом — работаем там, где есть спрос на OTA.</p>
+      </div>
+      <div class="geo-stats" data-reveal id="geoStats"></div>
+      <div class="geo-cards" id="geoCards" data-reveal></div>
+      <p class="geo-foot" data-reveal><a href="#trust">Смотреть всех клиентов →</a></p>
+    </div>
+  </section>
+
+  <!-- 8. INSTAGRAM -->
+  <section class="instagram" id="instagram">
+    <div class="container" data-reveal>
+      <span class="section-label" style="color:rgba(255,255,255,0.8)">Соцсети</span>
+      <h2 class="section-title">Кейсы и жизнь проекта в Instagram</h2>
+      <p class="section-desc">Смотрите реальные примеры, советы по OTA и закулисье работы с объектами.</p>
+      <a href="https://www.instagram.com/project_sauyt/" class="instagram__handle" target="_blank" rel="noopener">@project_sauyt</a>
+      <a href="https://www.instagram.com/project_sauyt/" class="btn btn--white" target="_blank" rel="noopener">Смотреть кейсы</a>
+    </div>
+  </section>
+
+  <!-- 9. CTA -->
+  <section class="cta" id="cta">
+    <div class="container" data-reveal>
+      <h2 class="section-title">Начните увеличивать количество бронирований уже сегодня</h2>
+      <p class="section-desc">Напишите в WhatsApp — обсудим ваш объект, подберём формат работы и ответим на вопросы.</p>
+      <a href="#" class="btn btn--wa btn--lg" data-wa>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Написать в WhatsApp
+      </a>
+    </div>
+  </section>
+
+  <!-- 10. FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div>
+          <div class="footer__brand">Project <span>Sauyt</span></div>
+          <p>Консалтинг и сервис для объектов размещения. Увеличиваем бронирования через OTA: настройка, оптимизация, обучение и сопровождение.</p>
+        </div>
+        <div>
+          <p style="color:#fff;font-weight:600;margin-bottom:0.75rem">Контакты</p>
+          <ul class="footer__links">
+            <li><a href="#" data-wa>WhatsApp</a></li>
+            <li><a href="https://www.instagram.com/project_sauyt/" target="_blank" rel="noopener">Instagram @project_sauyt</a></li>
+          </ul>
+        </div>
+        <div>
+          <p style="color:#fff;font-weight:600;margin-bottom:0.75rem">Разделы</p>
+          <ul class="footer__links">
+            <li><a href="#services">Услуги</a></li>
+            <li><a href="#cases">Кейсы</a></li>
+            <li><a href="#geo">География</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">© 2026 Project Sauyt. Все права защищены.</div>
+    </div>
+  </footer>
+
+  <a href="#" class="fab-wa" data-wa aria-label="WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
+  <script>
+    const WA_PHONE = '77073281573';
+    const WA_BASE = 'Здравствуйте! Интересует Project Sauyt. ';
+
+    function waUrl(msg) {
+      const text = msg ? WA_BASE + msg : WA_BASE + 'Хочу обсудить мой объект.';
+      return 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(text);
+    }
+
+    document.querySelectorAll('[data-wa]').forEach(el => {
+      el.href = waUrl(el.getAttribute('data-wa-msg') || '');
+      if (!el.target && el.tagName === 'A') {
+        el.target = '_blank';
+        el.rel = 'noopener noreferrer';
+      }
+    });
+
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    const burger = document.getElementById('burger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    burger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+    mobileMenu.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => mobileMenu.classList.remove('open'));
+    });
+
+    const revealObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          revealObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('[data-reveal]').forEach(el => revealObs.observe(el));
+    document.querySelectorAll('.hero [data-reveal]').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), 80 * i);
+    });
+
+    const HF_DAYS = 30;
+
+    const HF_MODES = {
+      setup: {
+        target: 60,
+        adrUplift: 1.08,
+        cost: 60000,
+        priceLabel: 'от 60 000 ₸',
+        modeHint: 'Настройка под ключ: разовый запуск OTA — ориентир роста загрузки до 60%.',
+        targetLbl: 'целевая загрузка после настройки OTA',
+        targetLblAbove: 'прогноз при дальнейшей оптимизации после настройки',
+        aboveGap: 'Вы уже выше 60% — для роста до 80% выберите сопровождение',
+        note: '* Прогноз для «Настройки под ключ»: рост загрузки до 60% после аудита, настройки карточек и запуска стратегии. Не является публичной офертой.',
+        waService: 'Настройка под ключ',
+        conditions: ['OTA под ключ', 'Аудит и запуск', 'Стратегия продаж']
+      },
+      care: {
+        target: 80,
+        adrUplift: 1.12,
+        cost: null,
+        modeHint: 'Ежемесячное сопровождение: постоянная работа с OTA — ориентир выхода на 80% загрузки.',
+        targetLbl: 'целевая загрузка при ежемесячном сопровождении',
+        targetLblAbove: 'прогноз при дальнейшей оптимизации OTA',
+        aboveGap: 'Вы уже на целевом уровне — работаем на удержание 80%+',
+        note: '* Прогноз для «Ежемесячного сопровождения»: загрузку до 80% достигаем на объектах с регулярной работой по карточкам и тарифам. Не является публичной офертой.',
+        waService: 'Ежемесячное сопровождение',
+        conditions: ['OTA под ключ', 'Актуальные тарифы', 'Карточки в работе']
+      }
+    };
+
+    function hfFmtNum(n) {
+      return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+    }
+
+    function hfFmtMoney(n) {
+      return hfFmtNum(n) + ' ₸';
+    }
+
+    function hfFmtCompactMoney(n) {
+      const abs = Math.abs(n);
+      if (abs >= 1_000_000) {
+        const m = (abs / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1).replace('.', ',');
+        return m + ' млн ₸';
+      }
+      return hfFmtMoney(abs);
+    }
+
+    function hfFmtDeltaMoney(n, suffix) {
+      const abs = Math.abs(n);
+      let text;
+      if (abs >= 1_000_000) {
+        const m = (abs / 1_000_000).toFixed(abs >= 100_000_000 ? 0 : 1).replace('.', ',');
+        text = m + ' млн ₸';
+      } else {
+        text = hfFmtMoney(abs);
+      }
+      const sign = n >= 0 ? '+ ' : '− ';
+      return sign + text + (suffix || '');
+    }
+
+    function hfDayLabel(n) {
+      const m = n % 10;
+      const m2 = n % 100;
+      if (m2 >= 11 && m2 <= 14) return 'дней';
+      if (m === 1) return 'день';
+      if (m >= 2 && m <= 4) return 'дня';
+      return 'дней';
+    }
+
+    function hfFmtPayback(revenueDelta, cost) {
+      if (!cost || revenueDelta <= 0) return '—';
+      const days = cost / (revenueDelta / HF_DAYS);
+      if (days < 1) return 'менее 1 дня';
+      const rounded = Math.ceil(days);
+      if (rounded < 45) return `~${rounded} ${hfDayLabel(rounded)}`;
+      const months = (days / 30).toFixed(1).replace('.', ',');
+      return `~${months} мес.`;
+    }
+
+    function hfForecastOcc(occ, target) {
+      if (occ >= target) return Math.min(95, Math.round(occ + (target >= 80 ? 3 : 2)));
+      return target;
+    }
+
+    function hfGetMode() {
+      const checked = document.querySelector('input[name="hfMode"]:checked');
+      return HF_MODES[checked ? checked.value : 'setup'] || HF_MODES.setup;
+    }
+
+    function hfBuildWaMsg(rooms, occRounded, adr, occNew, revenueDelta, annualDelta, mode) {
+      const deltaMonth = hfFmtDeltaMoney(revenueDelta).replace('+ ', '+');
+      const deltaYear = hfFmtDeltaMoney(annualDelta).replace('+ ', '+');
+      return [
+        `Интересует: ${mode.waService}. Хочу разобрать прогноз по моему объекту:`,
+        `• Номеров: ${rooms}`,
+        `• Загрузка сейчас: ${occRounded}%`,
+        `• Тариф: ${hfFmtNum(adr)} ₸`,
+        `• Прогноз загрузки: ${occNew}%`,
+        `• Доп. доход: ${deltaMonth}/мес. (${deltaYear}/год)`
+      ].join('\n');
+    }
+
+    function initHeroForecast() {
+      const roomsEl = document.getElementById('hfRooms');
+      const occEl = document.getElementById('hfOccupancy');
+      const adrEl = document.getElementById('hfAdr');
+      const modeHintEl = document.getElementById('hfModeHint');
+      const conditionsEl = document.getElementById('hfConditions');
+      const noteEl = document.getElementById('hfNote');
+      const occTargetEl = document.getElementById('hfOccTarget');
+      const occTargetLbl = document.getElementById('hfOccTargetLbl');
+      const annualGainEl = document.getElementById('hfAnnualGain');
+      const occNowLbl = document.getElementById('hfOccNowLbl');
+      const occGoalLbl = document.getElementById('hfOccGoalLbl');
+      const occNowBar = document.getElementById('hfOccNowBar');
+      const occGoalBar = document.getElementById('hfOccGoalBar');
+      const occGap = document.getElementById('hfOccGap');
+      const occRow = document.getElementById('hfOccRow');
+      const revparRow = document.getElementById('hfRevparRow');
+      const nightsRow = document.getElementById('hfNightsRow');
+      const revenueTotalRow = document.getElementById('hfRevenueTotalRow');
+      const revenueRow = document.getElementById('hfRevenueRow');
+      const paybackWrap = document.getElementById('hfPaybackWrap');
+      const paybackLabel = document.getElementById('hfPaybackLabel');
+      const paybackRow = document.getElementById('hfPaybackRow');
+      const annualRow = document.getElementById('hfAnnualRow');
+      const waBtn = document.getElementById('hfWaBtn');
+      const modeInputs = document.querySelectorAll('input[name="hfMode"]');
+      if (!roomsEl || !occEl || !adrEl) return;
+
+      function readInput(el, min, max, fallback) {
+        let v = parseFloat(String(el.value).replace(/\s/g, '').replace(',', '.'));
+        if (!Number.isFinite(v)) v = fallback;
+        return Math.min(max, Math.max(min, v));
+      }
+
+      function updateHeroForecast() {
+        const mode = hfGetMode();
+        const target = mode.target;
+        const rooms = readInput(roomsEl, 1, 999, 32);
+        const occ = readInput(occEl, 5, 100, 52);
+        const adr = readInput(adrEl, 1000, 9999999, 42000);
+
+        const occNew = hfForecastOcc(occ, target);
+        const adrNew = Math.round(adr * mode.adrUplift);
+        const occRounded = Math.round(occ);
+        const occGapPts = Math.max(0, occNew - occRounded);
+        const atOrAboveTarget = occ >= target;
+
+        const revparCur = adr * occ / 100;
+        const revparNew = adrNew * occNew / 100;
+        const revparPct = revparCur > 0 ? Math.round((revparNew - revparCur) / revparCur * 100) : 0;
+
+        const nightsCur = rooms * HF_DAYS * (occ / 100);
+        const nightsNew = rooms * HF_DAYS * (occNew / 100);
+        const nightsDelta = nightsNew - nightsCur;
+
+        const revenueCur = nightsCur * adr;
+        const revenueNew = nightsNew * adrNew;
+        const revenueDelta = revenueNew - revenueCur;
+        const annualDelta = revenueDelta * 12;
+        const roiMonth = mode.cost && revenueDelta > 0 ? Math.round(revenueDelta / mode.cost) : 0;
+
+        if (modeHintEl) modeHintEl.textContent = mode.modeHint;
+        if (noteEl) noteEl.textContent = mode.note;
+        if (conditionsEl) {
+          conditionsEl.innerHTML = mode.conditions.map(c => `<span>${c}</span>`).join('');
+        }
+
+        occNowLbl.textContent = occRounded + '%';
+        occGoalLbl.textContent = target + '%';
+        occNowBar.style.width = Math.min(100, occRounded) + '%';
+        if (occGoalBar) occGoalBar.style.left = target + '%';
+        occGap.textContent = atOrAboveTarget
+          ? mode.aboveGap
+          : `+${occGapPts} п.п. до цели ${target}%`;
+
+        occTargetEl.textContent = atOrAboveTarget ? occNew + '%' : target + '%';
+        occTargetLbl.textContent = atOrAboveTarget ? mode.targetLblAbove : mode.targetLbl;
+
+        annualGainEl.textContent = hfFmtDeltaMoney(annualDelta, '/год');
+        occRow.innerHTML = `${occRounded}% → <em>${occNew}%</em>`;
+        revparRow.innerHTML = `${hfFmtNum(revparCur)} → <em>${hfFmtMoney(revparNew)}</em> · <em>+${revparPct}%</em>`;
+        nightsRow.innerHTML = `<em>+${hfFmtNum(nightsDelta)}</em>`;
+        revenueTotalRow.innerHTML = `${hfFmtCompactMoney(revenueCur)} → <em>${hfFmtCompactMoney(revenueNew)}</em>`;
+        revenueRow.innerHTML = `<em>${hfFmtDeltaMoney(revenueDelta)}</em>`;
+
+        if (paybackWrap) {
+          if (mode.cost) {
+            paybackWrap.classList.remove('is-hidden');
+            if (paybackLabel) paybackLabel.textContent = `Окупаемость настройки · ${mode.priceLabel || hfFmtNum(mode.cost) + ' ₸'}`;
+            paybackRow.innerHTML = revenueDelta > 0
+              ? `<em>${hfFmtPayback(revenueDelta, mode.cost)}</em> · <em>${roiMonth}×</em> за 1 мес.`
+              : '<em>—</em>';
+          } else {
+            paybackWrap.classList.add('is-hidden');
+          }
+        }
+
+        annualRow.innerHTML = `<em>${hfFmtDeltaMoney(annualDelta)}</em>`;
+
+        if (waBtn) {
+          waBtn.href = waUrl(hfBuildWaMsg(rooms, occRounded, adr, occNew, revenueDelta, annualDelta, mode));
+        }
+      }
+
+      ['input', 'change'].forEach(evt => {
+        roomsEl.addEventListener(evt, updateHeroForecast);
+        occEl.addEventListener(evt, updateHeroForecast);
+        adrEl.addEventListener(evt, updateHeroForecast);
+        modeInputs.forEach(radio => radio.addEventListener(evt, updateHeroForecast));
+      });
+
+      updateHeroForecast();
+    }
+
+    initHeroForecast();
+
+    const GEO_CARDS = [
+      {
+        id: 'kz',
+        flag: '🇰🇿',
+        name: 'Казахстан',
+        badge: 'Основной рынок',
+        featured: true,
+        objects: '25+',
+        subtitle: 'Главная зона — отели и апартаменты от Алматы до Уральска.',
+        cities: ['Алматы', 'Астана', 'Шымкент', 'Актобе', 'Тараз', 'Кокшетау', 'Боровое', 'Уральск']
+      },
+      {
+        id: 'kg',
+        flag: '🇰🇬',
+        name: 'Кыргызстан',
+        badge: null,
+        featured: false,
+        objects: null,
+        subtitle: 'Объекты размещения в столице и регионах.',
+        cities: ['Бишкек']
+      },
+      {
+        id: 'uz',
+        flag: '🇺🇿',
+        name: 'Узбекистан',
+        badge: null,
+        featured: false,
+        objects: null,
+        subtitle: 'Запуск и сопровождение OTA в Ташкенте.',
+        cities: ['Ташкент']
+      },
+      {
+        id: 'az',
+        flag: '🇦🇿',
+        name: 'Азербайджан',
+        badge: null,
+        featured: false,
+        objects: null,
+        subtitle: 'Работа с объектами в Баку и регионах.',
+        cities: ['Баку']
+      },
+      {
+        id: 'es',
+        flag: '🇪🇸',
+        name: 'Канарские острова',
+        badge: null,
+        featured: false,
+        objects: null,
+        subtitle: 'Международные объекты — Tenerife.',
+        cities: ['Tenerife']
+      }
+    ];
+
+    function geoCountCities() {
+      return GEO_CARDS.reduce((n, c) => n + c.cities.length, 0);
+    }
+
+    function renderGeoSection() {
+      const statsEl = document.getElementById('geoStats');
+      const cardsEl = document.getElementById('geoCards');
+      if (!statsEl || !cardsEl) return;
+
+      const cityCount = geoCountCities();
+      statsEl.innerHTML = `
+        <div class="geo-stat"><b>25+</b><span>объектов</span></div>
+        <div class="geo-stat"><b>${GEO_CARDS.length}</b><span>стран / регионов</span></div>
+        <div class="geo-stat"><b>${cityCount}</b><span>городов</span></div>`;
+
+      cardsEl.innerHTML = GEO_CARDS.map(card => `
+        <article class="geo-card${card.featured ? ' geo-card--featured' : ''}">
+          <div class="geo-card__head">
+            <span class="geo-card__flag" aria-hidden="true">${card.flag}</span>
+            <div class="geo-card__head-text">
+              <h3>${card.name}</h3>
+              ${card.badge ? `<span class="geo-card__badge">${card.badge}</span>` : ''}
+            </div>
+            ${card.objects ? `<span class="geo-card__count">${card.objects} объектов</span>` : ''}
+          </div>
+          <p class="geo-card__desc">${card.subtitle}</p>
+          <div class="geo-card__cities">
+            ${card.cities.map(city => `<span>${city}</span>`).join('')}
+          </div>
+        </article>`).join('');
+    }
+
+    renderGeoSection();
+
+
+    const OTA_PLATFORMS = {
+      booking: {
+        name: 'Booking.com',
+        color: '#003580',
+        role: 'Глобальный лидер онлайн-бронирований',
+        desc: 'Booking.com — основной канал для отелей и апартаментов в Казахстане и мире. Через него гости ищут жильё, сравнивают цены и бронируют напрямую. Правильная настройка даёт стабильный поток бронирований и рост видимости в поиске.',
+        benefits: [
+          'Огромная аудитория международных и локальных гостей',
+          'Гибкая система тарифов, промо и ограничений',
+          'Рейтинг и отзывы напрямую влияют на позицию в выдаче',
+          'Extranet для полного контроля наличия и цен',
+          'Подходит отелям, апартаментам и мини-отелям'
+        ]
+      },
+      ostrovok: {
+        name: 'Ostrovok',
+        color: '#00a651',
+        logo: 'assets/logos/ostrovok.svg',
+        logoAlt: 'Ostrovok — Островок',
+        role: 'Сильный канал в СНГ и России',
+        desc: 'Ostrovok.ru — одна из ключевых OTA для рынка СНГ. Особенно эффективна для объектов, ориентированных на гостей из России, Казахстана и соседних стран. Хорошо работает в связке с Booking и локальными промо.',
+        benefits: [
+          'Высокий спрос в регионе СНГ',
+          'Удобные инструменты для отельеров и апартаментов',
+          'Конкурентные комиссии и промо-механики',
+          'Быстрый выход в топ по городу при грамотной карточке',
+          'Поддержка русскоязычного интерфейса Extranet'
+        ]
+      },
+      bronevik: {
+        name: 'Bronevik',
+        color: '#e85d04',
+        logo: 'assets/logos/bronevik.png',
+        logoAlt: 'Bronevik.com',
+        role: 'B2B и корпоративный сегмент',
+        desc: 'Bronevik.com — платформа с упором на деловых путешественников и корпоративные бронирования. Полезна отелям, которые хотят загрузку в будни и стабильный B2B-поток помимо leisure-гостей.',
+        benefits: [
+          'Корпоративные клиенты и командировочные',
+          'Дополнительный канал без каннибализации leisure',
+          'Прозрачные условия для отельных партнёров',
+          'Хорошо дополняет Booking и Ostrovok',
+          'Эффективна для городских отелей 3–4*'
+        ]
+      },
+      trip: {
+        name: 'Trip.com',
+        color: '#287dfa',
+        role: 'Азиатский и международный трафик',
+        desc: 'Trip.com (Ctrip) — крупная OTA с сильным потоком из Азии и растущим интересом к направлениям в Центральной Азии. Актуальна, если вы принимаете иностранных гостей и хотите диверсифицировать каналы продаж.',
+        benefits: [
+          'Гости из Китая, ЮВА и других регионов',
+          'Рост интереса к Казахстану и СНГ',
+          'Дополнительный канал диверсификации',
+          'Мобильная аудитория и пакетные предложения',
+          'Расширяет географию бронирований'
+        ]
+      },
+      airbnb: {
+        name: 'Airbnb',
+        color: '#ff385c',
+        role: 'Апартаменты и уникальное размещение',
+        desc: 'Airbnb — платформа для апартаментов, вилл, бутик-объектов и формата «как дома». Отличается от классических отельных OTA: другой тип гостя, рейтинги, правила и коммуникация с хостом.',
+        benefits: [
+          'Идеально для апартаментов и мини-объектов',
+          'Гибкие правила проживания и календарь',
+          'Сильный бренд у молодой аудитории',
+          'Отзывы и Superhost влияют на доверие',
+          'Дополняет отельные OTA без дублирования'
+        ]
+      },
+      expedia: {
+        name: 'Expedia',
+        color: '#191e3b',
+        role: 'Глобальная сеть брендов',
+        desc: 'Expedia Group объединяет несколько брендов (Expedia, Hotels.com и др.) и даёт доступ к международной аудитории. Подходит объектам, которые хотят больше зарубежных бронирований и присутствие в глобальных метапоисках.',
+        benefits: [
+          'Международные гости и пакетные туры',
+          'Интеграция с глобальными партнёрскими сетями',
+          'Дополнительная видимость в метапоиске',
+          'Подходит средним и крупным отелям',
+          'Усиливает мультиканальную стратегию'
+        ]
+      }
+    };
+
+    const platformTabs = document.getElementById('platformTabs');
+    const platformDetail = document.getElementById('platformDetail');
+    const platformDetailInner = document.getElementById('platformDetailInner');
+    let activePlatform = 'booking';
+
+    function renderPlatformLogo(id, p) {
+      if (p.logo) {
+        return `
+        <div class="platforms__logo-box">
+          <div class="platforms__logo platforms__logo--image">
+            <img src="${p.logo}" alt="${p.logoAlt || p.name}" decoding="async">
+          </div>
+        </div>`;
+      }
+      return `
+        <div class="platforms__logo-box">
+          <div class="platforms__logo" style="background:${p.color}">${p.name}</div>
+        </div>`;
+    }
+
+    function renderPlatformDetail(id) {
+      const p = OTA_PLATFORMS[id];
+      if (!p) return;
+      platformDetailInner.innerHTML = `
+        ${renderPlatformLogo(id, p)}
+        <div class="platforms__body">
+          <p class="platforms__role">${p.role}</p>
+          <h3>${p.name}</h3>
+          <p>${p.desc}</p>
+          <ul class="platforms__benefits">
+            ${p.benefits.map(b => `<li>${b}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    }
+
+    function selectPlatform(id) {
+      if (!OTA_PLATFORMS[id] || activePlatform === id) return;
+      activePlatform = id;
+      platformTabs.querySelectorAll('.platform-pill').forEach(btn => {
+        const on = btn.dataset.platform === id;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      platformDetail.classList.add('is-switching');
+      setTimeout(() => {
+        renderPlatformDetail(id);
+        platformDetail.classList.remove('is-switching');
+      }, 200);
+    }
+
+    Object.entries(OTA_PLATFORMS).forEach(([id, p]) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'platform-pill' + (id === 'booking' ? ' active' : '');
+      btn.dataset.platform = id;
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', id === 'booking' ? 'true' : 'false');
+      btn.textContent = p.name;
+      btn.addEventListener('click', () => selectPlatform(id));
+      platformTabs.appendChild(btn);
+    });
+
+    renderPlatformDetail('booking');
+
+    const CASES_DATA = [
+      {
+        type: 'Отель · 32 номера', city: 'Алматы, Казахстан',
+        problem: 'Низкая видимость на Booking.com, слабая конверсия просмотров в бронирования.',
+        actions: 'Аудит профиля, пересборка тарифов, оптимизация контента и работа с отзывами.',
+        result: 'Рост бронирований и стабилизация загрузки в низкий сезон.',
+        metrics: [
+          { val: '+18%', lbl: 'RevPAR', change: '41 500 → 48 970 ₸' },
+          { val: '+24%', lbl: 'Загрузка', change: '58% → 72%' },
+          { val: '+31%', lbl: 'Бронирования', change: 'за 60 дней' },
+          { val: '+22%', lbl: 'Доход OTA', change: 'кв. к кв.' }
+        ]
+      },
+      {
+        type: 'Апартаменты · 14 юнитов', city: 'Астана, Казахстан',
+        problem: 'Хаотичные цены, дубли на нескольких OTA, низкий рейтинг.',
+        actions: 'Настройка под ключ на Booking + Ostrovok, обучение администратора.',
+        result: 'Выход в топ района по Ostrovok, рост прямых OTA-броней.',
+        metrics: [
+          { val: '+14%', lbl: 'RevPAR', change: '34 800 → 39 672 ₸' },
+          { val: '+19%', lbl: 'Загрузка', change: '61% → 73%' },
+          { val: '+28%', lbl: 'Бронирования', change: 'за 45 дней' },
+          { val: '9.1', lbl: 'Рейтинг', change: 'было 8.3' }
+        ]
+      },
+      {
+        type: 'Хостел · 48 мест', city: 'Бишкек, Кыргызстан',
+        problem: 'Зависимость от walk-in, слабое присутствие на OTA.',
+        actions: 'Запуск Bronevik + Booking, ежемесячное сопровождение 2 месяца.',
+        result: 'Стабильный поток бронирований из OTA, снижение простоя будней.',
+        metrics: [
+          { val: '+11%', lbl: 'RevPAR', change: '2 150 → 2 387 сом' },
+          { val: '+33%', lbl: 'Загрузка', change: '42% → 56%' },
+          { val: '+47%', lbl: 'Бронирования', change: 'OTA-канал' },
+          { val: '+19%', lbl: 'Доход', change: 'за период' }
+        ]
+      },
+      {
+        type: 'Мини-отель · 18 номеров', city: 'Шымкент, Казахстан',
+        problem: 'Пустые будни, устаревшие фото и описание на карточке.',
+        actions: 'Ребрендинг листинга, динамическое ценообразование, промо на Booking.',
+        result: 'Рост выходных и будничной загрузки без снижения ADR.',
+        metrics: [
+          { val: '+16%', lbl: 'RevPAR', change: '26 400 → 30 624 ₸' },
+          { val: '+21%', lbl: 'Загрузка', change: '54% → 65%' },
+          { val: '+26%', lbl: 'Просмотры', change: 'карточки OTA' },
+          { val: '+17%', lbl: 'Доход', change: 'за 90 дней' }
+        ]
+      },
+      {
+        type: 'Отель · 45 номеров', city: 'Актобе, Казахстан',
+        problem: 'Низкий рейтинг, жалобы на несоответствие ожиданиям гостей.',
+        actions: 'Стандартизация ответов на отзывы, обновление политик и тарифной сетки.',
+        result: 'Рост рейтинга и удержание позиции в топ-10 города.',
+        metrics: [
+          { val: '8.9', lbl: 'Рейтинг', change: 'было 8.1' },
+          { val: '+20%', lbl: 'Загрузка', change: '49% → 59%' },
+          { val: '+15%', lbl: 'RevPAR', change: '23 600 → 27 140 ₸' },
+          { val: '+23%', lbl: 'Бронирования', change: 'за 75 дней' }
+        ]
+      },
+      {
+        type: 'Апартаменты · 8 юнитов', city: 'Ташкент, Узбекистан',
+        problem: 'Объект не отображался в поиске Trip.com и Ostrovok.',
+        actions: 'Подключение двух OTA, синхронизация календаря, базовое SEO описания.',
+        result: 'Первые стабильные OTA-брони в течение 3 недель после запуска.',
+        metrics: [
+          { val: '+42%', lbl: 'Бронирования', change: 'OTA с нуля' },
+          { val: '+12%', lbl: 'RevPAR', change: '468 000 → 524 160 сум' },
+          { val: '72%', lbl: 'Загрузка', change: 'было 58%' },
+          { val: '+18%', lbl: 'Доход', change: 'месяц к месяцу' }
+        ]
+      },
+      {
+        type: 'Бутик-отель · 24 номера', city: 'Баку, Азербайджан',
+        problem: 'Сезонные провалы, зависимость от агентств и офлайн-продаж.',
+        actions: 'Мульти-OTA стратегия (Booking + Ostrovok), пакеты и ограничения по тарифам.',
+        result: 'Сглаживание сезонности и рост доли прямых OTA-броней.',
+        metrics: [
+          { val: '+19%', lbl: 'RevPAR', change: '86 → 102 ₼' },
+          { val: '+27%', lbl: 'Бронирования', change: 'OTA-канал' },
+          { val: '+14%', lbl: 'Загрузка', change: '63% → 72%' },
+          { val: '+25%', lbl: 'Доход OTA', change: 'кв. к кв.' }
+        ]
+      }
+    ];
+
+    function renderCaseCard(c, i) {
+      const metrics = c.metrics.map((m) => `
+        <div class="case-metric">
+          <span class="case-metric__val">${m.val}</span>
+          <span class="case-metric__lbl">${m.lbl}</span>
+          <span class="case-metric__change">${m.change}</span>
+        </div>`).join('');
+      return `<article class="case-card" role="listitem" data-case-index="${i}">
+        <div class="case-card__head">
+          <div class="case-card__type">${c.type}</div>
+          <div class="case-card__city">${c.city}</div>
+        </div>
+        <div class="case-card__body">
+          <div class="case-card__block">
+            <div class="case-card__label">Проблема</div>
+            <p>${c.problem}</p>
+          </div>
+          <div class="case-card__block">
+            <div class="case-card__label">Действия</div>
+            <p>${c.actions}</p>
+          </div>
+          <div class="case-card__block">
+            <div class="case-card__label">Результат</div>
+            <p>${c.result}</p>
+          </div>
+          <div class="case-metrics">${metrics}</div>
+        </div>
+      </article>`;
+    }
+
+    function initCasesCarousel() {
+      const track = document.getElementById('casesTrack');
+      const prev = document.getElementById('casesPrev');
+      const next = document.getElementById('casesNext');
+      const dotsEl = document.getElementById('casesDots');
+      const counter = document.getElementById('casesCounter');
+      if (!track || !prev || !next || !dotsEl || !counter) return;
+
+      track.innerHTML = CASES_DATA.map(renderCaseCard).join('');
+      dotsEl.innerHTML = CASES_DATA.map((_, i) =>
+        `<button type="button" class="cases-dot${i === 0 ? ' active' : ''}" data-index="${i}" role="tab" aria-label="Кейс ${i + 1}" aria-selected="${i === 0 ? 'true' : 'false'}"></button>`
+      ).join('');
+
+      let activeIndex = 0;
+
+      function getCards() {
+        return track.querySelectorAll('.case-card');
+      }
+
+      function updateUI() {
+        dotsEl.querySelectorAll('.cases-dot').forEach((d, i) => {
+          const on = i === activeIndex;
+          d.classList.toggle('active', on);
+          d.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        counter.textContent = `${activeIndex + 1} / ${CASES_DATA.length}`;
+        prev.disabled = activeIndex === 0;
+        next.disabled = activeIndex === CASES_DATA.length - 1;
+      }
+
+      const trackWrap = track.closest('.cases-track-wrap');
+      const isMobileCases = () => window.matchMedia('(max-width: 767px)').matches;
+
+      function layoutCaseSlides() {
+        if (!trackWrap) return;
+        const pad = isMobileCases() ? 28 : 40;
+        const slideW = Math.max(260, trackWrap.clientWidth - pad);
+        track.style.setProperty('--case-slide-w', `${slideW}px`);
+      }
+
+      function getScrollTarget(card) {
+        const padLeft = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+        const cardLeft = card.offsetLeft - track.offsetLeft;
+        if (isMobileCases()) {
+          return Math.max(0, cardLeft - padLeft);
+        }
+        return Math.max(0, cardLeft - (track.clientWidth - card.offsetWidth) / 2);
+      }
+
+      function scrollToIndex(i, smooth) {
+        const cards = getCards();
+        if (!cards[i]) return;
+        track.scrollTo({
+          left: getScrollTarget(cards[i]),
+          behavior: smooth === false ? 'auto' : 'smooth'
+        });
+        activeIndex = i;
+        updateUI();
+      }
+
+      function syncIndexFromScroll() {
+        const cards = getCards();
+        if (!cards.length) return;
+        const anchor = track.scrollLeft + (isMobileCases() ? parseFloat(getComputedStyle(track).paddingLeft) || 0 : track.clientWidth / 2);
+        let closest = 0;
+        let minDist = Infinity;
+        cards.forEach((card, i) => {
+          const cardAnchor = isMobileCases()
+            ? card.offsetLeft - track.offsetLeft
+            : card.offsetLeft - track.offsetLeft + card.offsetWidth / 2;
+          const dist = Math.abs(cardAnchor - anchor);
+          if (dist < minDist) {
+            minDist = dist;
+            closest = i;
+          }
+        });
+        if (closest !== activeIndex) {
+          activeIndex = closest;
+          updateUI();
+        }
+      }
+
+      prev.addEventListener('click', () => scrollToIndex(Math.max(0, activeIndex - 1)));
+      next.addEventListener('click', () => scrollToIndex(Math.min(CASES_DATA.length - 1, activeIndex + 1)));
+      dotsEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.cases-dot');
+        if (btn) scrollToIndex(Number(btn.dataset.index));
+      });
+      track.addEventListener('scroll', () => {
+        clearTimeout(track._casesScrollT);
+        track._casesScrollT = setTimeout(syncIndexFromScroll, 100);
+      }, { passive: true });
+
+      let resizeT;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeT);
+        resizeT = setTimeout(() => {
+          layoutCaseSlides();
+          scrollToIndex(activeIndex, false);
+        }, 120);
+      });
+
+      layoutCaseSlides();
+      updateUI();
+    }
+
+    initCasesCarousel();
+
+    const TRUST_CLIENTS = [
+      { name: 'Grand Opera Hotel', city: 'Алматы', rooms: 40 },
+      { name: 'Aqua Grand Hotel', city: 'Алматы', rooms: 50 },
+      { name: 'Vivaldi International Hotel', city: 'Алматы', rooms: 23 },
+      { name: 'Kok-Tobe Villas Boutique Hotel', city: 'Алматы', rooms: 8 },
+      { name: 'Kok-Tobe Hilltop', city: 'Алматы', rooms: 4 },
+      { name: 'Mir Hotel', city: 'Шымкент', rooms: 20 },
+      { name: 'Paradise Villas', city: 'Шымкент', rooms: 35 },
+      { name: 'Aurum Garden Hotel', city: 'Шымкент', rooms: 45 },
+      { name: 'MirOtel Astana', city: 'Астана', rooms: 42 },
+      { name: 'Airis Residence Hotel', city: 'Алматы', rooms: 32 },
+      { name: 'Avenue Boutique Hotel', city: 'Боровое', rooms: 18 },
+      { name: 'TanZharyk Hotel', city: 'Актобе', rooms: 28 },
+      { name: 'Mazhor Hotel', city: 'Актобе', rooms: 24 },
+      { name: 'Keruen Hotel', city: 'Тараз', rooms: 36 },
+      { name: 'Keruen De Luxe', city: 'Тараз', rooms: 24 },
+      { name: 'Bal-Meyir Hotel', city: 'Алматы', rooms: 22 },
+      { name: 'Jasmine Hotel', city: 'Астана', rooms: 20 },
+      { name: 'East Astana Hotel', city: 'Астана', rooms: 32 },
+      { name: 'Seven House Hotel', city: 'Астана', rooms: 14 },
+      { name: 'Five Hotel', city: 'Астана', rooms: 8 },
+      { name: 'Bed & Breakfast', city: 'Астана', rooms: 12 },
+      { name: 'Tau Dream Hotel', city: 'Алматы', rooms: 18 },
+      { name: 'Sunny Hostel', city: 'Алматы', rooms: 12 },
+      { name: 'Well Sleep Hotel Almaty', city: 'Алматы', rooms: 14 },
+      { name: 'Inzhu Premium Hotel', city: 'Тараз', rooms: 17 }
+    ];
+
+    function trustRoomLabel(n) {
+      const m = n % 10;
+      const m2 = n % 100;
+      if (m2 >= 11 && m2 <= 14) return `${n} номеров`;
+      if (m === 1) return `${n} номер`;
+      if (m >= 2 && m <= 4) return `${n} номера`;
+      return `${n} номеров`;
+    }
+
+    function renderTrustItems() {
+      return TRUST_CLIENTS.map(c => `
+        <article class="trust__item">
+          <span class="trust__item-name">${c.name}</span>
+          <span class="trust__item-city">🇰🇿 ${c.city}</span>
+          <span class="trust__item-rooms">${trustRoomLabel(c.rooms)}</span>
+        </article>`).join('');
+    }
+
+    function initTrustMarquee() {
+      const el = document.getElementById('trustMarquee');
+      if (!el) return;
+      const items = renderTrustItems();
+      el.innerHTML = `<div class="trust__track">${items}${items}</div>`;
+    }
+
+    initTrustMarquee();
+  </script>
+</body>
+</html>
