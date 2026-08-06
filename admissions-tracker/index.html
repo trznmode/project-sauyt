@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Приёмная · Трекер переписок из таргета</title>
+  <meta name="description" content="Воронка и учёт переписок абитуриентов из рекламы Instagram / WhatsApp / Meta.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Spectral:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #12231c;
+      --ink-soft: #3d5348;
+      --muted: #6b7f74;
+      --line: rgba(18, 35, 28, 0.12);
+      --paper: #f3f6f2;
+      --panel: rgba(255, 255, 255, 0.82);
+      --panel-solid: #ffffff;
+      --brand: #0f6b4c;
+      --brand-deep: #0a4a35;
+      --brand-soft: #d8efe4;
+      --accent: #c9851a;
+      --accent-soft: #fff1d6;
+      --danger: #b42318;
+      --danger-soft: #fde8e6;
+      --shadow: 0 18px 50px rgba(18, 35, 28, 0.08);
+      --radius: 18px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font: "Manrope", sans-serif;
+      --display: "Spectral", Georgia, serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(15, 107, 76, 0.18), transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, rgba(201, 133, 26, 0.16), transparent 50%),
+        linear-gradient(180deg, #eef4ef 0%, var(--paper) 45%, #e8efe9 100%);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; border: none; background: none; }
+    a { color: inherit; }
+
+    .app {
+      width: min(1280px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 1.25rem 0 3rem;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      animation: rise 0.7s var(--ease) both;
+    }
+    .brand-block h1 {
+      font-family: var(--display);
+      font-size: clamp(1.75rem, 4vw, 2.4rem);
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .brand-block p {
+      margin-top: 0.35rem;
+      color: var(--ink-soft);
+      max-width: 42ch;
+    }
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-bottom: 0.55rem;
+      color: var(--brand-deep);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .brand-mark::before {
+      content: "";
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: var(--brand);
+      box-shadow: 0 0 0 4px var(--brand-soft);
+    }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      min-height: 44px;
+      padding: 0.7rem 1.05rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      transition: transform 0.2s var(--ease), background 0.2s, box-shadow 0.2s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary {
+      background: var(--brand);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(15, 107, 76, 0.25);
+    }
+    .btn-primary:hover { background: var(--brand-deep); }
+    .btn-ghost {
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--line);
+    }
+    .btn-ghost:hover { background: #fff; }
+    .btn-accent {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(201, 133, 26, 0.22);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      animation: rise 0.75s var(--ease) 0.05s both;
+    }
+    @media (min-width: 720px) {
+      .stats { grid-template-columns: repeat(5, 1fr); }
+    }
+    .stat {
+      padding: 1rem 1.05rem;
+      border-radius: var(--radius);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+    .stat strong {
+      display: block;
+      font-size: 1.55rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+    .stat span {
+      display: block;
+      margin-top: 0.25rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .stat[data-tone="brand"] strong { color: var(--brand-deep); }
+    .stat[data-tone="accent"] strong { color: #8a5a0c; }
+    .stat[data-tone="ok"] strong { color: #166534; }
+
+    .layout {
+      display: grid;
+      gap: 1rem;
+      animation: rise 0.8s var(--ease) 0.1s both;
+    }
+    @media (min-width: 1100px) {
+      .layout { grid-template-columns: 300px 1fr; align-items: start; }
+    }
+
+    .side, .board-wrap, .guide {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: calc(var(--radius) + 4px);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+    }
+
+    .side { padding: 1.1rem; position: sticky; top: 0.75rem; }
+    .side h2, .guide h2, .board-head h2 {
+      font-family: var(--display);
+      font-size: 1.25rem;
+      margin-bottom: 0.85rem;
+    }
+    .field { margin-bottom: 0.75rem; }
+    .field label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--ink-soft);
+      letter-spacing: 0.02em;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      min-height: 44px;
+      padding: 0.7rem 0.85rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.9);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field textarea { min-height: 88px; resize: vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: rgba(15, 107, 76, 0.45);
+      box-shadow: 0 0 0 4px rgba(15, 107, 76, 0.12);
+    }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+    .side .btn { width: 100%; margin-top: 0.25rem; }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-bottom: 0.9rem;
+      padding: 0.9rem 1rem 0;
+    }
+    .filters select, .filters input {
+      min-height: 42px;
+      padding: 0.55rem 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+      min-width: 150px;
+      flex: 1;
+    }
+
+    .board-wrap { overflow: hidden; }
+    .board-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 1rem 1rem 0;
+      align-items: center;
+    }
+    .board-head p { color: var(--muted); font-size: 0.88rem; }
+
+    .board {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(230px, 1fr);
+      gap: 0.75rem;
+      padding: 1rem;
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+    }
+
+    .col {
+      background: rgba(243, 246, 242, 0.85);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      min-height: 420px;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+    }
+    .col-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.85rem 0.9rem 0.55rem;
+      position: sticky;
+      top: 0;
+    }
+    .col-head h3 {
+      font-size: 0.92rem;
+      font-weight: 800;
+    }
+    .count {
+      min-width: 1.6rem;
+      height: 1.6rem;
+      padding: 0 0.4rem;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+    .col-body {
+      padding: 0.35rem 0.65rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      flex: 1;
+    }
+    .col.drag-over {
+      outline: 2px dashed rgba(15, 107, 76, 0.45);
+      outline-offset: -4px;
+      background: var(--brand-soft);
+    }
+
+    .lead {
+      background: var(--panel-solid);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.8rem;
+      box-shadow: 0 8px 20px rgba(18, 35, 28, 0.04);
+      cursor: grab;
+      transition: transform 0.2s var(--ease), box-shadow 0.2s;
+      animation: card-in 0.35s var(--ease) both;
+    }
+    .lead:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(18, 35, 28, 0.08);
+    }
+    .lead:active { cursor: grabbing; }
+    .lead.dragging { opacity: 0.45; }
+    .lead-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      align-items: flex-start;
+      margin-bottom: 0.35rem;
+    }
+    .lead-name { font-weight: 800; font-size: 0.95rem; }
+    .lead-meta {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-bottom: 0.45rem;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.18rem 0.45rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      background: var(--brand-soft);
+      color: var(--brand-deep);
+    }
+    .tag.channel-wa { background: #dff7ea; color: #146c43; }
+    .tag.channel-ig { background: #ffe4ef; color: #9d174d; }
+    .tag.channel-call { background: #e7eefc; color: #1e40af; }
+    .tag.campaign { background: var(--accent-soft); color: #8a5a0c; }
+    .lead-note {
+      margin-top: 0.45rem;
+      color: var(--ink-soft);
+      font-size: 0.8rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .lead-foot {
+      margin-top: 0.65rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .lead-foot time {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink-soft);
+      font-size: 0.95rem;
+      line-height: 1;
+    }
+    .icon-btn:hover { background: var(--danger-soft); color: var(--danger); }
+
+    .guide {
+      margin-top: 1rem;
+      padding: 1.15rem 1.2rem 1.25rem;
+      animation: rise 0.85s var(--ease) 0.15s both;
+    }
+    .guide-grid {
+      display: grid;
+      gap: 0.85rem;
+    }
+    @media (min-width: 800px) {
+      .guide-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .step {
+      padding: 0.95rem;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+    }
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.7rem;
+      height: 1.7rem;
+      border-radius: 8px;
+      background: var(--brand);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 800;
+      margin-bottom: 0.55rem;
+    }
+    .step h3 {
+      font-size: 0.98rem;
+      margin-bottom: 0.35rem;
+    }
+    .step p, .step li {
+      color: var(--ink-soft);
+      font-size: 0.86rem;
+    }
+    .step ol {
+      margin-left: 1.1rem;
+      display: grid;
+      gap: 0.3rem;
+    }
+    .chain {
+      margin-top: 1rem;
+      padding: 0.95rem 1rem;
+      border-radius: 14px;
+      background:
+        linear-gradient(120deg, rgba(15,107,76,0.08), rgba(201,133,26,0.1));
+      border: 1px solid var(--line);
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+    }
+    .chain strong { color: var(--ink); }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78em;
+      background: rgba(18, 35, 28, 0.06);
+      padding: 0.1em 0.35em;
+      border-radius: 6px;
+    }
+
+    .empty {
+      padding: 1.2rem 0.7rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 1rem;
+      bottom: 1rem;
+      z-index: 50;
+      background: var(--ink);
+      color: #fff;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.2);
+      transform: translateY(120%);
+      opacity: 0;
+      transition: transform 0.35s var(--ease), opacity 0.35s;
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    dialog {
+      border: none;
+      border-radius: 18px;
+      padding: 0;
+      width: min(480px, calc(100% - 2rem));
+      box-shadow: 0 30px 80px rgba(18, 35, 28, 0.25);
+    }
+    dialog::backdrop { background: rgba(10, 20, 16, 0.45); backdrop-filter: blur(4px); }
+    .modal { padding: 1.2rem; }
+    .modal h3 {
+      font-family: var(--display);
+      font-size: 1.35rem;
+      margin-bottom: 0.85rem;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 0.55rem;
+      justify-content: flex-end;
+      margin-top: 0.4rem;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes card-in {
+      from { opacity: 0; transform: translateY(8px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (max-width: 719px) {
+      .app { width: min(100%, calc(100% - 1rem)); }
+      .field-row { grid-template-columns: 1fr; }
+      .side { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand-mark">Приёмная комиссия</div>
+        <h1>Переписки из таргета</h1>
+        <p>Одна доска: откуда пришёл абитуриент, на каком этапе диалог и что делать дальше.</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" type="button" id="btnExport">Экспорт CSV</button>
+        <button class="btn btn-ghost" type="button" id="btnSeed">Демо-данные</button>
+        <button class="btn btn-accent" type="button" id="btnGuide">Как связать таргет</button>
+        <button class="btn btn-primary" type="button" id="btnFocusForm">+ Новый лид</button>
+      </div>
+    </header>
+
+    <section class="stats" id="stats" aria-label="Сводка"></section>
+
+    <div class="layout">
+      <aside class="side" id="formPanel">
+        <h2>Добавить лид</h2>
+        <form id="leadForm">
+          <div class="field">
+            <label for="name">Имя / как обращаться</label>
+            <input id="name" name="name" required placeholder="Айгерим" autocomplete="name">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="phone">Телефон</label>
+              <input id="phone" name="phone" placeholder="+7 700…" inputmode="tel">
+            </div>
+            <div class="field">
+              <label for="channel">Куда написал</label>
+              <select id="channel" name="channel" required>
+                <option value="ig">Instagram Direct</option>
+                <option value="wa">WhatsApp</option>
+                <option value="call">Звонок</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="campaign">Кампания / объявление</label>
+            <input id="campaign" name="campaign" list="campaignList" placeholder="напр. ig_priem_2026_it" required>
+            <datalist id="campaignList"></datalist>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="specialty">Специальность</label>
+              <input id="specialty" name="specialty" list="specialtyList" placeholder="IT / Бухучёт…">
+              <datalist id="specialtyList"></datalist>
+            </div>
+            <div class="field">
+              <label for="stage">Этап</label>
+              <select id="stage" name="stage">
+                <option value="new">Новый</option>
+                <option value="dialog">В диалоге</option>
+                <option value="interest">Интерес</option>
+                <option value="applied">Подал заявку</option>
+                <option value="enrolled">Зачислен</option>
+                <option value="lost">Отказ</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="note">Короткий итог переписки</label>
+            <textarea id="note" name="note" placeholder="Спросил про грант, ждёт день открытых дверей…"></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">Сохранить в воронку</button>
+        </form>
+      </aside>
+
+      <section class="board-wrap">
+        <div class="board-head">
+          <div>
+            <h2>Воронка переписок</h2>
+            <p>Перетаскивайте карточки между этапами — картина обновляется сразу.</p>
+          </div>
+        </div>
+        <div class="filters">
+          <input id="search" type="search" placeholder="Поиск: имя, телефон, заметка…">
+          <select id="filterCampaign">
+            <option value="">Все кампании</option>
+          </select>
+          <select id="filterChannel">
+            <option value="">Все каналы</option>
+            <option value="ig">Instagram</option>
+            <option value="wa">WhatsApp</option>
+            <option value="call">Звонок</option>
+          </select>
+        </div>
+        <div class="board" id="board" aria-label="Канбан этапов"></div>
+      </section>
+    </div>
+
+    <section class="guide" id="guide">
+      <h2>Как отследить переписки от таргета</h2>
+      <div class="guide-grid">
+        <article class="step">
+          <div class="step-num">1</div>
+          <h3>В рекламе — метка источника</h3>
+          <ol>
+            <li>В Meta Ads у каждой кампании задайте имя: <code>ig_priem_it</code>, <code>wa_priem_grant</code>.</li>
+            <li>В ссылке на WhatsApp / сайт добавьте UTM: <code>?utm_source=meta&utm_campaign=ig_priem_it</code>.</li>
+            <li>Для WhatsApp-кнопки в креативе используйте отдельный текст первого сообщения с кодом кампании.</li>
+          </ol>
+        </article>
+        <article class="step">
+          <div class="step-num">2</div>
+          <h3>В переписке — сразу фиксируем</h3>
+          <ol>
+            <li>Админ видит входящее в IG / WA → за 30 секунд заносит карточку сюда.</li>
+            <li>Поля обязательно: канал + кампания + этап.</li>
+            <li>Если человек пришёл «сам» без метки — кампания <code>organic</code>.</li>
+          </ol>
+        </article>
+        <article class="step">
+          <div class="step-num">3</div>
+          <h3>Каждый день — ясная картина</h3>
+          <ol>
+            <li>Сверху смотрите: сколько новых, в диалоге, заявок, зачислений.</li>
+            <li>Фильтруйте по кампании — видно, какой креатив даёт диалоги.</li>
+            <li>Экспортируйте CSV в Excel / Google Sheets для отчёта директору.</li>
+          </ol>
+        </article>
+      </div>
+      <div class="chain">
+        <strong>Цепочка учёта:</strong>
+        объявление Meta → клик с UTM / первым сообщением → Instagram или WhatsApp → карточка в этой доске → этап до «Зачислен».
+        Без карточки в день обращения картина по таргету всегда будет размытой.
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="editDialog">
+    <form method="dialog" class="modal" id="editForm">
+      <h3>Карточка лида</h3>
+      <input type="hidden" id="editId">
+      <div class="field">
+        <label for="editName">Имя</label>
+        <input id="editName" required>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="editPhone">Телефон</label>
+          <input id="editPhone">
+        </div>
+        <div class="field">
+          <label for="editChannel">Канал</label>
+          <select id="editChannel">
+            <option value="ig">Instagram Direct</option>
+            <option value="wa">WhatsApp</option>
+            <option value="call">Звонок</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="editCampaign">Кампания</label>
+        <input id="editCampaign" required>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="editSpecialty">Специальность</label>
+          <input id="editSpecialty">
+        </div>
+        <div class="field">
+          <label for="editStage">Этап</label>
+          <select id="editStage">
+            <option value="new">Новый</option>
+            <option value="dialog">В диалоге</option>
+            <option value="interest">Интерес</option>
+            <option value="applied">Подал заявку</option>
+            <option value="enrolled">Зачислен</option>
+            <option value="lost">Отказ</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="editNote">Итог переписки</label>
+        <textarea id="editNote"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" value="cancel" type="submit">Отмена</button>
+        <button class="btn btn-primary" id="saveEdit" value="save" type="submit">Сохранить</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    const STORAGE_KEY = 'bbs_admissions_leads_v1';
+    const STAGES = [
+      { id: 'new', title: 'Новый' },
+      { id: 'dialog', title: 'В диалоге' },
+      { id: 'interest', title: 'Интерес' },
+      { id: 'applied', title: 'Подал заявку' },
+      { id: 'enrolled', title: 'Зачислен' },
+      { id: 'lost', title: 'Отказ' },
+    ];
+    const CHANNELS = {
+      ig: 'Instagram',
+      wa: 'WhatsApp',
+      call: 'Звонок',
+    };
+
+    const DEMO = [
+      { name: 'Айгерим С.', phone: '+7 707 111 22 33', channel: 'ig', campaign: 'ig_priem_it', specialty: 'IT', stage: 'dialog', note: 'Спросила про грант и сроки подачи', createdAt: daysAgo(0) },
+      { name: 'Данияр К.', phone: '+7 705 444 55 66', channel: 'wa', campaign: 'wa_priem_grant', specialty: 'Бухучёт', stage: 'interest', note: 'Хочет приехать на консультацию в пятницу', createdAt: daysAgo(1) },
+      { name: 'Мадина Т.', phone: '+7 776 222 33 44', channel: 'ig', campaign: 'ig_priem_it', specialty: 'IT', stage: 'applied', note: 'Заявку отправили, ждём документы', createdAt: daysAgo(2) },
+      { name: 'Ерлан Б.', phone: '+7 701 888 99 00', channel: 'wa', campaign: 'wa_openday', specialty: 'Дизайн', stage: 'new', note: 'Первое сообщение из сторис-рекламы', createdAt: daysAgo(0) },
+      { name: 'Сабина Н.', phone: '+7 747 123 45 67', channel: 'call', campaign: 'ig_priem_it', specialty: 'IT', stage: 'enrolled', note: 'Зачислена после звонка мамы', createdAt: daysAgo(5) },
+      { name: 'Алмас Ж.', phone: '', channel: 'ig', campaign: 'organic', specialty: 'Логистика', stage: 'lost', note: 'Выбрал другой колледж ближе к дому', createdAt: daysAgo(4) },
+    ];
+
+    function daysAgo(n) {
+      const d = new Date();
+      d.setDate(d.getDate() - n);
+      return d.toISOString();
+    }
+    function uid() {
+      return crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+    }
+    function load() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const data = JSON.parse(raw);
+        return Array.isArray(data) ? data : [];
+      } catch {
+        return [];
+      }
+    }
+    function save(leads) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
+    }
+
+    let leads = load();
+    let dragId = null;
+
+    const els = {
+      stats: document.getElementById('stats'),
+      board: document.getElementById('board'),
+      form: document.getElementById('leadForm'),
+      search: document.getElementById('search'),
+      filterCampaign: document.getElementById('filterCampaign'),
+      filterChannel: document.getElementById('filterChannel'),
+      campaignList: document.getElementById('campaignList'),
+      specialtyList: document.getElementById('specialtyList'),
+      toast: document.getElementById('toast'),
+      editDialog: document.getElementById('editDialog'),
+      editForm: document.getElementById('editForm'),
+    };
+
+    function toast(msg) {
+      els.toast.textContent = msg;
+      els.toast.classList.add('show');
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => els.toast.classList.remove('show'), 2200);
+    }
+
+    function filtered() {
+      const q = els.search.value.trim().toLowerCase();
+      const camp = els.filterCampaign.value;
+      const ch = els.filterChannel.value;
+      return leads.filter((l) => {
+        if (camp && l.campaign !== camp) return false;
+        if (ch && l.channel !== ch) return false;
+        if (!q) return true;
+        const hay = [l.name, l.phone, l.campaign, l.specialty, l.note].join(' ').toLowerCase();
+        return hay.includes(q);
+      });
+    }
+
+    function uniqueValues(key) {
+      return [...new Set(leads.map((l) => (l[key] || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ru'));
+    }
+
+    function fillDatalists() {
+      els.campaignList.innerHTML = uniqueValues('campaign').map((v) => `<option value="${escapeAttr(v)}"></option>`).join('');
+      els.specialtyList.innerHTML = uniqueValues('specialty').map((v) => `<option value="${escapeAttr(v)}"></option>`).join('');
+
+      const current = els.filterCampaign.value;
+      const camps = uniqueValues('campaign');
+      els.filterCampaign.innerHTML = '<option value="">Все кампании</option>' +
+        camps.map((c) => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+      if (camps.includes(current)) els.filterCampaign.value = current;
+    }
+
+    function renderStats(list) {
+      const total = list.length;
+      const fromTarget = list.filter((l) => l.campaign && l.campaign !== 'organic').length;
+      const dialog = list.filter((l) => ['dialog', 'interest', 'applied'].includes(l.stage)).length;
+      const applied = list.filter((l) => l.stage === 'applied').length;
+      const enrolled = list.filter((l) => l.stage === 'enrolled').length;
+      const targetPct = total ? Math.round((fromTarget / total) * 100) : 0;
+
+      const items = [
+        { value: total, label: 'Всего лидов', tone: '' },
+        { value: fromTarget + ' · ' + targetPct + '%', label: 'Из таргета', tone: 'brand' },
+        { value: dialog, label: 'Живые диалоги', tone: 'accent' },
+        { value: applied, label: 'Подали заявку', tone: '' },
+        { value: enrolled, label: 'Зачислены', tone: 'ok' },
+      ];
+      els.stats.innerHTML = items.map((i) => `
+        <article class="stat" ${i.tone ? `data-tone="${i.tone}"` : ''}>
+          <strong>${escapeHtml(String(i.value))}</strong>
+          <span>${escapeHtml(i.label)}</span>
+        </article>
+      `).join('');
+    }
+
+    function formatDate(iso) {
+      try {
+        return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+      } catch {
+        return '';
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;');
+    }
+    function escapeAttr(s) {
+      return escapeHtml(s).replaceAll("'", '&#39;');
+    }
+
+    function renderBoard() {
+      const list = filtered();
+      fillDatalists();
+      renderStats(list);
+
+      els.board.innerHTML = STAGES.map((stage) => {
+        const items = list.filter((l) => l.stage === stage.id);
+        return `
+          <section class="col" data-stage="${stage.id}">
+            <div class="col-head">
+              <h3>${escapeHtml(stage.title)}</h3>
+              <span class="count">${items.length}</span>
+            </div>
+            <div class="col-body" data-drop="${stage.id}">
+              ${items.length ? items.map(cardHtml).join('') : '<div class="empty">Пока пусто</div>'}
+            </div>
+          </section>
+        `;
+      }).join('');
+
+      bindBoardEvents();
+    }
+
+    function cardHtml(l) {
+      return `
+        <article class="lead" draggable="true" data-id="${escapeAttr(l.id)}" tabindex="0">
+          <div class="lead-top">
+            <div class="lead-name">${escapeHtml(l.name)}</div>
+            <button class="icon-btn" type="button" data-del="${escapeAttr(l.id)}" title="Удалить" aria-label="Удалить">×</button>
+          </div>
+          <div class="lead-meta">${escapeHtml(l.phone || 'без телефона')}${l.specialty ? ' · ' + escapeHtml(l.specialty) : ''}</div>
+          <div class="tags">
+            <span class="tag channel-${escapeAttr(l.channel)}">${escapeHtml(CHANNELS[l.channel] || l.channel)}</span>
+            <span class="tag campaign">${escapeHtml(l.campaign)}</span>
+          </div>
+          ${l.note ? `<p class="lead-note">${escapeHtml(l.note)}</p>` : ''}
+          <div class="lead-foot">
+            <time datetime="${escapeAttr(l.createdAt)}">${escapeHtml(formatDate(l.createdAt))}</time>
+            <button class="btn btn-ghost" style="min-height:32px;padding:0.25rem 0.55rem;font-size:0.75rem" type="button" data-edit="${escapeAttr(l.id)}">Править</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function bindBoardEvents() {
+      els.board.querySelectorAll('.lead').forEach((card) => {
+        card.addEventListener('dragstart', () => {
+          dragId = card.dataset.id;
+          card.classList.add('dragging');
+        });
+        card.addEventListener('dragend', () => {
+          card.classList.remove('dragging');
+          dragId = null;
+          els.board.querySelectorAll('.col').forEach((c) => c.classList.remove('drag-over'));
+        });
+        card.addEventListener('dblclick', () => openEdit(card.dataset.id));
+      });
+
+      els.board.querySelectorAll('.col').forEach((col) => {
+        const stage = col.dataset.stage;
+        col.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          col.classList.add('drag-over');
+        });
+        col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+        col.addEventListener('drop', (e) => {
+          e.preventDefault();
+          col.classList.remove('drag-over');
+          if (!dragId) return;
+          const lead = leads.find((l) => l.id === dragId);
+          if (!lead || lead.stage === stage) return;
+          lead.stage = stage;
+          lead.updatedAt = new Date().toISOString();
+          save(leads);
+          renderBoard();
+          toast('Этап обновлён → ' + STAGES.find((s) => s.id === stage).title);
+        });
+      });
+
+      els.board.querySelectorAll('[data-del]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute('data-del');
+          if (!confirm('Удалить карточку?')) return;
+          leads = leads.filter((l) => l.id !== id);
+          save(leads);
+          renderBoard();
+          toast('Удалено');
+        });
+      });
+
+      els.board.querySelectorAll('[data-edit]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openEdit(btn.getAttribute('data-edit'));
+        });
+      });
+    }
+
+    function openEdit(id) {
+      const lead = leads.find((l) => l.id === id);
+      if (!lead) return;
+      document.getElementById('editId').value = lead.id;
+      document.getElementById('editName').value = lead.name || '';
+      document.getElementById('editPhone').value = lead.phone || '';
+      document.getElementById('editChannel').value = lead.channel || 'ig';
+      document.getElementById('editCampaign').value = lead.campaign || '';
+      document.getElementById('editSpecialty').value = lead.specialty || '';
+      document.getElementById('editStage').value = lead.stage || 'new';
+      document.getElementById('editNote').value = lead.note || '';
+      els.editDialog.showModal();
+    }
+
+    els.editForm.addEventListener('submit', (e) => {
+      const submitter = e.submitter;
+      if (!submitter || submitter.value !== 'save') return;
+      e.preventDefault();
+      const id = document.getElementById('editId').value;
+      const lead = leads.find((l) => l.id === id);
+      if (!lead) return;
+      lead.name = document.getElementById('editName').value.trim();
+      lead.phone = document.getElementById('editPhone').value.trim();
+      lead.channel = document.getElementById('editChannel').value;
+      lead.campaign = document.getElementById('editCampaign').value.trim();
+      lead.specialty = document.getElementById('editSpecialty').value.trim();
+      lead.stage = document.getElementById('editStage').value;
+      lead.note = document.getElementById('editNote').value.trim();
+      lead.updatedAt = new Date().toISOString();
+      save(leads);
+      els.editDialog.close();
+      renderBoard();
+      toast('Карточка сохранена');
+    });
+
+    els.form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(els.form);
+      const lead = {
+        id: uid(),
+        name: String(fd.get('name') || '').trim(),
+        phone: String(fd.get('phone') || '').trim(),
+        channel: String(fd.get('channel') || 'ig'),
+        campaign: String(fd.get('campaign') || '').trim(),
+        specialty: String(fd.get('specialty') || '').trim(),
+        stage: String(fd.get('stage') || 'new'),
+        note: String(fd.get('note') || '').trim(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      if (!lead.name || !lead.campaign) return;
+      leads.unshift(lead);
+      save(leads);
+      els.form.reset();
+      document.getElementById('stage').value = 'new';
+      renderBoard();
+      toast('Лид добавлен в воронку');
+    });
+
+    ['input', 'change'].forEach((ev) => {
+      els.search.addEventListener(ev, renderBoard);
+      els.filterCampaign.addEventListener(ev, renderBoard);
+      els.filterChannel.addEventListener(ev, renderBoard);
+    });
+
+    document.getElementById('btnExport').addEventListener('click', () => {
+      const rows = [
+        ['id', 'name', 'phone', 'channel', 'campaign', 'specialty', 'stage', 'note', 'createdAt'],
+        ...leads.map((l) => [l.id, l.name, l.phone, CHANNELS[l.channel] || l.channel, l.campaign, l.specialty, STAGES.find((s) => s.id === l.stage)?.title || l.stage, l.note, l.createdAt]),
+      ];
+      const csv = rows.map((r) => r.map((cell) => {
+        const s = String(cell ?? '');
+        return /["\n,;]/.test(s) ? '"' + s.replaceAll('"', '""') + '"' : s;
+      }).join(';')).join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'priem-perepiski-' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast('CSV скачан');
+    });
+
+    document.getElementById('btnSeed').addEventListener('click', () => {
+      if (leads.length && !confirm('Добавить демо-данные к текущим?')) return;
+      const seeded = DEMO.map((d) => ({ ...d, id: uid(), updatedAt: d.createdAt }));
+      leads = [...seeded, ...leads];
+      save(leads);
+      renderBoard();
+      toast('Демо-данные загружены');
+    });
+
+    document.getElementById('btnGuide').addEventListener('click', () => {
+      document.getElementById('guide').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    document.getElementById('btnFocusForm').addEventListener('click', () => {
+      document.getElementById('formPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('name').focus();
+    });
+
+    if (!leads.length) {
+      leads = DEMO.map((d) => ({ ...d, id: uid(), updatedAt: d.createdAt }));
+      save(leads);
+    }
+    renderBoard();
+  </script>
+</body>
+</html>
