@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>ПРИКАЗ — Project Sauyt</title>
+  <style>
+    @page { size: 1080px 1350px; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1080px;
+      height: 1350px;
+      overflow: hidden;
+      background: #1a1a1a;
+    }
+    .sheet {
+      width: 1080px;
+      height: 1350px;
+      position: relative;
+      background:
+        radial-gradient(ellipse at 18% 12%, rgba(180, 40, 40, 0.05), transparent 42%),
+        radial-gradient(ellipse at 82% 88%, rgba(40, 70, 140, 0.06), transparent 46%),
+        linear-gradient(180deg, #f7f1e3 0%, #efe4cc 48%, #e8d9b8 100%);
+      color: #1a140c;
+      font-family: "Tinos", "Liberation Serif", "Noto Serif", "Times New Roman", serif;
+    }
+    .sheet::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+    }
+    .frame {
+      position: absolute;
+      inset: 36px;
+      border: 3px solid #6b1d1d;
+      padding: 10px;
+    }
+    .frame-inner {
+      height: 100%;
+      border: 1.5px solid #b0893a;
+      padding: 42px 56px 36px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      color: #8a6a2a;
+      font-size: 13px;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+    }
+    .ornament::before, .ornament::after {
+      content: "";
+      width: 92px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #b0893a, transparent);
+    }
+    .org {
+      text-align: center;
+      margin-top: 6px;
+    }
+    .org__name {
+      font-family: "Noto Serif Display", "Tinos", serif;
+      font-weight: 700;
+      font-size: 34px;
+      letter-spacing: 0.22em;
+      color: #6b1d1d;
+      text-transform: uppercase;
+    }
+    .org__sub {
+      margin-top: 8px;
+      font-size: 18px;
+      letter-spacing: 0.04em;
+      color: #3d2a16;
+    }
+    .org__geo {
+      margin-top: 4px;
+      font-size: 16px;
+      color: #6b1d1d;
+      font-style: italic;
+    }
+    .rule {
+      margin: 18px auto 8px;
+      width: 72%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #6b1d1d 18%, #b0893a 50%, #6b1d1d 82%, transparent);
+    }
+    .rule--thin {
+      height: 1px;
+      width: 48%;
+      margin-top: 4px;
+      background: linear-gradient(90deg, transparent, #b0893a, transparent);
+    }
+    .title {
+      text-align: center;
+      margin: 22px 0 8px;
+      font-family: "Noto Serif Display", "Tinos", serif;
+      font-size: 92px;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      color: #6b1d1d;
+      line-height: 1;
+      text-indent: 0.28em;
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin: 10px 8px 0;
+      font-size: 20px;
+    }
+    .meta b { font-weight: 700; letter-spacing: 0.04em; }
+    .city {
+      text-align: right;
+      font-style: italic;
+    }
+    .preamble {
+      margin: 28px 8px 0;
+      font-size: 22px;
+      line-height: 1.45;
+      text-align: justify;
+      text-indent: 42px;
+    }
+    .prikazuyu {
+      text-align: center;
+      margin: 26px 0 10px;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      color: #6b1d1d;
+    }
+    ol {
+      margin: 6px 8px 0 8px;
+      padding-left: 42px;
+      font-size: 22px;
+      line-height: 1.42;
+    }
+    li { margin-bottom: 14px; padding-left: 8px; }
+    li b { color: #6b1d1d; }
+    .sign {
+      margin-top: 36px;
+      display: grid;
+      grid-template-columns: 1fr 200px 1fr;
+      align-items: end;
+      gap: 8px;
+      padding: 18px 8px 0;
+    }
+    .sign__left {
+      font-size: 18px;
+      line-height: 1.35;
+    }
+    .sign__left .role { font-weight: 700; }
+    .sign__line {
+      margin-top: 38px;
+      border-bottom: 1.5px solid #1a140c;
+      width: 210px;
+    }
+    .sign__cap {
+      margin-top: 6px;
+      font-size: 14px;
+      color: #5a4a38;
+    }
+    .stamp {
+      width: 168px;
+      height: 168px;
+      justify-self: center;
+      opacity: 0.88;
+      transform: rotate(-12deg) translateY(8px);
+    }
+    .sign__script {
+      text-align: right;
+      font-family: "Noto Serif Display", "Tinos", serif;
+      font-style: italic;
+      font-size: 42px;
+      color: #1a3a78;
+      line-height: 1;
+      padding-bottom: 10px;
+      text-shadow: 0 0 0.5px #1a3a78;
+    }
+    .foot {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 15px;
+      color: #5a4a38;
+      letter-spacing: 0.06em;
+    }
+    .foot b { color: #6b1d1d; }
+    .legal {
+      margin-top: 8px;
+      text-align: center;
+      font-size: 11px;
+      color: #8a7a66;
+      letter-spacing: 0.02em;
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="frame">
+      <div class="frame-inner">
+        <div class="ornament">официально</div>
+        <div class="org">
+          <div class="org__name">Project Sauyt</div>
+          <div class="org__sub">Консалтинг и сервис для объектов размещения</div>
+          <div class="org__geo">Казахстан и СНГ · Booking.com · Ostrovok · Bronevik</div>
+        </div>
+        <div class="rule"></div>
+        <div class="rule rule--thin"></div>
+
+        <h1 class="title">ПРИКАЗ</h1>
+        <div class="meta">
+          <div>№ <b>11/09-OTA</b></div>
+          <div>от «<b>11</b>» сентября 2026 г.</div>
+        </div>
+        <div class="meta" style="margin-top:6px">
+          <div></div>
+          <div class="city">г. Алматы</div>
+        </div>
+
+        <p class="preamble">
+          В целях увеличения количества бронирований, устранения слабой видимости на OTA
+          и наведения порядка в карточках объектов размещения
+        </p>
+        <div class="prikazuyu">ПРИКАЗЫВАЮ:</div>
+        <ol>
+          <li>Прекратить вести <b>тарифы, календарь и фото</b> «на глаз» — профиль настраивать системно.</li>
+          <li>Привести в порядок карточки на <b>Booking.com, Ostrovok и Bronevik</b>: контент, отзывы, ограничения.</li>
+          <li>Персоналу пройти <b>обучение OTA — 50&nbsp;000 тенге</b> либо заказать <b>настройку под ключ — от 60&nbsp;000 тенге</b>.</li>
+          <li>Контроль исполнения и сопровождение возложить на <b>Project Sauyt</b>.</li>
+        </ol>
+
+        <div class="sign">
+          <div class="sign__left">
+            <div class="role">Руководитель</div>
+            <div>Project Sauyt</div>
+            <div class="sign__line"></div>
+            <div class="sign__cap">подпись</div>
+          </div>
+          <svg class="stamp" viewBox="0 0 200 200" aria-hidden="true">
+            <circle cx="100" cy="100" r="96" fill="rgba(155,28,28,0.04)" stroke="#9b1c1c" stroke-width="3.6"/>
+            <circle cx="100" cy="100" r="88" fill="none" stroke="#9b1c1c" stroke-width="1.4"/>
+            <circle cx="100" cy="100" r="78" fill="none" stroke="#9b1c1c" stroke-width="0.8" stroke-dasharray="2.5 2.2"/>
+            <text x="100" y="78" text-anchor="middle" fill="#9b1c1c" font-size="13" font-family="Tinos, Liberation Serif, serif" font-weight="700" letter-spacing="1.5">PROJECT</text>
+            <text x="100" y="98" text-anchor="middle" fill="#9b1c1c" font-size="13" font-family="Tinos, Liberation Serif, serif" font-weight="700" letter-spacing="1.5">SAUYT</text>
+            <line x1="62" y1="110" x2="138" y2="110" stroke="#9b1c1c" stroke-width="1.1"/>
+            <text x="100" y="132" text-anchor="middle" fill="#9b1c1c" font-size="18" font-family="Tinos, Liberation Serif, serif" font-weight="700">М.П.</text>
+            <text x="100" y="152" text-anchor="middle" fill="#9b1c1c" font-size="11" font-family="Tinos, Liberation Serif, serif">11.09.2026</text>
+          </svg>
+          <div class="sign__script">P. Sauyt</div>
+        </div>
+
+        <div class="foot">Исполнение: <b>@project_sauyt</b> · WhatsApp +7 707 328 15 73</div>
+        <div class="legal">Творческий формат Project Sauyt. Не является государственным документом и публичной офертой.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
