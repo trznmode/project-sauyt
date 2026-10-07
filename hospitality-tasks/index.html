@@ -323,7 +323,7 @@ details summary{cursor:pointer;font-weight:600}
 <body>
 <section class="gate" id="gate"><div class="gatecard" id="gatecard"></div></section>
 <div class="wrap" id="app" hidden>
-  <div class="topbar"><div class="who" id="who"></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="finalbtn" id="tBack" hidden></button><div class="lang" id="langApp"></div></div></div>
+  <div class="topbar"><div class="who" id="who"></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="finalbtn" id="tBack" hidden></button><button class="finalbtn" id="cpTop" hidden></button><div class="lang" id="langApp"></div></div></div>
   <div class="banner" id="banner" hidden></div>
   <header class="hero">
     <div class="eyebrow">Hotel «Sauyt» · hospitality practicum</div>
@@ -376,6 +376,7 @@ const UI={
   tNone:'Пока никто не вошёл. Отправьте студентам ссылку и дайте им доступ «Участник» (Contributor).',
   tLessonH:'Состав урока',tLessonSub:'Отметьте задания для класса: студенты увидят только отмеченные. Изменения применяются сразу.',tP80:'Пресет: ~80 минут',tAll:'Все задания',tTotal:'Итого',tCfgFail:'Не удалось сохранить состав: нужны права редактора страницы.',tPts:'баллов',
   connWait:'Проверяю связь с преподавателем…',connOk:'Связь с преподавателем есть: ваши результаты будут видны.',connNo:'Преподаватель вас не увидит: вы не вошли в аккаунт или у вас нет доступа «Участник». Войдите в аккаунт и откройте ссылку снова. Пока можно проходить задания, а в конце скопировать результат и отправить преподавателю.',copyRes:'Скопировать результат',copied:'Скопировано. Отправьте это преподавателю.',
+  tImpH:'Результаты студентов без аккаунта',tImpSub:'Если студент не вошёл в аккаунт, его результаты не попадут сюда сами. Пусть нажмёт «Скопировать результат» и пришлёт вам сообщение целиком. Вставьте присланное сюда.',tImpBtn:'Добавить в список',tImpDone:'Добавлено студентов',tImpBad:'Код результата не найден в тексте',tImpPh:'Вставьте сообщения студентов с кодом SAUYT1:…',sendTop:'Отправить результат преподавателю',
   tDb:'База',tRoom:'Присутствие',tRecs:'Записей',tPeersN:'Окон открыто',tRefresh:'Обновить',
   tDetail:'Подробно',tClose:'Закрыть',tTimeIn:'время',tAns:'Ответы',tCsv:'Скачать CSV',tReset:'Очистить список',tResetSure:'Нажмите ещё раз, чтобы удалить всех',
   tNoDb:'База данных недоступна в этом окне: показаны только те, кто в сети.',tNow2:'сейчас',tAgo:'назад',tMinShort:'мин',lobby:'вход'
@@ -398,6 +399,7 @@ const UI={
   tNone:'Әзірге ешкім кірген жоқ. Студенттерге сілтемені жіберіп, оларға «Қатысушы» (Contributor) қолжетімділігін беріңіз.',
   tLessonH:'Сабақ құрамы',tLessonSub:'Сыныпқа тапсырмаларды белгілеңіз: студенттер тек белгіленгенді көреді. Өзгерістер бірден қолданылады.',tP80:'Пресет: ~80 минут',tAll:'Барлық тапсырма',tTotal:'Барлығы',tCfgFail:'Құрамды сақтау мүмкін болмады: бет редакторының құқығы керек.',tPts:'ұпай',
   connWait:'Мұғалімді байланыс тексерілуде…',connOk:'Мұғаліммен байланыс бар: нәтижелеріңіз көрінеді.',connNo:'Мұғалім сізді көрмейді: аккаунтқа кірмегенсіз немесе «Қатысушы» қолжетімділігі жоқ. Аккаунтқа кіріп, сілтемені қайта ашыңыз. Әзірге тапсырмаларды орындай аласыз, ал соңында нәтижені көшіріп мұғалімге жібересіз.',copyRes:'Нәтижені көшіру',copied:'Көшірілді. Мұны мұғалімге жіберіңіз.',
+  tImpH:'Аккаунтсыз студенттер нәтижелері',tImpSub:'Студент аккаунтқа кірмесе, оның нәтижелері мұнда өздігінен түспейді. «Нәтижені көшіру» батырмасын басып, хабарламаны толық жіберсін. Келгенін осында қойыңыз.',tImpBtn:'Тізімге қосу',tImpDone:'Қосылған студенттер',tImpBad:'Мәтінде нәтиже коды табылмады',tImpPh:'SAUYT1:… коды бар студент хабарламаларын қойыңыз',sendTop:'Нәтижені мұғалімге жіберу',
   tDb:'Дерекқор',tRoom:'Қатысу',tRecs:'Жазба',tPeersN:'Ашық терезе',tRefresh:'Жаңарту',
   tDetail:'Толығырақ',tClose:'Жабу',tTimeIn:'уақыт',tAns:'Жауаптар',tCsv:'CSV жүктеу',tReset:'Тізімді тазалау',tResetSure:'Барлығын жою үшін тағы бір рет басыңыз',
   tNoDb:'Бұл терезеде дерекқор қолжетімсіз: тек желідегілер көрсетіледі.',tNow2:'қазір',tAgo:'бұрын',tMinShort:'мин',lobby:'кіреберіс'
@@ -453,7 +455,7 @@ async function initCaps(){
     if(db){try{db.doc('config/lesson').onSnapshot(sn=>{if(sn.exists){const d=sn.data();if(d&&Array.isArray(d.on))ENABLED=new Set(d.on)}else ENABLED=new Set(DEFAULT80);cfgChanged()},()=>{})}catch(e){}}
   }catch(e){}
   if(connState==='wait')connState='no';
-  gateRender();banner();
+  gateRender();banner();if(!$('#app').hidden)appChrome();
   if(!$('#tapp').hidden)tConnect();
   if(S.name&&!$('#app').hidden){persist()}
 }
@@ -519,6 +521,7 @@ function appChrome(){
   $('#heroLead').textContent=U('heroLead');
   $('#finBtn').textContent=U('finBtn');
   const tb=$('#tBack');tb.hidden=!isTeacher;tb.textContent=U('backTeacher');
+  const ct=$('#cpTop');ct.hidden=!(connState==='no'&&!PRACTICE);ct.textContent=U('sendTop');
   drawDoors();
   $$('.pfoot').forEach((f,i)=>footDraw(i));
 }
@@ -594,18 +597,31 @@ function finalDraw(){
   <p class="lead" style="margin-top:16px;font-size:.95rem">${weak.length?U('improve')+': '+esc(weak.join(', '))+'.':U('allGood')}</p></div></div>`;
 }
 
+function codeOf(){
+  const o={n:S.name,g:S.group,l:LANG,s:S.startedAt,r:{}};
+  ONMODS().forEach(m=>{const x=S.res[m.id];if(!x)return;const a={};let c=0;for(const k in (x.a||{})){if(c++>=3)break;a[k.slice(0,40)]=String(x.a[k]).slice(0,220)}o.r[m.id]=[x.s,x.m,x.t,a]});
+  return 'SAUYT1:'+btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+}
+function decodeCodes(text){
+  const out=[];(String(text).match(/SAUYT1:[A-Za-z0-9+\/=]+/g)||[]).forEach(c=>{
+    try{const o=JSON.parse(decodeURIComponent(escape(atob(c.slice(7)))));if(!o||!o.n)return;
+      const res={};let tot=0,k=0;for(const id in o.r){const v=o.r[id];res[id]={s:v[0],m:v[1],t:v[2],a:v[3]||{}};tot+=v[0];k++}
+      out.push({id:'imp_'+hash((o.n+'|'+(o.g||'')).toLowerCase()),name:o.n,group:o.g||'',lang:o.l,startedAt:o.s||0,res,tot,k,imp:true,lastAt:0})}catch(e){}});
+  return out;
+}
 function resultText(){
   const lines=[`${S.name}${S.group?' ('+S.group+')':''} — ${total()} / ${MAXPTS()}`].concat(ONMODS().map(m=>{const x=S.res[m.id];return `${m.no} ${L(m.title)}: ${x?x.s+'/'+x.m+', '+Math.round((x.t||0)/60)+' мин':'—'}`}));
-  return lines.join('\n');
+  return lines.join('\n')+'\n\n'+codeOf();
 }
 document.addEventListener('click',e=>{
-  if(e.target&&e.target.id==='cpRes'){
-    const txt=resultText(),msg=$('#cpMsg');
-    const ok=()=>{if(msg)msg.textContent=U('copied')};
+  if(e.target&&(e.target.id==='cpRes'||e.target.id==='cpTop')){
+    const txt=resultText(),msg=$('#cpMsg'),btn=e.target;
+    const ok=()=>{if(msg)msg.textContent=U('copied');if(btn.id==='cpTop'){const o=btn.textContent;btn.textContent=U('copied');setTimeout(()=>{btn.textContent=o},2500)}};
     try{navigator.clipboard.writeText(txt).then(ok,()=>{window.prompt&&0;const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='width:100%;min-height:140px';e.target.parentNode.appendChild(ta);ta.select()})}catch(err){const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='width:100%;min-height:140px';e.target.parentNode.appendChild(ta);ta.select()}
   }
 });
 /* ── teacher ── */
+let tImp={};try{tImp=JSON.parse(STORE.get('sauyt_imp')||'{}')}catch(e){}
 let tUnsub=[],tDocs={},tPeers=[],tSel=null,tReady=false,tResetArm=false,tRaf=0;
 let tSubDb=false,tSubRoom=false,tErr='';
 function tConnect(){
@@ -625,10 +641,11 @@ async function tRefresh(){
   try{const sn=await caps.db.collection('students').get();tDocs={};sn.docs.forEach(d=>{tDocs[d.id]=d.data()});tErr=''}catch(e){tErr=(e&&e.code)||'error'}
   tSched();
 }
-function tSched(){if(tRaf)return;tRaf=requestAnimationFrame(()=>{tRaf=0;if(!$('#tapp').hidden)tRender()})}
+function tSched(){if(tRaf)return;const ae=document.activeElement;if(ae&&$('#tapp').contains(ae)&&/TEXTAREA|INPUT/.test(ae.tagName))return;tRaf=requestAnimationFrame(()=>{tRaf=0;if(!$('#tapp').hidden)tRender()})}
 function tStudents(){
   const rows={};
   Object.entries(tDocs).forEach(([id,d])=>{rows[id]={id,live:false,...d}});
+  Object.entries(tImp).forEach(([id,d])=>{if(!rows[id])rows[id]={id,live:false,...d}});
   tPeers.forEach(p=>{
     if(p.kind!=='viewer'||!p.presence||!p.presence.n)return;
     const id=p.presence.i||p.by||('p:'+p.peer);const o=rows[id]||{id};
@@ -657,6 +674,7 @@ function tRender(){
    <div class="map">${ONMODS().map(m=>`<div class="mc ${cnt[m.id]?'hot':''}"><small>${m.no}</small><b>${esc(L(m.title))}</b><div class="pp">${(cnt[m.id]||[]).map(n=>`<i title="${esc(n)}">${esc(n.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase())}</i>`).join('')}</div></div>`).join('')}<div class="mc ${cnt.final?'hot':''}"><small>🏁</small><b>${U('badge')}</b><div class="pp">${(cnt.final||[]).map(n=>`<i title="${esc(n)}">${esc(n[0].toUpperCase())}</i>`).join('')}</div></div></div>
    <div class="mini" style="margin-top:20px">${U('tTable')}</div>
    ${rows.length?`<div class="tw"><table><thead><tr><th></th><th>${U('tName')}</th><th>${U('tGroup')}</th><th>${U('tNow')}</th><th>${U('tProg')}</th><th>${U('tScore')}</th><th>${U('tTime')}</th><th>${U('tLang')}</th><th>${U('tSeen')}</th></tr></thead><tbody>${rows.map(r=>`<tr class="clk" data-id="${esc(r.id)}"><td><span class="dot ${r.live?'on':''}"></span></td><td><b>${esc(r.name)}</b></td><td>${esc(r.group||'')}</td><td>${esc(r.door?modTitle(r.door):U('lobby'))}</td><td>${r.k||0} / ${ONMODS().length}</td><td>${r.tot||0} / ${mx}</td><td>${r.startedAt?Math.round((Date.now()-r.startedAt)/60000)+' '+U('tMinShort'):'—'}</td><td>${r.lang==='kk'?'ҚАЗ':'RU'}</td><td>${r.live?U('tNow2'):ago(r.lastAt)}</td></tr>`).join('')}</tbody></table></div>`:`<p class="lead">${U('tNone')}</p>`}
+   <div class="mini" style="margin-top:20px">${U('tImpH')}</div><p class="det">${U('tImpSub')}</p><textarea id="impTx" style="min-height:80px" placeholder="${U('tImpPh')}"></textarea><p style="margin-top:8px"><button class="btn sm" id="impGo">${U('tImpBtn')}</button> <span class="det" id="impMsg"></span></p>
    <div class="tbar">${caps.dl?`<button class="btn sm" id="tCsv">${U('tCsv')}</button>`:''}<button class="btn sm ghost" id="tRst">${tResetArm?U('tResetSure'):U('tReset')}</button><button class="btn sm ghost" id="tToApp">${LANG==='kk'?'Студент ретінде өту':'Пройти как студент'}</button></div>
   </div>
   ${sel?tDetail(sel):''}`;
@@ -667,6 +685,11 @@ function tRender(){
   $$('tr.clk',t).forEach(tr=>tr.onclick=()=>{tSel=tSel===tr.dataset.id?null:tr.dataset.id;tRender();if(tSel)$('#tdet')&&$('#tdet').scrollIntoView({behavior:'smooth'})});
   const c=$('#tCsv');if(c)c.onclick=()=>tCsv(rows);
   $('#tRef').onclick=tRefresh;
+  $('#impGo').onclick=async()=>{const arr=decodeCodes($('#impTx').value),msg=$('#impMsg');
+    if(!arr.length){msg.textContent=U('tImpBad');return}
+    arr.forEach(d=>{tImp[d.id]=d});STORE.set('sauyt_imp',JSON.stringify(tImp));
+    if(caps.db){for(const d of arr){try{await caps.db.doc('students/'+d.id).set(d)}catch(e){}}}
+    $('#impTx').value='';tRender();const m2=$('#impMsg');if(m2)m2.textContent=U('tImpDone')+': '+arr.length};
   $('#tRst').onclick=async()=>{if(!tResetArm){tResetArm=true;tRender();setTimeout(()=>{tResetArm=false},5000);return}tResetArm=false;
     try{await Promise.all(Object.keys(tDocs).map(id=>caps.db.doc('students/'+id).delete()))}catch(e){}tRender()};
   $('#tToApp').onclick=()=>{$('#tapp').hidden=true;$('#gate').hidden=false;gateRender()};
