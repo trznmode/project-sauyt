@@ -166,17 +166,51 @@ input[type=text]{width:100%;padding:12px 14px;border:2px solid var(--line);borde
   .badge{transform:none}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+.gate{min-height:92vh;display:grid;place-items:center;padding-block:40px}
+.gate[hidden],#app[hidden]{display:none!important}
+.gatecard{max-width:560px;width:100%}
+.gatecard h1{margin-block:8px 12px}
+.keycard{width:150px;height:92px;border-radius:12px;background:var(--blue);color:var(--on-blue);transform:rotate(-8deg);position:relative;margin-bottom:26px;box-shadow:0 18px 34px var(--shadow);display:flex;align-items:flex-end;padding:10px 12px;font-family:var(--f-display);font-weight:900;letter-spacing:.12em;font-size:.8rem}
+.keycard i{position:absolute;left:0;right:0;top:18px;height:16px;background:var(--on-sun);opacity:.85}
+.nmerr{color:var(--bad);font-weight:600;min-height:1.6em;margin-bottom:6px}
+.gatecard .btn{width:100%;font-size:1.05rem;padding:14px}
+.dots{display:flex;gap:6px;margin-bottom:12px}.dots i{width:28px;height:6px;border-radius:99px;background:var(--line)}.dots i.d{background:var(--ok)}.dots i.c{background:var(--blue)}
+.mt{display:block;color:var(--muted);font-size:.86rem;font-weight:400;margin-top:2px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}.fgrid.rows{grid-template-columns:1fr}
+.fl{text-align:left;border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:10px 14px;cursor:pointer;min-width:0;transition:border-color .2s,background .2s}
+.fl:hover{border-color:var(--blue)}
+.fl small{display:block;color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em}
+.fl b{display:block;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.fl.flag{border-color:var(--blue);background:var(--blue-soft)}
+.fl.hit{border-color:var(--ok);background:var(--ok-bg)}.fl.fp{border-color:var(--bad);background:var(--bad-bg)}.fl.miss{border-color:var(--bad);border-style:dashed}
+ol.order{list-style:none;padding:0;display:grid;gap:8px}
+ol.order li{display:flex;gap:8px;align-items:center;border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:8px 12px}
+ol.order li span{flex:1;min-width:0}
+ol.order li.ok{border-color:var(--ok);background:var(--ok-bg)}ol.order li.bad{border-color:var(--bad);background:var(--bad-bg)}
+ol.order button{width:38px;height:38px;border-radius:10px;border:2px solid var(--line);background:var(--card);cursor:pointer;color:var(--ink)}
+.fgrid+p,.scene+.opt{margin-top:0}
 </style>
 
 </head>
 <body>
-<div class="wrap">
+<section class="gate" id="gate"><div class="gatecard">
+  <div class="keycard" aria-hidden="true"><span>САУЫТ</span><i></i></div>
+  <div class="eyebrow">Отель «Сауыт» · приём сотрудников</div>
+  <h1>Как вас зовут?</h1>
+  <p class="lead">Сегодня вы выходите на смену. Одиннадцать ситуаций, от заселения до пожарной тревоги. Имя появится на вашем бейдже в конце.</p>
+  <label class="mini" for="nm0" style="margin-top:22px;display:block">Имя на бейдже</label>
+  <input type="text" id="nm0" maxlength="24" placeholder="Например, Асель" autocomplete="off">
+  <div id="nmerr" class="nmerr" role="alert"></div>
+  <button class="btn sun" id="go">Начать смену</button>
+</div></section>
+<div class="wrap" id="app" hidden>
   <header class="hero">
-    <div class="eyebrow">Практикум · гостиничный бизнес</div>
+    <div class="eyebrow" id="hello">Практикум · гостиничный бизнес</div>
     <h1>Смена в отеле <em>«Сауыт»</em></h1>
-    <p class="lead">Вы — дежурный администратор. Пять дверей, пять ситуаций: заселить гостей, назначить цену, найти грязь в номере, пережить овербукинг и ответить на злой отзыв. В конце получите бейдж с вашим званием.</p>
+    <p class="lead">Вы — дежурный администратор. Одиннадцать дверей, одиннадцать ситуаций: заселить гостей, назначить цену, найти грязь, проверить бронь и сверку, накормить гостей с аллергиями, продать апгрейд, пережить овербукинг и пожарную тревогу. Двери можно открывать в любом порядке. В конце получите бейдж со званием.</p>
     <div class="doors" id="doors"></div>
-    <div class="hud"><div class="bar" aria-hidden="true"><i id="prog"></i></div><b id="hudScore">0 / 19</b><button class="finalbtn" id="finBtn">Получить бейдж</button></div>
+    <div class="hud"><div class="bar" aria-hidden="true"><i id="prog"></i></div><b id="hudScore">0 / 40</b><button class="finalbtn" id="finBtn">Получить бейдж</button></div>
   </header>
   <main id="stage"></main>
 </div>
@@ -192,8 +226,15 @@ const DOORS=[
  {no:'202',name:'Revenue',sub:'Цена на 3 дня',max:3,init:taskRevenue},
  {no:'303',name:'Осмотр',sub:'Найти дефекты',max:5,init:taskInspect},
  {no:'404',name:'Овербукинг',sub:'Ночной кризис',max:3,init:taskOver},
- {no:'505',name:'Отзыв',sub:'Ответ гостю',max:4,init:taskReview}
+ {no:'505',name:'Отзыв',sub:'Ответ гостю',max:4,init:taskReview},
+ {no:'606',name:'Бронь',sub:'Найти ошибки',max:4,init:taskBooking},
+ {no:'707',name:'Ресторан',sub:'Диеты гостей',max:4,init:taskFood},
+ {no:'808',name:'Аудит',sub:'Сверка сумм',max:3,init:taskAudit},
+ {no:'909',name:'Этикет',sub:'Гости мира',max:4,init:taskEtiquette},
+ {no:'111',name:'Продажи',sub:'Апгрейд гостя',max:3,init:taskSales},
+ {no:'212',name:'Тревога',sub:'Порядок действий',max:3,init:taskFire}
 ];
+let NAME='Гость';
 const MAX=DOORS.reduce((a,d)=>a+d.max,0);
 const pts=DOORS.map(()=>0), fin=DOORS.map(()=>false);
 let cur=0;
@@ -227,7 +268,7 @@ function setScore(i,p,done=true,from){
   if(done&&from)burst(from);
 }
 $('#doors').addEventListener('click',e=>{const b=e.target.closest('.door');if(b)show(+b.dataset.i)});
-$('#finBtn').addEventListener('click',()=>show(5));
+$('#finBtn').addEventListener('click',()=>show(DOORS.length));
 
 /* ───── 101 · ЛОББИ ───── */
 function taskLobby(root){
@@ -385,7 +426,7 @@ function taskOver(root){
       box.innerHTML=`<div class="note ${sc>=2?'ok':'bad'}">Итог: ${sc} из 3. ${lvl}</div><p style="margin-top:12px"><button class="btn ghost" id="rst">Пройти заново</button></p>`;
       $('#rst',root).onclick=()=>{s=0;sc=0;m={g:50,b:50,r:50};meters();draw()};return}
     const st=steps[s];
-    box.innerHTML=`<div class="scene"><small>Ситуация ${s+1} из ${steps.length}</small>${st.t}</div>`+st.o.map((o,j)=>`<button class="opt" data-j="${j}">${o[0]}</button>`).join('')+`<div class="note" id="ff" style="display:none"></div>`;
+    box.innerHTML=`<div class="scene"><small>Ситуация ${s+1} из ${steps.length}</small>${s===0?'Администратор '+esc(NAME)+', '+st.t.charAt(0).toLowerCase()+st.t.slice(1):st.t}</div>`+st.o.map((o,j)=>`<button class="opt" data-j="${j}">${o[0]}</button>`).join('')+`<div class="note" id="ff" style="display:none"></div>`;
     box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
       const o=st.o[+b.dataset.j];box.querySelectorAll('.opt').forEach((x,k)=>{x.disabled=true;if(st.o[k][2])x.classList.add('best')});b.classList.add('pick');
       for(const k of ['g','b','r'])m[k]=clamp(m[k]+o[1][k]);meters();if(o[2])sc++;
@@ -436,18 +477,179 @@ function taskReview(root){
   upd();
 }
 
+/* ───── ОБЩИЕ МЕХАНИКИ ───── */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const shuf=a=>[...a].sort(()=>Math.random()-.5);
+const head=c=>`<div class="eyebrow">${c.eyebrow}</div><h2>${c.title}</h2><p class="intro">${c.intro}</p>`;
+
+function choiceTask(root,cfg,idx){
+  const items=cfg.items.map(it=>({...it,opts:shuf(it.opts)}));
+  let n=0,sc=0;
+  root.innerHTML=head(cfg)+'<div class="cx"></div>';
+  const box=$('.cx',root);
+  function draw(){
+    if(n>=items.length){
+      box.innerHTML=`<div class="note ${sc>=items.length-1?'ok':'bad'}">${cfg.end(sc,items.length)}</div><p style="margin-top:12px"><button class="btn ghost rs">Пройти заново</button></p>`;
+      $('.rs',root).onclick=()=>{n=0;sc=0;draw()};return;
+    }
+    const it=items[n];
+    box.innerHTML=`<div class="dots">${items.map((_,k)=>`<i class="${k<n?'d':k===n?'c':''}"></i>`).join('')}</div><div class="scene"><small>${cfg.kicker||'Ситуация'} ${n+1} из ${items.length}${it.who?' · '+it.who:''}</small>${it.text}</div>`
+      +it.opts.map((o,j)=>`<button class="opt" data-j="${j}"><b>${o[0]}</b>${o[3]?`<small class="mt">${o[3]}</small>`:''}</button>`).join('')+'<div class="note ff" style="display:none"></div>';
+    box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      const o=it.opts[+b.dataset.j];
+      box.querySelectorAll('.opt').forEach((x,k)=>{x.disabled=true;if(it.opts[k][1])x.classList.add('best')});
+      b.classList.add('pick');if(o[1])sc++;
+      const f=$('.ff',box);f.style.display='block';f.className='note ff '+(o[1]?'ok':'bad');
+      f.innerHTML=`${o[1]?'Верно. ':'Не лучший вариант. '}${o[2]}<br><br><button class="btn nx">${n===items.length-1?'Итоги':'Дальше'}</button>`;
+      $('.nx',f).onclick=()=>{n++;if(n>=items.length)setScore(idx,sc,true,root);draw()};
+    });
+  }
+  draw();
+}
+
+function flagTask(root,cfg,idx){
+  const flags=new Set();let done=false;
+  root.innerHTML=head(cfg)+(cfg.pre||'')+`<div class="fgrid ${cfg.cls||''}">${cfg.items.map((it,i)=>`<button class="fl" data-i="${i}"><small>${it.k}</small><b>${it.v}</b></button>`).join('')}</div><p style="margin-top:14px"><button class="btn ck">${cfg.btn||'Проверить'}</button></p><div class="note fn">${cfg.hint}</div>`;
+  const btns=[...root.querySelectorAll('.fl')],note=$('.fn',root);
+  btns.forEach((b,i)=>b.onclick=()=>{if(done)return;flags.has(i)?flags.delete(i):flags.add(i);b.classList.toggle('flag',flags.has(i))});
+  $('.ck',root).onclick=()=>{
+    if(done)return;done=true;let hit=0,fp=0,miss=[];
+    btns.forEach((b,i)=>{const bad=cfg.items[i].bad,f=flags.has(i);b.classList.remove('flag');
+      if(bad&&f){hit++;b.classList.add('hit')}else if(!bad&&f){fp++;b.classList.add('fp')}else if(bad){b.classList.add('miss');miss.push(i)}});
+    const max=cfg.items.filter(x=>x.bad).length,sc=Math.max(0,hit-fp);
+    note.className='note fn '+(sc===max?'ok':'bad');
+    note.innerHTML=`Найдено ошибок: ${hit} из ${max}. Ложных отметок: ${fp}. Баллов: ${sc}.<br><br>`+cfg.items.filter(x=>x.bad).map(x=>`• ${x.k}: ${x.fix}`).join('<br>');
+    setScore(idx,sc,true,root);
+  };
+}
+
+/* ───── 606 · БРОНЬ ───── */
+function taskBooking(root){
+  flagTask(root,{eyebrow:'Номер 606 · служба бронирования',title:'Найди ошибки в подтверждении брони',
+   intro:'Гость написал письмо, а менеджер составил подтверждение. Отметьте поля, где данные не совпадают с письмом, и нажмите «Проверить». Ложная отметка отнимает балл.',
+   pre:`<div class="scene"><small>Письмо гостя</small>«Здравствуйте! Меня зовут Азамат Нурпеисов. Приезжаем 14 ноября, выезд 17 ноября. Нас двое взрослых, нужен номер с двумя раздельными кроватями. Оплатим картой при заезде, завтрак включите, пожалуйста.»</div>`,
+   items:[
+    {k:'Гость',v:'Азамат Нурпеисов',bad:false},
+    {k:'Даты',v:'14 → 16 ноября (2 ночи)',bad:true,fix:'в письме выезд 17 ноября, значит 3 ночи.'},
+    {k:'Гости',v:'1 взрослый',bad:true,fix:'приезжают двое взрослых.'},
+    {k:'Номер',v:'Standard Double (одна кровать)',bad:true,fix:'гость просил две раздельные кровати: Twin.'},
+    {k:'Питание',v:'BB, завтрак включён',bad:false},
+    {k:'Оплата',v:'Предоплата 100% картой',bad:true,fix:'гость платит картой при заезде, предоплаты нет.'},
+    {k:'Контакт',v:'Письмо на почту гостя',bad:false}
+   ],hint:'Сверьте каждое поле с письмом гостя.'},5);
+}
+
+/* ───── 707 · ПИТАНИЕ ───── */
+function taskFood(root){
+  choiceTask(root,{eyebrow:'Номер 707 · ресторан отеля',title:'Что подать этому гостю',kicker:'Гость',
+   intro:'Официант просит вас подтвердить заказ. Прочитайте составы блюд и выберите то, что безопасно и подходит гостю.',
+   end:(s,n)=>`Итог: ${s} из ${n}. Правило: диетические ограничения гостя важнее вкуса и скорости. Если не уверены, уточняйте у шефа.`,
+   items:[
+    {who:'аллергия на арахис',text:'Гость предупредил: «У меня сильная аллергия на арахис, даже следы опасны».',opts:[
+     ['Салат с курицей и ореховой заправкой',false,'В заправке арахисовое масло. Для аллергика это риск.','грецкий орех, арахисовое масло, курица'],
+     ['Рис с овощами и индейкой',true,'Арахиса нет, блюдо готовится отдельно от орехов.','рис, овощи, индейка, оливковое масло'],
+     ['Печенье с арахисовой пастой',false,'Прямое содержание арахиса.','мука, арахисовая паста, сахар']]},
+    {who:'халяль',text:'Гость мусульманин и просит блюдо без свинины и алкоголя.',opts:[
+     ['Плов с бараниной',true,'Мясо халяль, алкоголя в рецепте нет.','баранина (халяль), рис, морковь, зира'],
+     ['Паста карбонара',false,'В классическом рецепте бекон из свинины.','бекон, яйцо, сыр, паста'],
+     ['Курица в соусе на красном вине',false,'Вино — алкоголь, даже после готовки блюдо не подходит.','курица, красное вино, лук']]},
+    {who:'веган',text:'Гость не ест мясо, молоко, яйца и мёд.',opts:[
+     ['Борщ со сметаной',false,'В борще говядина и сметана.','говядина, свёкла, сметана'],
+     ['Омлет с сыром',false,'Яйца и сыр — животные продукты.','яйца, сыр, молоко'],
+     ['Овощное рагу с нутом',true,'Полностью растительное блюдо.','нут, кабачок, томаты, оливковое масло']]},
+    {who:'без глютена',text:'Гость с целиакией: нельзя пшеницу, рожь и ячмень.',opts:[
+     ['Пицца на пшеничном тесте',false,'Пшеничная мука содержит глютен.','пшеничная мука, сыр, томаты'],
+     ['Гречка с тушёными овощами и курицей',true,'Гречка не относится к злакам с глютеном, но попросите кухню не смешивать с лапшой и соевым соусом.','гречка, курица, овощи'],
+     ['Лапша удон',false,'Лапша делается из пшеничной муки.','пшеничная мука, соевый соус']]}
+   ]},6);
+}
+
+/* ───── 808 · АУДИТ ───── */
+function taskAudit(root){
+  flagTask(root,{eyebrow:'Номер 808 · ночной аудит',title:'Ночной аудит: найди расхождения',
+   intro:'В ведомости посчитана сумма проживания: тариф × ночи. Найдите строки, где итог посчитан неверно. Есть риск потерять деньги отеля, а ложные отметки отнимают баллы.',
+   cls:'rows',btn:'Закрыть аудит',
+   items:[
+    {k:'Номер 101',v:'18 000 ₸ × 2 ночи = 36 000 ₸',bad:false},
+    {k:'Номер 205',v:'22 000 ₸ × 3 ночи = 56 000 ₸',bad:true,fix:'205: 22 000 × 3 = 66 000 ₸, недостача 10 000 ₸.'},
+    {k:'Номер 307',v:'25 000 ₸ × 1 ночь = 25 000 ₸',bad:false},
+    {k:'Номер 402',v:'30 000 ₸ × 4 ночи = 120 000 ₸',bad:false},
+    {k:'Номер 410',v:'15 000 ₸ × 3 ночи = 54 000 ₸',bad:true,fix:'410: 15 000 × 3 = 45 000 ₸, гостю выставили больше на 9 000 ₸.'},
+    {k:'Номер 501',v:'45 000 ₸ × 2 ночи = 80 000 ₸',bad:true,fix:'501: 45 000 × 2 = 90 000 ₸, недостача 10 000 ₸.'}
+   ],hint:'Пересчитайте каждую строку: тариф умножить на число ночей.'},7);
+}
+
+/* ───── 909 · ЭТИКЕТ ───── */
+function taskEtiquette(root){
+  choiceTask(root,{eyebrow:'Номер 909 · международные гости',title:'Гости со всего мира',kicker:'Гости',
+   intro:'Казахстан принимает туристов из многих стран. Выберите действие, которое показывает уважение к культуре гостя.',
+   end:(s,n)=>`Итог: ${s} из ${n}. Уважение к привычкам гостя делает сервис личным: спросите, если не уверены.`,
+   items:[
+    {who:'Китай',text:'Туристическая группа из Китая заселяется вечером, номера распределяет администратор.',opts:[
+     ['Предложить номера не на 4 этаже и без цифры 4',true,'Цифра 4 звучит как «смерть» и считается несчастливой.'],
+     ['Поселить на 4 этаже: он тихий',false,'Тихий, но для многих гостей это плохая примета.'],
+     ['Подарить каждому по часам в знак внимания',false,'Часы в Китае нельзя дарить: ассоциация с похоронами.']]},
+    {who:'мусульманский гость',text:'Гость просит помочь с намазом. Что вы предложите?',opts:[
+     ['Подсказать направление на Мекку, выдать коврик для намаза и уточнить время завтрака',true,'Простая услуга показывает уважение и ничего не стоит отелю.'],
+     ['Сказать, что молитвы в номере запрещены правилами',false,'Это не так, и гость почувствует отказ.'],
+     ['Отправить его в ближайшую мечеть, и всё',false,'Мечеть хороша, но удобство в номере тоже важно.']]},
+    {who:'Япония',text:'Гость из Японии подходит к стойке регистрации.',opts:[
+     ['Лёгкий поклон головой, документы и ключ подаёте двумя руками',true,'Двумя руками — знак уважения в японской культуре.'],
+     ['Дружески хлопнуть по плечу и назвать по имени',false,'Физический контакт с незнакомыми гостями неуместен.'],
+     ['Говорить громче, чтобы он лучше понял',false,'Громкость не заменяет ясных простых слов.']]},
+    {who:'Германия',text:'Гости из Германии приехали в 13:30, а заселение с 14:00. Номер ещё убирают.',opts:[
+     ['Назвать точное время готовности и предложить подождать в лаунже с кофе',true,'Для гостей важны честность и конкретика.'],
+     ['Сказать «скоро будет» без срока',false,'Неопределённость раздражает больше ожидания.'],
+     ['Поселить в неубранный номер, чтобы не ждали',false,'Нарушает стандарт чистоты.']]}
+   ]},8);
+}
+
+/* ───── 111 · ПРОДАЖИ ───── */
+function taskSales(root){
+  choiceTask(root,{eyebrow:'Номер 111 · продажи на ресепшн',title:'Продай, не продавая',kicker:'Диалог',
+   intro:'Ресепшн — главный отдел продаж отеля. Хороший администратор предлагает то, что действительно нужно гостю. Выберите реплику, которая принесёт и деньги, и благодарность.',
+   end:(s,n)=>`Итог: ${s} из ${n}. Формула: выслушать повод, предложить конкретную выгоду, оставить выбор гостю.`,
+   items:[
+    {who:'повод',text:'Гость: «Мы забронировали Стандарт, едем на годовщину свадьбы».',opts:[
+     ['«Для годовщины могу предложить Делюкс с видом на горы за +8 000 ₸ в ночь. Показать фото?»',true,'Связали повод с апгрейдом и оставили выбор.','+8 000 ₸ за ночь'],
+     ['«Стандарт — хороший номер, другие вам не нужны».',false,'Вы упустили и продажу, и красивый повод.'],
+     ['«Берите люкс, он намного лучше!»',false,'Давление без привязки к потребностям гостя.']]},
+    {who:'раннее прибытие',text:'Гость приехал в 8 утра после ночного рейса, заезд с 14:00.',opts:[
+     ['«Номер освободится позже. Могу заселить сейчас за 50% ночи, а пока — завтрак и душ в спа»',true,'Решение для усталого гостя и дополнительный доход.','+50% ночи'],
+     ['«Приходите в 14:00».',false,'Формально верно, но сервиса нет.'],
+     ['«Заселю бесплатно прямо сейчас».',false,'Теряете доход и не учитываете занятость номеров.']]},
+    {who:'вечер',text:'Гость: «Чем бы заняться вечером?»',opts:[
+     ['«Рекомендую ужин на террасе на закате. Забронировать столик? Трансфер отель организует»',true,'Конкретное предложение и забота, плюс выручка ресторана.','стол + трансфер'],
+     ['«Не знаю, посмотрите в интернете».',false,'Это отказ в консультации.'],
+     ['Передать список из двадцати мест без рекомендаций',false,'Слишком много выбора — гость ничего не выберет.']]}
+   ]},9);
+}
+
+/* ───── 212 · ТРЕВОГА ───── */
+function taskFire(root){
+  const steps=['Услышать сигнал и проверить на панели, где сработал датчик','Позвонить в службу спасения 112 и назвать адрес отеля','Включить оповещение и начать эвакуацию гостей по лестницам (лифты не использовать)','Взять список гостей и ключи-мастер','Собрать гостей на точке сбора и сверить списки','Встретить пожарных и передать информацию о людях внутри'];
+  let ord=shuf([...steps.keys()]);
+  root.innerHTML=head({eyebrow:'Номер 212 · безопасность',title:'Пожарная тревога в 3 часа ночи',intro:'Сработала сигнализация. Расставьте шаги администратора по порядку кнопками ▲▼. Баллы: 3 за идеальный порядок, 2 если на местах хотя бы 4 шага, 1 если хотя бы 2.'})+'<ol class="order"></ol><p style="margin-top:14px"><button class="btn ck">Проверить</button> <button class="btn ghost sh">Перемешать</button></p><div class="note fn" style="display:none"></div>';
+  const ol=$('.order',root);let locked=false;
+  const draw=res=>{ol.innerHTML=ord.map((k,p)=>`<li class="${res?(k===p?'ok':'bad'):''}"><span>${p+1}. ${steps[k]}</span><button data-p="${p}" data-d="-1" aria-label="выше">▲</button><button data-p="${p}" data-d="1" aria-label="ниже">▼</button></li>`).join('')};
+  ol.onclick=e=>{const b=e.target.closest('button');if(!b||locked)return;const p=+b.dataset.p,q=p+ +b.dataset.d;if(q<0||q>=ord.length)return;[ord[p],ord[q]]=[ord[q],ord[p]];draw()};
+  $('.sh',root).onclick=()=>{if(locked)return;ord=shuf(ord);draw()};
+  $('.ck',root).onclick=()=>{if(locked)return;locked=true;const c=ord.filter((k,p)=>k===p).length;draw(true);
+    const sc=c===6?3:c>=4?2:c>=2?1:0;const n=$('.fn',root);n.style.display='block';n.className='note fn '+(sc>=2?'ok':'bad');
+    n.textContent=`На своих местах: ${c} из 6. Баллов: ${sc}. Правильный порядок идёт сверху вниз: проверить, вызвать помощь, эвакуировать, взять списки, сверить на точке сбора, встретить пожарных.`;
+    setScore(10,sc,true,root)};
+  draw();
+}
+
 /* ───── ФИНАЛ ───── */
 function taskFinal(root){
-  root.innerHTML=`<div class="eyebrow">Конец смены</div><h2>Ваш бейдж сотрудника</h2><p class="intro">Введите имя. Звание зависит от баллов за пройденные двери. Двери, которые вы не открыли, дают ноль.</p>
-  <div class="final"><div class="badge"><div class="bh">ОТЕЛЬ «САУЫТ»</div><div class="big" id="bi">?</div><div class="bn" id="bn">Ваше имя</div><div class="br" id="brk"></div><div class="sc" id="bsc"></div></div>
-  <div><label for="nm" class="mini">Как вас зовут</label><input type="text" id="nm" maxlength="24" placeholder="Например, Асель" autocomplete="off"><div class="mini">Результаты по дверям</div><ul class="brk" id="bl"></ul><p class="lead" style="margin-top:16px;font-size:.95rem" id="adv"></p></div></div>`;
-  const nm=$('#nm',root);
-  nm.addEventListener('input',draw);
+  root.innerHTML=`<div class="eyebrow">Конец смены</div><h2>Ваш бейдж сотрудника</h2><p class="intro">Звание зависит от баллов за пройденные двери. Непройденные двери дают ноль.</p>
+  <div class="final"><div class="badge"><div class="bh">ОТЕЛЬ «САУЫТ»</div><div class="big" id="bi">?</div><div class="bn" id="bn"></div><div class="br" id="brk"></div><div class="sc" id="bsc"></div></div>
+  <div><div class="mini">Результаты по дверям</div><ul class="brk" id="bl"></ul><p class="lead" style="margin-top:16px;font-size:.95rem" id="adv"></p></div></div>`;
   function draw(){
     const t=pts.reduce((a,b)=>a+b,0),r=t/MAX;
     const rank=r>=.85?'Генеральный директор':r>=.65?'Менеджер смены':r>=.4?'Администратор':'Стажёр';
-    const v=nm.value.trim();
-    $('#bn',root).textContent=v||'Ваше имя';$('#bi',root).textContent=v?v[0].toUpperCase():'?';
+    $('#bn',root).textContent=NAME;$('#bi',root).textContent=NAME[0].toUpperCase();
     $('#brk',root).textContent=rank;$('#bsc',root).textContent=`${t} из ${MAX} баллов`;
     $('#bl',root).innerHTML=DOORS.map((d,i)=>`<li><span>${d.no} · ${d.name}</span><b>${fin[i]?pts[i]+' / '+d.max:'не пройдено'}</b></li>`).join('');
     const weak=DOORS.map((d,i)=>[d,pts[i]/d.max,fin[i]]).filter(x=>!x[2]||x[1]<.7).map(x=>x[0].name);
@@ -461,9 +663,11 @@ const stage=$('#stage');
 DOORS.forEach(d=>{const p=el('<section class="panel"></section>');stage.appendChild(p);d.init(p)});
 const fp=el('<section class="panel"></section>');stage.appendChild(fp);taskFinal(fp);
 const _show=show;
-show=function(i){_show(i);if(i===5&&fp._draw)fp._draw()};
+show=function(i){_show(i);if(i===DOORS.length&&fp._draw)fp._draw()};
 drawDoors();
 document.querySelectorAll('.panel')[0].classList.add('on');
+function start(){const v=$('#nm0').value.trim();if(!v){$('#nm0').focus();$('#nmerr').textContent='Введите имя, чтобы получить бейдж.';return}NAME=v;$('#gate').hidden=true;$('#app').hidden=false;$('#hello').textContent='Администратор '+NAME+', ваша смена началась';$('#nm0').blur();window.scrollTo(0,0)}
+$('#go').onclick=start;$('#nm0').addEventListener('keydown',e=>{if(e.key==='Enter')start()});
 </script>
 </body>
 </html>
