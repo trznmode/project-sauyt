@@ -3,200 +3,467 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Интерактивные задания — гостиничный бизнес</title>
+<title>Смена в отеле Сауыт</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#f4f8fc;--card:#fff;--primary:#1a56db;--primary-soft:#e8f0fe;--text:#0f172a;--muted:#475569;--border:#e2e8f0;--ok:#15803d;--ok-bg:#dcfce7;--bad:#b91c1c;--bad-bg:#fee2e2;--radius:16px}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
-  header{background:var(--primary);color:#fff;padding:28px 16px;text-align:center}
-  header h1{font-size:1.5rem}header p{opacity:.85;margin-top:4px}
-  nav{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--border);display:flex;gap:6px;overflow-x:auto;padding:10px 16px;align-items:center}
-  nav button{white-space:nowrap;border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:.9rem}
-  nav button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-  nav button.done::after{content:" ✓"}
-  #score{margin-left:auto;font-weight:600;white-space:nowrap;color:var(--primary)}
-  main{max-width:760px;margin:0 auto;padding:20px 16px 60px}
-  section{display:none}section.active{display:block}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(15,23,42,.04)}
-  h2{font-size:1.25rem;margin-bottom:6px}.hint{color:var(--muted);font-size:.92rem;margin-bottom:14px}
-  .q{font-weight:600;margin-bottom:10px}
-  .opt{display:block;width:100%;text-align:left;border:1px solid var(--border);background:#fff;border-radius:12px;padding:10px 14px;margin-bottom:8px;cursor:pointer;font-size:1rem}
-  .opt:hover:not(:disabled){background:var(--primary-soft)}
-  .opt.ok{background:var(--ok-bg);border-color:var(--ok)}.opt.bad{background:var(--bad-bg);border-color:var(--bad)}
-  .fb{margin-top:8px;font-size:.92rem;padding:8px 12px;border-radius:10px;display:none}
-  .fb.show{display:block}.fb.ok{background:var(--ok-bg);color:var(--ok)}.fb.bad{background:var(--bad-bg);color:var(--bad)}
-  .btn{background:var(--primary);color:#fff;border:0;border-radius:12px;padding:10px 18px;font-size:1rem;cursor:pointer}
-  .btn.ghost{background:#fff;color:var(--primary);border:1px solid var(--primary)}
-  .btn:hover{opacity:.9}
-  .row{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
-  .row .term{flex:0 0 150px;font-weight:600}
-  select,input[type=number]{padding:9px 10px;border:1px solid var(--border);border-radius:10px;font-size:1rem;flex:1;min-width:160px;background:#fff}
-  select.ok,input.ok{border-color:var(--ok);background:var(--ok-bg)}select.bad,input.bad{border-color:var(--bad);background:var(--bad-bg)}
-  ol.order{list-style:none}
-  ol.order li{display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:12px;padding:8px 12px;margin-bottom:8px;background:#fff}
-  ol.order li span{flex:1}ol.order li.ok{background:var(--ok-bg);border-color:var(--ok)}ol.order li.bad{background:var(--bad-bg);border-color:var(--bad)}
-  ol.order button{border:1px solid var(--border);background:#fff;border-radius:8px;width:34px;height:34px;cursor:pointer}
-  .guest{background:var(--primary-soft);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-style:italic}
-  .result{font-weight:600;margin-top:12px}
-  .final{text-align:center}.final .big{font-size:2.4rem;font-weight:700;color:var(--primary)}
+/* Layout: арочные «двери» номеров 101–505 как навигация; каждая дверь открывает одну игровую ситуацию смены. */
+:root{
+  --bg:#eef2ff;--card:#ffffff;--ink:#0b1437;--muted:#55608a;--line:#d5dcf5;
+  --blue:#2347ff;--on-blue:#ffffff;--blue-soft:#e3e8ff;--sun:#ffcf3f;--on-sun:#0b1437;
+  --ok:#0b7a53;--ok-bg:#d9f5e8;--bad:#b9202f;--bad-bg:#fde0e3;--shadow:rgba(35,71,255,.14);
+  --r-wall:#dfe5ff;--r-floor:#b9c3f2;--r-bed:#ffffff;--r-bed2:#2347ff;--r-wood:#8a6a4b;--r-curt:#ff8a5c;--r-glass:#bfe6ff;--r-towel:#f3f3f3;--r-bin:#6b7390;
+  --f-display:'Unbounded','Arial Black',system-ui,sans-serif;--f-body:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#080d2b;--card:#121a44;--ink:#eef1ff;--muted:#9aa6d6;--line:#27316b;
+  --blue:#4a65ff;--blue-soft:#1b2760;--sun:#ffd54d;
+  --ok:#4fdca0;--ok-bg:#0f3a2c;--bad:#ff8a97;--bad-bg:#451a26;--shadow:rgba(0,0,0,.45);
+  --r-wall:#1b2563;--r-floor:#111945;--r-bed:#e9edff;--r-wood:#a98159;--r-glass:#3a5a9a;--r-towel:#d8dcf0;--r-bin:#8c95b8;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#080d2b;--card:#121a44;--ink:#eef1ff;--muted:#9aa6d6;--line:#27316b;
+  --blue:#4a65ff;--blue-soft:#1b2760;--sun:#ffd54d;
+  --ok:#4fdca0;--ok-bg:#0f3a2c;--bad:#ff8a97;--bad-bg:#451a26;--shadow:rgba(0,0,0,.45);
+  --r-wall:#1b2563;--r-floor:#111945;--r-bed:#e9edff;--r-wood:#a98159;--r-glass:#3a5a9a;--r-towel:#d8dcf0;--r-bin:#8c95b8;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);line-height:1.1;text-wrap:balance}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+
+/* hero */
+.hero{padding-block:36px 8px}
+.eyebrow{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:clamp(2rem,6.4vw,3.8rem);font-weight:900;margin-block:10px 14px;letter-spacing:-.02em}
+h1 em{font-style:normal;background:var(--sun);color:var(--on-sun);padding:0 .15em;border-radius:.12em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.lead{max-width:56ch;color:var(--muted);font-size:1.05rem}
+
+/* doors */
+.doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:14px;margin-block:30px 10px}
+.door{position:relative;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:80px 80px 14px 14px;padding:26px 16px 16px;cursor:pointer;transition:transform .25s,background .25s,border-color .25s,box-shadow .25s;min-width:0}
+.door:hover{transform:translateY(-4px);box-shadow:0 14px 28px var(--shadow)}
+.door .no{display:block;font-family:var(--f-display);font-weight:900;font-size:1.7rem;letter-spacing:-.02em;text-align:center}
+.door .nm{display:block;text-align:center;font-weight:700;margin-top:2px}
+.door .sb{display:block;text-align:center;font-size:.8rem;color:var(--muted)}
+.door .st{display:block;text-align:center;margin-top:10px;font-size:.78rem;font-weight:700;border-radius:99px;padding:3px 8px;background:var(--blue-soft);color:var(--blue)}
+.door::after{content:"";position:absolute;right:12px;top:58%;width:9px;height:9px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 2px var(--on-sun) inset}
+.door.on{background:var(--blue);border-color:var(--blue);color:var(--on-blue);transform:translateY(-4px);box-shadow:0 18px 34px var(--shadow)}
+.door.on .sb{color:#dfe5ff}.door.on .st{background:var(--sun);color:var(--on-sun)}
+.door.fin .st{background:var(--ok-bg);color:var(--ok)}
+.door.on.fin .st{background:var(--sun);color:var(--on-sun)}
+.hud{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;margin-block:14px 6px}
+.bar{flex:1 1 220px;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--sun));border-radius:99px;transition:width .7s cubic-bezier(.2,.9,.3,1)}
+.hud b{font-family:var(--f-display);font-size:1.05rem}
+.finalbtn{border:2px solid var(--ink);background:transparent;border-radius:99px;padding:8px 16px;font-weight:700;cursor:pointer}
+.finalbtn:hover{background:var(--ink);color:var(--bg)}
+
+/* panels */
+.panel{display:none;background:var(--card);border:2px solid var(--line);border-radius:28px;padding:clamp(18px,4vw,34px);margin-top:18px;box-shadow:0 22px 48px var(--shadow)}
+.panel.on{display:block;animation:open .5s cubic-bezier(.2,.9,.3,1)}
+@keyframes open{from{opacity:0;transform:perspective(900px) rotateY(-14deg) translateX(-18px);transform-origin:left}to{opacity:1;transform:none}}
+.panel h2{font-size:clamp(1.3rem,3.6vw,2rem);margin-block:6px 8px}
+.panel .intro{color:var(--muted);max-width:62ch;margin-bottom:22px}
+.mini{font-family:var(--f-body);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.note{margin-top:16px;padding:12px 16px;border-radius:14px;background:var(--blue-soft);font-weight:500;min-height:48px}
+.note.ok{background:var(--ok-bg);color:var(--ok)}.note.bad{background:var(--bad-bg);color:var(--bad)}
+.btn{background:var(--blue);color:var(--on-blue);border:0;border-radius:14px;padding:12px 22px;font-weight:700;font-size:1rem;cursor:pointer;transition:transform .15s,opacity .15s}
+.btn:hover:not(:disabled){transform:translateY(-2px)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sun{background:var(--sun);color:var(--on-sun)}
+.btn.ghost{background:transparent;color:var(--blue);border:2px solid var(--blue)}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+/* lobby */
+.lobby{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.lobby>div{min-width:0}
+.gcard,.rcard{width:100%;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:18px;padding:12px 14px;margin-bottom:10px;cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:border-color .2s,background .2s,transform .2s}
+.gcard:hover:not(:disabled),.rcard:hover:not(:disabled){border-color:var(--blue)}
+.gcard.sel{border-color:var(--blue);background:var(--blue-soft);transform:translateX(6px)}
+.gcard:disabled,.rcard:disabled{cursor:default}
+.gcard.done{opacity:.55}
+.av{flex:0 0 42px;height:42px;border-radius:50%;background:var(--blue);color:var(--on-blue);display:grid;place-items:center;font-family:var(--f-display);font-weight:700}
+.gcard b,.rcard b{display:block}
+.gcard small,.rcard small{color:var(--muted);display:block;font-size:.88rem;line-height:1.4}
+.rno{flex:0 0 66px;font-family:var(--f-display);font-weight:900;font-size:1.35rem;color:var(--blue)}
+.rcard.ok{border-color:var(--ok);background:var(--ok-bg)}
+.rcard .who{display:block;margin-top:6px;font-weight:700;color:var(--ok)}
+
+/* revenue */
+.days{display:grid;gap:18px}
+.day{border:2px solid var(--line);border-radius:22px;padding:18px;background:var(--bg);min-width:0}
+.day h3{font-size:1.05rem}.day p{color:var(--muted);font-size:.92rem;margin-block:4px 14px}
+.price{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.price b{font-family:var(--f-display);font-size:1.9rem;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--blue);height:28px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-block:12px}
+.kpi{background:var(--card);border-radius:14px;padding:10px 12px;border:1px solid var(--line)}
+.kpi small{display:block;color:var(--muted);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase}
+.kpi b{font-family:var(--f-display);font-size:1.05rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.chart{width:100%;height:auto;display:block;margin-block:6px 12px}
+.chart text{fill:var(--muted);font-size:9px;font-family:var(--f-body)}
+.res{font-weight:600;margin-top:10px}
+
+/* inspect */
+.insp{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:20px;align-items:start}
+.room{width:100%;height:auto;border-radius:20px;border:2px solid var(--line);background:var(--r-wall);display:block}
+.hot{cursor:pointer}.hot:hover{filter:brightness(1.08)}
+.ring{fill:none;stroke:var(--sun);stroke-width:3;display:none}
+.hot.found .ring{display:block;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{stroke-width:6;opacity:.6}}
+.chk{list-style:none;display:grid;gap:8px}
+.chk,.brk{padding:0;margin:0}
+.chk li{padding:10px 12px;border-radius:12px;border:2px dashed var(--line);font-size:.92rem;color:var(--muted)}
+.chk li.on{border:2px solid var(--ok);background:var(--ok-bg);color:var(--ok);border-style:solid}
+.chk li b{display:block}
+
+/* overbooking */
+.meters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.meter small{display:flex;justify-content:space-between;color:var(--muted);font-weight:600;font-size:.82rem}
+.meter .tr{height:12px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:4px}
+.meter .tr i{display:block;height:100%;width:50%;border-radius:99px;background:var(--blue);transition:width .8s cubic-bezier(.2,.9,.3,1),background .4s}
+.scene{background:var(--ink);color:var(--bg);border-radius:20px;padding:18px 20px;margin-bottom:14px;font-size:1.02rem}
+.scene small{display:block;letter-spacing:.14em;text-transform:uppercase;opacity:.65;margin-bottom:6px;font-size:.72rem;font-weight:600}
+.opt{display:block;width:100%;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:10px;font-size:1rem;cursor:pointer;transition:border-color .2s,transform .2s}
+.opt:hover:not(:disabled){border-color:var(--blue);transform:translateX(5px)}
+.opt:disabled{cursor:default}.opt.best{border-color:var(--ok);background:var(--ok-bg)}.opt.pick{border-color:var(--bad);background:var(--bad-bg)}.opt.best.pick{border-color:var(--ok);background:var(--ok-bg)}
+
+/* review */
+.review{background:var(--bg);border:2px solid var(--line);border-radius:20px;padding:16px 18px;margin-bottom:18px}
+.review .stars{color:var(--sun);letter-spacing:.15em;font-size:1.2rem;text-shadow:0 0 1px var(--on-sun)}
+.slot{margin-bottom:16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:9px 13px;font-size:.92rem;cursor:pointer;text-align:left;transition:all .2s;max-width:100%}
+.chip:hover:not(:disabled){border-color:var(--blue)}
+.chip.sel{background:var(--blue);color:var(--on-blue);border-color:var(--blue)}
+.chip:disabled{cursor:default}
+.chip.best{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}.chip.bad{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.bubble{background:var(--blue-soft);border-radius:20px 20px 20px 4px;padding:14px 18px;margin-block:8px 16px;min-height:60px}
+.bubble span.h{color:var(--muted)}
+
+/* badge */
+.final{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:28px;align-items:start}
+.badge{background:var(--blue);color:var(--on-blue);border-radius:26px;padding:46px 22px 24px;text-align:center;position:relative;box-shadow:0 24px 50px var(--shadow);transform:rotate(-2deg)}
+.badge::before{content:"";position:absolute;left:50%;top:14px;width:64px;height:12px;border-radius:99px;background:var(--bg);transform:translateX(-50%)}
+.badge .bh{font-family:var(--f-display);font-size:.74rem;letter-spacing:.2em}
+.badge .big{width:104px;height:104px;border-radius:50%;background:var(--sun);color:var(--on-sun);display:grid;place-items:center;font-family:var(--f-display);font-weight:900;font-size:2.4rem;margin:16px auto}
+.badge .bn{font-family:var(--f-display);font-size:1.3rem;font-weight:700;overflow-wrap:anywhere;min-height:1.5em}
+.badge .br{display:inline-block;margin-top:10px;background:var(--sun);color:var(--on-sun);border-radius:99px;padding:5px 14px;font-weight:700;font-size:.9rem}
+.badge .sc{margin-top:14px;font-size:.9rem;opacity:.9}
+input[type=text]{width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:14px;font:inherit;background:var(--bg);color:var(--ink);margin-block:6px 18px}
+.brk{list-style:none;display:grid;gap:8px}
+.brk li{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding-bottom:6px}
+
+.pf{position:fixed;pointer-events:none;width:9px;height:14px;border-radius:2px;z-index:50}
+
+@media (max-width:720px){
+  .lobby,.insp,.final{grid-template-columns:1fr}
+  .meters{grid-template-columns:1fr}
+  .kpis{grid-template-columns:1fr 1fr 1fr}
+  .badge{transform:none}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
+
 </head>
 <body>
-<header>
-  <h1>🏨 Интерактивные задания</h1>
-  <p>Практикум для студентов гостиничного бизнеса</p>
-</header>
-<nav id="nav"></nav>
-<main>
-
-<!-- 1. ТЕСТ -->
-<section id="s0" class="active">
-  <div class="card"><h2>1. Тест: основы отрасли</h2><p class="hint">Выберите один ответ — подсказка появится сразу. За каждый верный ответ с первой попытки — 1 балл.</p><div id="quiz"></div></div>
-</section>
-
-<!-- 2. ТЕРМИНЫ -->
-<section id="s1">
-  <div class="card"><h2>2. Сопоставьте термины</h2><p class="hint">Подберите определение к каждому термину. 1 балл за каждое верное соответствие.</p>
-    <div id="match"></div>
-    <button class="btn" onclick="checkMatch()">Проверить</button>
-    <div class="result" id="matchRes"></div></div>
-</section>
-
-<!-- 3. ПОРЯДОК -->
-<section id="s2">
-  <div class="card"><h2>3. Процедура заселения (check-in)</h2><p class="hint">Расставьте шаги в правильном порядке кнопками ▲ ▼. Максимум 4 балла: по баллу за каждые 2 шага на своём месте.</p>
-    <ol class="order" id="order"></ol>
-    <button class="btn" onclick="checkOrder()">Проверить</button>
-    <button class="btn ghost" onclick="shuffleOrder()">Перемешать</button>
-    <div class="result" id="orderRes"></div></div>
-</section>
-
-<!-- 4. КЕЙС -->
-<section id="s3">
-  <div class="card"><h2>4. Кейс: жалоба гостя</h2><p class="hint">Вы — администратор ресепшн. Выбирайте действия; каждый шаг оценивается.</p>
-    <div id="caseBox"></div></div>
-</section>
-
-<!-- 5. РАСЧЁТ -->
-<section id="s4">
-  <div class="card"><h2>5. Расчёт показателей отеля</h2>
-    <p class="hint">В отеле 40 номеров. За сутки продано 28 номеров, выручка от номеров — 840 000 ₸. Округляйте до целых. 1 балл за каждый показатель.</p>
-    <div class="row"><div class="term">Загрузка, %</div><input type="number" id="c_occ" placeholder="Occupancy"></div>
-    <div class="row"><div class="term">ADR, ₸</div><input type="number" id="c_adr" placeholder="Средняя цена проданного номера"></div>
-    <div class="row"><div class="term">RevPAR, ₸</div><input type="number" id="c_rev" placeholder="Доход на доступный номер"></div>
-    <button class="btn" onclick="checkCalc()">Проверить</button>
-    <div class="result" id="calcRes"></div></div>
-</section>
-
-<!-- ИТОГ -->
-<section id="s5">
-  <div class="card final"><h2>Итоги</h2><div class="big" id="total">0</div><p id="verdict" class="hint"></p>
-    <button class="btn" onclick="location.reload()">Пройти заново</button></div>
-</section>
-</main>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Практикум · гостиничный бизнес</div>
+    <h1>Смена в отеле <em>«Сауыт»</em></h1>
+    <p class="lead">Вы — дежурный администратор. Пять дверей, пять ситуаций: заселить гостей, назначить цену, найти грязь в номере, пережить овербукинг и ответить на злой отзыв. В конце получите бейдж с вашим званием.</p>
+    <div class="doors" id="doors"></div>
+    <div class="hud"><div class="bar" aria-hidden="true"><i id="prog"></i></div><b id="hudScore">0 / 19</b><button class="finalbtn" id="finBtn">Получить бейдж</button></div>
+  </header>
+  <main id="stage"></main>
+</div>
 
 <script>
-const $=id=>document.getElementById(id);
-const sections=['Тест','Термины','Check-in','Кейс','Расчёт','Итоги'];
-const max=[6,6,4,3,3];
-const pts=[0,0,0,0,0], doneFlags=[false,false,false,false,false];
+const $=(s,r=document)=>r.querySelector(s);
+const el=(html)=>{const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstChild};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt=n=>Math.round(n).toLocaleString('ru-RU').replace(/ /g,' ');
 
-function renderNav(){
-  $('nav').innerHTML=sections.map((s,i)=>`<button class="${doneFlags[i]?'done':''}" onclick="go(${i})" id="nb${i}">${s}</button>`).join('')+`<span id="score"></span>`;
-  updScore();
-}
-function go(i){
-  document.querySelectorAll('section').forEach((s,k)=>s.classList.toggle('active',k===i));
-  document.querySelectorAll('nav button').forEach((b,k)=>b.classList.toggle('active',k===i));
-  if(i===5)showTotal();window.scrollTo(0,0);
-}
-function updScore(){const t=pts.reduce((a,b)=>a+b,0);const m=max.reduce((a,b)=>a+b,0);$('score').textContent=`${t} / ${m}`}
-function setDone(i,p){pts[i]=p;doneFlags[i]=true;const b=$('nb'+i);if(b)b.classList.add('done');updScore()}
-function showTotal(){
-  const t=pts.reduce((a,b)=>a+b,0),m=max.reduce((a,b)=>a+b,0),r=t/m;
-  $('total').textContent=`${t} из ${m}`;
-  $('verdict').textContent=r>=.85?'Отлично! Вы готовы к практике на ресепшн.':r>=.6?'Хороший результат. Повторите термины и порядок процедур.':'Стоит повторить материал и попробовать ещё раз.';
-}
-
-/* 1. QUIZ */
-const quiz=[
- {q:'Что означает аббревиатура OTA?',o:['Online Travel Agency','Official Tourist Association','Open Table Allocation'],a:0,e:'OTA — онлайн-агентство путешествий (Booking.com, Ostrovok и др.).'},
- {q:'Овербукинг — это…',o:['Бронирование сверх доступного числа номеров','Бронь на длительный срок','Скидка за раннее бронирование'],a:0,e:'Отель намеренно продаёт больше номеров, чем есть, рассчитывая на отмены и no-show.'},
- {q:'Кто такой «no-show»?',o:['Гость, не приехавший и не отменивший бронь','Гость без документов','VIP-гость'],a:0,e:'No-show — неявка без отмены; обычно удерживается плата за первую ночь.'},
- {q:'Какая служба отвечает за уборку номеров?',o:['Housekeeping','Front Office','F&B'],a:0,e:'Housekeeping — служба горничных и поддержания номерного фонда.'},
- {q:'Тип питания BB (Bed & Breakfast) означает…',o:['Проживание и завтрак','Полный пансион','Только проживание'],a:0,e:'BB — bed and breakfast. RO — без питания, FB — полный пансион.'},
- {q:'Как лучше реагировать на негативный отзыв гостя?',o:['Вежливо ответить, извиниться и предложить решение','Игнорировать','Оспорить публично, доказывая неправоту гостя'],a:0,e:'Публичный профессиональный ответ повышает доверие будущих гостей.'}
+const DOORS=[
+ {no:'101',name:'Лобби',sub:'Подбор номера',max:4,init:taskLobby},
+ {no:'202',name:'Revenue',sub:'Цена на 3 дня',max:3,init:taskRevenue},
+ {no:'303',name:'Осмотр',sub:'Найти дефекты',max:5,init:taskInspect},
+ {no:'404',name:'Овербукинг',sub:'Ночной кризис',max:3,init:taskOver},
+ {no:'505',name:'Отзыв',sub:'Ответ гостю',max:4,init:taskReview}
 ];
-let quizPts=0,quizAns=0;
-$('quiz').innerHTML=quiz.map((x,i)=>`<div class="card" id="qq${i}"><div class="q">${i+1}. ${x.q}</div>${x.o.map((o,j)=>`<button class="opt" onclick="ans(${i},${j})">${o}</button>`).join('')}<div class="fb" id="qf${i}"></div></div>`).join('');
-function ans(i,j){
-  const x=quiz[i],box=$('qq'+i);if(box.dataset.d)return;box.dataset.d=1;
-  const btns=box.querySelectorAll('.opt');
-  btns.forEach((b,k)=>{b.disabled=true;if(k===x.a)b.classList.add('ok');else if(k===j)b.classList.add('bad')});
-  const ok=j===x.a;if(ok)quizPts++;
-  const f=$('qf'+i);f.className='fb show '+(ok?'ok':'bad');f.textContent=(ok?'Верно! ':'Неверно. ')+x.e;
-  if(++quizAns===quiz.length)setDone(0,quizPts);
+const MAX=DOORS.reduce((a,d)=>a+d.max,0);
+const pts=DOORS.map(()=>0), fin=DOORS.map(()=>false);
+let cur=0;
+
+function burst(from){
+  if(reduce)return;
+  const r=from.getBoundingClientRect(),x0=r.left+r.width/2,y0=Math.max(40,r.top+Math.min(r.height,300)/2);
+  const cols=['#ffcf3f','#2347ff','#ff6b6b','#2ee59d','#ffffff'];
+  for(let i=0;i<34;i++){
+    const p=document.createElement('i');p.className='pf';p.style.background=cols[i%cols.length];p.style.left=x0+'px';p.style.top=y0+'px';
+    document.body.appendChild(p);
+    const a=Math.random()*Math.PI*2,d=90+Math.random()*190;
+    p.animate([{transform:'translate(0,0) rotate(0)',opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d+140}px) rotate(${Math.random()*720}deg)`,opacity:0}],{duration:1100+Math.random()*700,easing:'cubic-bezier(.1,.7,.3,1)'}).onfinish=()=>p.remove();
+  }
 }
 
-/* 2. MATCH */
-const defs=['Средняя цена проданного номера','Доля проданных номеров от доступных','Доход на один доступный номер','Бронирование сверх наличия номеров','Неявка гостя без отмены','Онлайн-агентство путешествий'];
-const terms=[['ADR',0],['Occupancy',1],['RevPAR',2],['Overbooking',3],['No-show',4],['OTA',5]];
-const shuffled=[...defs.keys()].sort(()=>Math.random()-.5);
-$('match').innerHTML=terms.map(([t,a],i)=>`<div class="row"><div class="term">${t}</div><select id="m${i}"><option value="">— выберите —</option>${shuffled.map(k=>`<option value="${k}">${defs[k]}</option>`).join('')}</select></div>`).join('');
-function checkMatch(){
-  let p=0;terms.forEach(([t,a],i)=>{const s=$('m'+i);const ok=s.value!==''&&+s.value===a;s.className=ok?'ok':'bad';if(ok)p++});
-  $('matchRes').textContent=`Верно: ${p} из ${terms.length}`+(p<terms.length?' — исправьте красные поля и проверьте снова.':' 🎉');
-  setDone(1,p);
+function drawDoors(){
+  $('#doors').innerHTML=DOORS.map((d,i)=>`<button class="door ${i===cur?'on':''} ${fin[i]?'fin':''}" data-i="${i}" aria-label="Номер ${d.no}: ${d.name}"><span class="no">${d.no}</span><span class="nm">${d.name}</span><span class="sb">${d.sub}</span><span class="st">${fin[i]?`${pts[i]} из ${d.max}`:'открыть'}</span></button>`).join('');
+  const t=pts.reduce((a,b)=>a+b,0);
+  $('#hudScore').textContent=`${t} / ${MAX}`;
+  $('#prog').style.width=(t/MAX*100)+'%';
+}
+function show(i){
+  cur=i;
+  document.querySelectorAll('.panel').forEach((p,k)=>p.classList.toggle('on',k===i));
+  drawDoors();
+  $('#stage').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+}
+function setScore(i,p,done=true,from){
+  pts[i]=p;fin[i]=done;drawDoors();
+  if(done&&from)burst(from);
+}
+$('#doors').addEventListener('click',e=>{const b=e.target.closest('.door');if(b)show(+b.dataset.i)});
+$('#finBtn').addEventListener('click',()=>show(5));
+
+/* ───── 101 · ЛОББИ ───── */
+function taskLobby(root){
+  const guests=[
+   {id:'a',n:'Айгерим',q:'Мы с двумя детьми, 4 и 7 лет, после ночного перелёта. Хочу, чтобы дети спали отдельно, но рядом.',ans:'201',why:'Семейный номер из двух смежных комнат: дети рядом, но отдельно.',hint:'Нужны смежные комнаты, а не одна кровать.'},
+   {id:'m',n:'Марат',q:'Завтра в 9:00 презентация. Мне нужны тишина и нормальный рабочий стол.',ans:'305',why:'Тихий этаж и рабочая зона — классический бизнес-номер.',hint:'Для работы нужны стол и тишина, а не вид на город.'},
+   {id:'b',n:'Бахытжан-ата',q:'Я передвигаюсь на коляске. Мне важны отсутствие порогов и широкие двери.',ans:'102',why:'Первый этаж, широкий проём, санузел для маломобильных гостей.',hint:'Ключевое: первый этаж и доступная среда.'},
+   {id:'d',n:'Дина и Ерлан',q:'У нас годовщина свадьбы. Хотим сделать вечер особенным.',ans:'501',why:'Люкс с панорамой и комплиментом (шампанское, лепестки) — повод запомнится.',hint:'Для особенного повода нужен номер уровнем выше.'}
+  ];
+  const rooms=[
+   {no:'305',t:'Бизнес',d:'Тихий этаж, рабочий стол, быстрый Wi-Fi'},
+   {no:'501',t:'Люкс с панорамой',d:'Гостиная, вид на горы, приветственный комплимент'},
+   {no:'102',t:'Доступный номер',d:'1 этаж, широкие двери, санузел без порогов'},
+   {no:'201',t:'Семейный',d:'Две смежные комнаты, детские кроватки по запросу'}
+  ];
+  let sel=null,wrong={},placed={},score=0;
+  root.innerHTML=`<div class="eyebrow">Номер 101 · ресепшн</div><h2>Каждому гостю — свой номер</h2><p class="intro">У стойки четверо гостей. Нажмите на гостя, затем на подходящий номер. Балл даётся за верный выбор с первой попытки.</p>
+  <div class="lobby"><div><div class="mini">Гости у стойки</div><div id="lg"></div></div><div><div class="mini">Свободные номера</div><div id="lr"></div></div></div><div class="note" id="ln">Выберите гостя.</div>`;
+  const note=(t,c='')=>{const n=$('#ln',root);n.textContent=t;n.className='note '+c};
+  function draw(){
+    $('#lg',root).innerHTML=guests.map(g=>`<button class="gcard ${sel===g.id?'sel':''} ${placed[g.id]?'done':''}" data-g="${g.id}" ${placed[g.id]?'disabled':''}><span class="av">${g.n[0]}</span><span><b>${g.n}</b><small>«${g.q}»</small></span></button>`).join('');
+    $('#lr',root).innerHTML=rooms.map(r=>{const gid=Object.keys(placed).find(k=>placed[k]===r.no),g=guests.find(x=>x.id===gid);
+      return `<button class="rcard ${g?'ok':''}" data-r="${r.no}" ${g?'disabled':''}><span class="rno">${r.no}</span><span><b>${r.t}</b><small>${r.d}</small>${g?`<span class="who">✓ ${g.n}</span>`:''}</span></button>`}).join('');
+  }
+  root.addEventListener('click',e=>{
+    const g=e.target.closest('[data-g]'),r=e.target.closest('[data-r]');
+    if(g){sel=g.dataset.g;draw();note('Теперь выберите номер.');return}
+    if(r){
+      if(!sel){note('Сначала выберите гостя.','bad');return}
+      const gu=guests.find(x=>x.id===sel);
+      if(gu.ans===r.dataset.r){
+        placed[sel]=r.dataset.r;if(!wrong[sel])score++;sel=null;draw();note(gu.why,'ok');
+        if(Object.keys(placed).length===guests.length){setScore(0,score,true,root);note(`Все заселены. Баллы: ${score} из ${guests.length}. ${gu.why}`,'ok')}
+      }else{
+        wrong[sel]=true;note(`Не подходит. ${gu.hint}`,'bad');
+        const b=root.querySelector(`[data-r="${r.dataset.r}"]`);b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');
+      }
+    }
+  });
+  draw();
 }
 
-/* 3. ORDER */
-const steps=['Поприветствовать гостя и найти бронь','Проверить документы, удостоверяющие личность','Подтвердить даты, тип номера и условия оплаты','Принять оплату или гарантию, оформить регистрационную карту','Выдать ключ-карту и рассказать о завтраке и Wi-Fi','Проводить гостя / указать путь к номеру и пожелать приятного отдыха'];
-let ord=[...steps.keys()].sort(()=>Math.random()-.5);
-function drawOrder(res){
-  $('order').innerHTML=ord.map((k,pos)=>`<li class="${res?(k===pos?'ok':'bad'):''}"><span>${pos+1}. ${steps[k]}</span><button onclick="mv(${pos},-1)">▲</button><button onclick="mv(${pos},1)">▼</button></li>`).join('');
-}
-function mv(p,d){const q=p+d;if(q<0||q>=ord.length)return;[ord[p],ord[q]]=[ord[q],ord[p]];drawOrder();}
-function shuffleOrder(){ord.sort(()=>Math.random()-.5);drawOrder();$('orderRes').textContent=''}
-function checkOrder(){
-  const c=ord.filter((k,i)=>k===i).length;drawOrder(true);
-  const p=Math.min(4,Math.floor(c*4/steps.length));
-  $('orderRes').textContent=`На своих местах: ${c} из ${steps.length}`+(c===steps.length?' — идеально! 🎉':'');
-  setDone(2,c===steps.length?4:Math.min(p,3));
-}
-drawOrder();
-
-/* 4. CASE */
-const caseSteps=[
- {t:'Гость в 23:00 жалуется: в номере шумно из-за соседней вечеринки, он устал после перелёта. Что делаете первым?',
-  o:[['Извиняюсь, выражаю сочувствие и уточняю номер комнаты',1,'Верно: сначала эмпатия и сбор фактов.'],['Объясняю, что «после 23:00 тишина и это не наша вина»',0,'Это звучит как отказ в помощи и усиливает конфликт.'],['Предлагаю подождать до утра',0,'Гость остаётся без решения проблемы.']]},
- {t:'Вы выяснили: шумят из 214 номера. Следующий шаг?',
-  o:[['Звоню/иду в 214 и вежливо прошу соблюдать тишину, сообщаю гостю',1,'Верно: решаете причину и информируете гостя.'],['Ничего не делаю — гость сам разберётся',0,'Проблема остаётся неустранённой.'],['Сразу выселяю шумных гостей без предупреждения',0,'Слишком радикально, нарушает процедуру предупреждения.']]},
- {t:'Гость всё ещё недоволен. Что предложите?',
-  o:[['Перевод в тихий номер + небольшой комплимент (напиток/поздний завтрак), согласовав с менеджером',1,'Верно: компенсация в рамках полномочий + эскалация.'],['Полный возврат за всё проживание сразу',0,'Выходит за ваши полномочия и несоразмерно.'],['Предложить оставить плохой отзыв, если ему так легче',0,'Недопустимо: вы провоцируете негатив вместо решения.']]}
-];
-let cs=0,cp=0;
-function drawCase(){
-  const box=$('caseBox');
-  if(cs>=caseSteps.length){setDone(3,cp);box.innerHTML=`<div class="result">Кейс завершён: ${cp} из ${caseSteps.length}. Алгоритм работы с жалобой: выслушать → посочувствовать → решить → компенсировать → зафиксировать.</div><button class="btn ghost" onclick="cs=0;cp=0;drawCase()">Пройти заново</button>`;return}
-  const s=caseSteps[cs];
-  box.innerHTML=`<div class="guest">«${s.t}»</div>`+s.o.map((o,j)=>`<button class="opt" onclick="pick(${j})">${o[0]}</button>`).join('')+`<div class="fb" id="cf"></div>`;
-}
-function pick(j){
-  const o=caseSteps[cs].o[j];cp+=o[1];
-  const f=$('cf');f.className='fb show '+(o[1]?'ok':'bad');f.innerHTML=o[2]+'<br><br><button class="btn" onclick="cs++;drawCase()">Далее</button>';
-  document.querySelectorAll('#caseBox .opt').forEach(b=>b.disabled=true);
-}
-drawCase();
-
-/* 5. CALC */
-function checkCalc(){
-  const ans={c_occ:70,c_adr:30000,c_rev:21000};let p=0;
-  for(const id in ans){const el=$(id);const ok=Math.round(+el.value)===ans[id];el.className=ok?'ok':'bad';if(ok)p++}
-  $('calcRes').innerHTML=`Верно: ${p} из 3.`+(p===3?' 🎉':'<br>Подсказки: Загрузка = проданные / все × 100; ADR = выручка / проданные; RevPAR = выручка / все номера (или ADR × загрузка).');
-  setDone(4,p);
+/* ───── 202 · REVENUE ───── */
+function taskRevenue(root){
+  const N=40,PMIN=8000,PMAX=60000;
+  const days=[
+   {t:'Вторник',s:'Обычный будний день. Конкуренты держат цену около 18 000 ₸.',base:.82,ref:18000,slope:.024},
+   {t:'Пятница',s:'В городе концерт, спрос зашкаливает. Но и потолок цены есть.',base:1.25,ref:25000,slope:.02},
+   {t:'Понедельник',s:'Дождь и низкий сезон. Город пуст, гости выбирают дёшево.',base:.5,ref:14000,slope:.03}
+  ];
+  const occ=(d,p)=>Math.max(0,Math.min(1,d.base-d.slope*(p-d.ref)/1000));
+  const best=d=>{let bp=PMIN,br=0;for(let p=PMIN;p<=PMAX;p+=100){const r=p*occ(d,p);if(r>br){br=r;bp=p}}return{p:bp,r:br}};
+  const got=days.map(()=>null);
+  root.innerHTML=`<div class="eyebrow">Номер 202 · revenue-отдел</div><h2>Цена, которая зарабатывает</h2><p class="intro">В отеле ${N} номеров. Чем выше цена, тем меньше гостей, а пустой номер ночью не продать. Найдите цену с максимальным RevPAR (доход на доступный номер) и зафиксируйте её. Балл — за результат не ниже 96% от возможного максимума. Кривая спроса откроется после фиксации.</p><div class="days" id="dd"></div>`;
+  const X=p=>20+(p-PMIN)/(PMAX-PMIN)*280;
+  days.forEach((d,i)=>{
+    const o=best(d),Y=r=>100-(r/(o.r*1.2))*90;
+    const card=el(`<div class="day"><h3>${d.t}</h3><p>${d.s}</p>
+      <div class="price"><b id="pv${i}">20 000</b><span>₸ за ночь</span></div>
+      <input type="range" id="pr${i}" min="${PMIN}" max="${PMAX}" step="500" value="20000" aria-label="Цена, ${d.t}">
+      <div class="kpis"><div class="kpi"><small>Загрузка</small><b id="ko${i}"></b></div><div class="kpi"><small>Продано</small><b id="ks${i}"></b></div><div class="kpi"><small>RevPAR</small><b id="kr${i}"></b></div></div>
+      <svg class="chart" viewBox="0 0 320 120" id="ch${i}" role="img" aria-label="График RevPAR от цены"><line x1="20" y1="100" x2="300" y2="100" stroke="var(--line)" stroke-width="2"/><text x="20" y="114">8 тыс</text><text x="300" y="114" text-anchor="end">60 тыс ₸</text><g id="tr${i}"></g><g id="cv${i}"></g><circle id="dt${i}" r="6" fill="var(--blue)" stroke="var(--card)" stroke-width="2"/></svg>
+      <button class="btn sun" id="lk${i}">Зафиксировать цену</button><div class="res" id="rs${i}"></div></div>`);
+    $('#dd',root).appendChild(card);
+    const sl=$('#pr'+i,card),tried=new Set();
+    const upd=()=>{
+      const p=+sl.value,oc=occ(d,p),r=p*oc;
+      $('#pv'+i,card).textContent=fmt(p);$('#ko'+i,card).textContent=Math.round(oc*100)+'%';$('#ks'+i,card).textContent=Math.round(oc*N)+' из '+N;$('#kr'+i,card).textContent=fmt(r)+' ₸';
+      const dt=$('#dt'+i,card);dt.setAttribute('cx',X(p));dt.setAttribute('cy',Y(r));
+    };
+    sl.addEventListener('input',upd);
+    sl.addEventListener('change',()=>{const p=+sl.value;if(tried.has(p))return;tried.add(p);const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',X(p));c.setAttribute('cy',Y(p*occ(d,p)));c.setAttribute('r',3);c.setAttribute('fill','var(--muted)');c.setAttribute('opacity','.5');$('#tr'+i,card).appendChild(c)});
+    $('#lk'+i,card).addEventListener('click',()=>{
+      if(got[i]!==null)return;
+      const p=+sl.value,r=p*occ(d,p),ratio=r/o.r,win=ratio>=.96;got[i]=win?1:0;
+      sl.disabled=true;$('#lk'+i,card).disabled=true;
+      let path='';for(let q=PMIN;q<=PMAX;q+=500)path+=(path?'L':'M')+X(q)+' '+Y(q*occ(d,q));
+      $('#cv'+i,card).innerHTML=`<path d="${path}" fill="none" stroke="var(--blue)" stroke-width="2.5"/><line x1="${X(o.p)}" y1="${Y(o.r)}" x2="${X(o.p)}" y2="100" stroke="var(--ok)" stroke-dasharray="3 3"/><circle cx="${X(o.p)}" cy="${Y(o.r)}" r="5" fill="var(--ok)"/><text x="${X(o.p)}" y="${Y(o.r)-9}" text-anchor="middle" style="fill:var(--ok);font-weight:700">${fmt(Math.round(o.p/500)*500)} ₸</text>`;
+      const rs=$('#rs'+i,card);rs.style.color=win?'var(--ok)':'var(--bad)';
+      rs.textContent=`${win?'Верно!':'Мимо.'} Вы получили ${Math.round(ratio*100)}% от максимума. Оптимум: около ${fmt(Math.round(o.p/500)*500)} ₸ (RevPAR ${fmt(o.r)} ₸).`;
+      const done=got.every(x=>x!==null);setScore(1,got.reduce((a,b)=>a+(b||0),0),done,done?root:null);
+    });
+    upd();
+  });
 }
 
-renderNav();go(0);
+/* ───── 303 · ОСМОТР ───── */
+function taskInspect(root){
+  const defs={
+   pillow:['Пятно на наволочке','Бельё меняют при любом загрязнении. Гость сразу заметит такое при заселении.'],
+   lamp:['Треснувший абажур','Повреждённая мебель и освещение подлежат замене до заселения.'],
+   curtain:['Сорванная занавеска','Шторы должны быть целыми и полностью закрываться: это приватность гостя.'],
+   towel:['Полотенце на полу','Номер не убран: использованный текстиль следует выносить при каждой уборке.'],
+   bin:['Мусор в корзине','Корзина должна быть пустой и чистой. Это проверяют в первую очередь.']
+  };
+  let found=new Set(),miss=0;
+  root.innerHTML=`<div class="eyebrow">Номер 303 · housekeeping</div><h2>Осмотр номера перед заселением</h2><p class="intro">Горничная сдала номер, но кое-что она пропустила. Найдите пять дефектов: нажимайте на подозрительные предметы. За каждый ложный клик по нормальному предмету баллы снимаются: минус 1 за каждые три ошибки.</p>
+  <div class="insp"><svg class="room" viewBox="0 0 400 260" id="rm" role="img" aria-label="Номер, нарисованный в разрезе">
+    <rect width="400" height="260" style="fill:var(--r-wall)"/>
+    <polygon points="0,190 400,190 400,260 0,260" style="fill:var(--r-floor)"/>
+    <g class="ok" data-n="Рамка на стене висит ровно: тут всё в порядке."><rect x="90" y="28" width="76" height="50" rx="3" style="fill:var(--r-bed)"/><rect x="96" y="34" width="64" height="38" style="fill:var(--r-glass)"/><path d="M96 66 L112 50 L124 60 L138 44 L160 66Z" style="fill:var(--blue)"/></g>
+    <g class="ok hotn" data-n="Окно чистое, рама целая."><rect x="262" y="28" width="104" height="84" rx="4" style="fill:var(--r-glass)"/><path d="M314 28V112M262 70H366" stroke="var(--r-bed)" stroke-width="4"/></g>
+    <rect x="252" y="22" width="122" height="6" rx="3" style="fill:var(--r-wood)"/>
+    <g class="hot" data-d="curtain"><path d="M254 28 H284 L278 128 Q268 136 258 128Z" style="fill:var(--r-curt)"/><path d="M372 28 H346 L330 96 L350 112 L336 140 L372 100Z" style="fill:var(--r-curt)"/><path d="M346 28 L334 70" stroke="var(--on-sun)" stroke-width="2" stroke-dasharray="3 3" opacity=".5"/><circle class="ring" cx="340" cy="78" r="46"/></g>
+    <g class="ok hotn" data-n="Кровать заправлена безупречно."><rect x="34" y="96" width="180" height="26" rx="6" style="fill:var(--r-wood)"/><rect x="26" y="132" width="196" height="58" rx="10" style="fill:var(--r-bed)"/><rect x="26" y="156" width="196" height="34" rx="8" style="fill:var(--r-bed2)"/><rect x="34" y="188" width="8" height="14" style="fill:var(--r-wood)"/><rect x="206" y="188" width="8" height="14" style="fill:var(--r-wood)"/></g>
+    <g class="hot" data-d="pillow"><rect x="52" y="112" width="70" height="26" rx="12" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/><ellipse cx="88" cy="125" rx="14" ry="8" fill="#9b6a3e" opacity=".75"/><circle cx="82" cy="123" r="4" fill="#6f4522" opacity=".7"/><circle class="ring" cx="88" cy="125" r="30"/></g>
+    <g class="ok hotn" data-n="Вторая подушка чистая."><rect x="130" y="112" width="70" height="26" rx="12" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/></g>
+    <g class="ok hotn" data-n="Тумбочка чистая, всё на месте."><rect x="236" y="150" width="54" height="46" rx="4" style="fill:var(--r-wood)"/><rect x="242" y="160" width="42" height="12" rx="2" fill="#00000026"/></g>
+    <g class="hot" data-d="lamp"><rect x="258" y="130" width="6" height="22" style="fill:var(--r-bin)"/><path d="M240 130 L282 130 L272 100 L250 100Z" style="fill:var(--sun)"/><path d="M262 100 L258 112 L266 116 L260 130" fill="none" stroke="var(--ink)" stroke-width="2"/><circle class="ring" cx="261" cy="116" r="28"/></g>
+    <g class="ok hotn" data-n="Мини-бар в порядке, пломбы целы."><rect x="306" y="150" width="62" height="46" rx="4" style="fill:var(--r-bin)"/><rect x="312" y="156" width="50" height="3" fill="#ffffff55"/><circle cx="360" cy="176" r="2.5" fill="#fff"/></g>
+    <g class="hot" data-d="towel"><rect x="86" y="212" width="82" height="24" rx="9" style="fill:var(--r-towel);stroke:var(--line);stroke-width:2" transform="rotate(-6 127 224)"/><rect x="100" y="212" width="6" height="24" fill="var(--blue)" transform="rotate(-6 127 224)"/><circle class="ring" cx="127" cy="224" r="48"/></g>
+    <g class="hot" data-d="bin"><path d="M326 206 H362 L358 252 H330Z" style="fill:var(--r-bin)"/><circle cx="336" cy="204" r="8" fill="#fff"/><circle cx="350" cy="201" r="7" fill="#ffd1d1"/><path d="M342 208 l8 -10 l5 8z" fill="#f3f3f3"/><circle class="ring" cx="344" cy="228" r="34"/></g>
+  </svg>
+  <div><div class="mini">Чек-лист проверки · <span id="cnt">0/5</span></div><ul class="chk" id="ck">${Object.values(defs).map((_,i)=>`<li id="c${i}">Дефект ${i+1}: ???</li>`).join('')}</ul></div></div>
+  <div class="note" id="inn">Осмотрите комнату внимательно: не всё здесь в порядке.</div>`;
+  const keys=Object.keys(defs);
+  const note=(t,c='')=>{const n=$('#inn',root);n.textContent=t;n.className='note '+c};
+  $('#rm',root).addEventListener('click',e=>{
+    const g=e.target.closest('g[data-d],g[data-n]');if(!g||fin[2])return;
+    if(g.dataset.d){
+      const k=g.dataset.d;if(found.has(k))return;
+      found.add(k);g.classList.add('found');const i=keys.indexOf(k);
+      const li=$('#c'+i,root);li.className='on';li.innerHTML=`<b>${defs[k][0]}</b>${defs[k][1]}`;
+      $('#cnt',root).textContent=found.size+'/5';note(`Нашли: ${defs[k][0].toLowerCase()}.`,'ok');
+      if(found.size===5){const p=Math.max(0,5-Math.floor(miss/3));setScore(2,p,true,root);note(`Номер проверен. Ложных кликов: ${miss}. Итог: ${p} из 5.`,'ok')}
+    }else{miss++;note(g.dataset.n+` (ошибок: ${miss})`,'bad');g.classList.remove('shake');void g.getBoundingClientRect();}
+  });
+}
+
+/* ───── 404 · ОВЕРБУКИНГ ───── */
+function taskOver(root){
+  const steps=[
+   {t:'23:40. Отель полон. У стойки двое гостей с подтверждённой бронью: номера для них нет. Отель продал больше номеров, чем есть.',o:[
+     ['Сказать: «Извините, мест нет» и закрыть окно ресепшн',{g:-30,b:0,r:-20},false,'Отказ без решения — худший вариант: гость остаётся ночью на улице.'],
+     ['Забронировать равный номер в соседнем отеле, оплатить его и такси',{g:15,b:-20,r:10},true,'Правильно: отель берёт ответственность на себя и закрывает проблему гостя.'],
+     ['Предложить диван в лобби до утра',{g:-40,b:0,r:-30},false,'Гость заплатил за номер, а не за диван. Такое сразу попадёт в отзывы.']]},
+   {t:'Гость по дороге в другой отель просит компенсацию за испорченный вечер.',o:[
+     ['Ужин в ресторане и скидка 20% на следующий визит',{g:15,b:-10,r:10},true,'Верно: компенсация сопоставима с неудобством и возвращает лояльность.'],
+     ['Ответить, что овербукинг есть в договоре',{g:-15,b:0,r:-10},false,'Формально правы, но гость запомнит, что его не услышали.'],
+     ['Вернуть деньги и отменить всю бронь',{g:5,b:-25,r:0},false,'Дорого и не нужно: гость хотел проживание, а не возврат.']]},
+   {t:'Утро. Как вернуть гостей в «Сауыт» на оставшиеся ночи?',o:[
+     ['Перевезти их первыми, накрыть завтрак и передать письмо с извинениями от менеджера',{g:20,b:-5,r:15},true,'Отлично: внимание и личное извинение закрывают историю.'],
+     ['Сделать вид, что ничего не было',{g:-15,b:0,r:-10},false,'Молчание воспринимается как безразличие.'],
+     ['Попросить оставить хороший отзыв «за беспокойство»',{g:-10,b:0,r:-25},false,'Обмен компенсации на отзыв нарушает правила площадок и вызывает недоверие.']]}
+  ];
+  let s=0,m={g:50,b:50,r:50},sc=0;
+  root.innerHTML=`<div class="eyebrow">Номер 404 · ночная смена</div><h2>Овербукинг: ночь без номеров</h2><p class="intro">Три решения подряд. Следите за шкалами: доверие гостя, бюджет отеля и репутация. Балл даётся за самое сильное решение на каждом шаге.</p>
+  <div class="meters"><div class="meter"><small>Доверие гостя<span id="mg"></span></small><div class="tr"><i id="bg"></i></div></div><div class="meter"><small>Бюджет<span id="mb"></span></small><div class="tr"><i id="bb"></i></div></div><div class="meter"><small>Репутация<span id="mr"></span></small><div class="tr"><i id="br"></i></div></div></div>
+  <div id="sc"></div>`;
+  const clamp=v=>Math.max(0,Math.min(100,v));
+  const meters=()=>{for(const k of ['g','b','r']){$('#b'+k,root).style.width=m[k]+'%';$('#m'+k,root).textContent=m[k];$('#b'+k,root).style.background=m[k]<30?'var(--bad)':m[k]>=65?'var(--ok)':'var(--blue)'}};
+  function draw(){
+    const box=$('#sc',root);
+    if(s>=steps.length){const lvl=sc===3?'Кризис превращён в историю лояльности.':sc===2?'Хорошо, но одно решение стоило репутации.':'Тяжёлая ночь. Повторите и попробуйте иначе.';
+      box.innerHTML=`<div class="note ${sc>=2?'ok':'bad'}">Итог: ${sc} из 3. ${lvl}</div><p style="margin-top:12px"><button class="btn ghost" id="rst">Пройти заново</button></p>`;
+      $('#rst',root).onclick=()=>{s=0;sc=0;m={g:50,b:50,r:50};meters();draw()};return}
+    const st=steps[s];
+    box.innerHTML=`<div class="scene"><small>Ситуация ${s+1} из ${steps.length}</small>${st.t}</div>`+st.o.map((o,j)=>`<button class="opt" data-j="${j}">${o[0]}</button>`).join('')+`<div class="note" id="ff" style="display:none"></div>`;
+    box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      const o=st.o[+b.dataset.j];box.querySelectorAll('.opt').forEach((x,k)=>{x.disabled=true;if(st.o[k][2])x.classList.add('best')});b.classList.add('pick');
+      for(const k of ['g','b','r'])m[k]=clamp(m[k]+o[1][k]);meters();if(o[2])sc++;
+      const f=$('#ff',root);f.style.display='block';f.className='note '+(o[2]?'ok':'bad');f.innerHTML=o[3]+`<br><br><button class="btn" id="nx">${s===steps.length-1?'Итоги':'Дальше'}</button>`;
+      $('#nx',root).onclick=()=>{s++;if(s>=steps.length)setScore(3,sc,true,root);draw()};
+    });
+  }
+  meters();draw();
+}
+
+/* ───── 505 · ОТЗЫВ ───── */
+function taskReview(root){
+  const slots=[
+   {t:'Обращение',o:[['Здравствуйте, Алия! Спасибо, что рассказали о своих впечатлениях.',2],['Уважаемый гость, ваш отзыв получен.',1],['Алия, вы всё преувеличиваете.',0]]},
+   {t:'Извинение',o:[['Нам очень жаль, что заселение затянулось, а в номере было шумно. Это не наш стандарт.',2],['Приносим извинения за возможные неудобства.',1],['Мы не виноваты: был сезон, и всех не успеть.',0]]},
+   {t:'Решение',o:[['Мы разобрали ситуацию с командой: на вечерние заезды добавили второго администратора и проверили шумоизоляцию на вашем этаже.',2],['Мы обязательно примем меры.',1],['В следующий раз выбирайте другой этаж.',0]]},
+   {t:'Приглашение',o:[['Будем рады подарить вам завтрак при следующем визите. Напишите нам в личные сообщения.',2],['Ждём вас снова.',1],['Если мы вас устроили, измените, пожалуйста, оценку.',0]]}
+  ];
+  const why=['Обращение по имени показывает, что отзыв прочитан человеком.','Конкретное извинение признаёт проблему. Общие слова звучат как отписка.','Решение с фактами доказывает, что отель действительно что-то изменил.','Приглашение вернуться превращает недовольного гостя в будущего клиента.'];
+  const pick=[null,null,null,null];
+  root.innerHTML=`<div class="eyebrow">Номер 505 · онлайн-репутация</div><h2>Ответ на отзыв</h2><p class="intro">Публичный ответ читают будущие гости. Соберите ответ из четырёх частей: выберите лучший вариант в каждой.</p>
+  <div class="review"><div class="stars">★★☆☆☆</div><b>Алия, Алматы</b><p>«Заселение заняло 40 минут, на ресепшн никто не извинился. Ночью шумели за стеной. Номер в целом чистый, персонал вежливый, но впечатление испорчено».</p></div>
+  <div id="sl"></div><div class="mini">Ваш ответ</div><div class="bubble" id="bb"></div>
+  <div class="meters"><div class="meter"><small>Эмпатия<span id="e1"></span></small><div class="tr"><i id="f1"></i></div></div><div class="meter"><small>Конкретика<span id="e2"></span></small><div class="tr"><i id="f2"></i></div></div><div class="meter"><small>Возврат гостя<span id="e3"></span></small><div class="tr"><i id="f3"></i></div></div></div>
+  <button class="btn" id="snd" disabled>Опубликовать ответ</button><div class="note" id="rn" style="display:none"></div>`;
+  const sl=$('#sl',root);
+  sl.innerHTML=slots.map((s,i)=>`<div class="slot"><div class="mini">${i+1}. ${s.t}</div><div class="chips">${s.o.map((o,j)=>`<button class="chip" data-i="${i}" data-j="${j}">${o[0]}</button>`).join('')}</div></div>`).join('');
+  const val=(i)=>pick[i]===null?0:slots[i].o[pick[i]][1]*50;
+  function upd(){
+    $('#bb',root).innerHTML=pick.map((p,i)=>p===null?`<span class="h">[${slots[i].t.toLowerCase()}]</span>`:slots[i].o[p][0]).join(' ');
+    const e=[(val(0)+val(1))/2,val(2),val(3)];
+    e.forEach((v,k)=>{const f=$('#f'+(k+1),root);f.style.width=v+'%';f.style.background=v<30?'var(--bad)':v>=80?'var(--ok)':'var(--blue)';$('#e'+(k+1),root).textContent=Math.round(v)});
+    $('#snd',root).disabled=pick.some(p=>p===null);
+  }
+  sl.addEventListener('click',e=>{
+    const b=e.target.closest('.chip');if(!b||fin[4])return;
+    const i=+b.dataset.i;pick[i]=+b.dataset.j;
+    sl.querySelectorAll(`[data-i="${i}"]`).forEach(x=>x.classList.toggle('sel',x===b));upd();
+  });
+  $('#snd',root).addEventListener('click',()=>{
+    let sc=0;sl.querySelectorAll('.chip').forEach(c=>{c.disabled=true;const i=+c.dataset.i,j=+c.dataset.j,v=slots[i].o[j][1];c.classList.remove('sel');if(v===2)c.classList.add('best');else if(+pick[i]===j&&v===0)c.classList.add('bad')});
+    pick.forEach((p,i)=>{if(slots[i].o[p][1]===2)sc++});
+    $('#snd',root).disabled=true;
+    const n=$('#rn',root);n.style.display='block';n.className='note '+(sc>=3?'ok':'bad');
+    n.innerHTML=`Итог: ${sc} из 4.<br>`+pick.map((p,i)=>`${slots[i].o[p][1]===2?'✓':'✗'} ${why[i]}`).join('<br>');
+    setScore(4,sc,true,root);
+  });
+  upd();
+}
+
+/* ───── ФИНАЛ ───── */
+function taskFinal(root){
+  root.innerHTML=`<div class="eyebrow">Конец смены</div><h2>Ваш бейдж сотрудника</h2><p class="intro">Введите имя. Звание зависит от баллов за пройденные двери. Двери, которые вы не открыли, дают ноль.</p>
+  <div class="final"><div class="badge"><div class="bh">ОТЕЛЬ «САУЫТ»</div><div class="big" id="bi">?</div><div class="bn" id="bn">Ваше имя</div><div class="br" id="brk"></div><div class="sc" id="bsc"></div></div>
+  <div><label for="nm" class="mini">Как вас зовут</label><input type="text" id="nm" maxlength="24" placeholder="Например, Асель" autocomplete="off"><div class="mini">Результаты по дверям</div><ul class="brk" id="bl"></ul><p class="lead" style="margin-top:16px;font-size:.95rem" id="adv"></p></div></div>`;
+  const nm=$('#nm',root);
+  nm.addEventListener('input',draw);
+  function draw(){
+    const t=pts.reduce((a,b)=>a+b,0),r=t/MAX;
+    const rank=r>=.85?'Генеральный директор':r>=.65?'Менеджер смены':r>=.4?'Администратор':'Стажёр';
+    const v=nm.value.trim();
+    $('#bn',root).textContent=v||'Ваше имя';$('#bi',root).textContent=v?v[0].toUpperCase():'?';
+    $('#brk',root).textContent=rank;$('#bsc',root).textContent=`${t} из ${MAX} баллов`;
+    $('#bl',root).innerHTML=DOORS.map((d,i)=>`<li><span>${d.no} · ${d.name}</span><b>${fin[i]?pts[i]+' / '+d.max:'не пройдено'}</b></li>`).join('');
+    const weak=DOORS.map((d,i)=>[d,pts[i]/d.max,fin[i]]).filter(x=>!x[2]||x[1]<.7).map(x=>x[0].name);
+    $('#adv',root).textContent=weak.length?`Что подтянуть: ${weak.join(', ')}.`:'Все ситуации закрыты на высоком уровне. Можно браться за настоящую смену.';
+  }
+  root._draw=draw;draw();
+}
+
+/* init */
+const stage=$('#stage');
+DOORS.forEach(d=>{const p=el('<section class="panel"></section>');stage.appendChild(p);d.init(p)});
+const fp=el('<section class="panel"></section>');stage.appendChild(fp);taskFinal(fp);
+const _show=show;
+show=function(i){_show(i);if(i===5&&fp._draw)fp._draw()};
+drawDoors();
+document.querySelectorAll('.panel')[0].classList.add('on');
 </script>
 </body>
 </html>
