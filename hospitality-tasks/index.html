@@ -330,7 +330,7 @@ details summary{cursor:pointer;font-weight:600}
     <h1 id="heroH"></h1>
     <p class="lead" id="heroLead"></p>
     <div class="doors" id="doors"></div>
-    <div class="hud"><div class="bar" aria-hidden="true"><i id="prog"></i></div><b id="hudScore">0 / 80</b><button class="finalbtn" id="finBtn"></button></div>
+    <div class="hud"><div class="bar" aria-hidden="true"><i id="prog"></i></div><b id="hudScore">0 / 100</b><button class="finalbtn" id="finBtn"></button></div>
   </header>
   <main id="stage"></main>
 </div>
@@ -350,16 +350,21 @@ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let LANG=STORE.get('sauyt_lang')==='kk'?'kk':'ru';
 const MODS=[];
 const TPW=12551026;
-const MAXPTS=()=>MODS.reduce((a,m)=>a+m.max,0);
+const DEFAULT80=['guest','rev','audit','over','reply','inspect','hall','rush','book','ready','reflect'];
+let ENABLED=new Set(DEFAULT80);
+const on=m=>ENABLED.has(m.id);
+const ONMODS=()=>MODS.filter(on);
+const MAXPTS=()=>ONMODS().reduce((a,m)=>a+m.max,0);
+const LESSON_MIN=()=>ONMODS().reduce((a,m)=>a+m.min,0);
 
 const UI={
  ru:{
   gateEy:'Отель «Сауыт» · приём сотрудников',gateH:'Как вас зовут?',
-  gateLead:'Сегодня вы выходите на смену. Девять ситуаций — от общения с гостем до кризиса. Всего около 80 минут. Имя увидит преподаватель и оно будет на бейдже в конце.',
+  gateLead:'Сегодня вы выходите на смену. Вас ждут ситуации из жизни отеля: от общения с гостем до кризиса. Время смены — около {min} минут. Имя увидит преподаватель и оно будет на бейдже в конце.',
   nameL:'Имя и фамилия',nameP:'Например, Асель Нурланова',groupL:'Группа (необязательно)',groupP:'Например, ГБ-21',
   start:'Начать смену',err:'Введите имя, чтобы начать.',
   tHello:'Вы вошли как преподаватель',tPanel:'Открыть панель преподавателя',tPractice:'Пробное прохождение (результаты не сохраняются)',tLink:'Я преподаватель',tPw:'Пароль преподавателя',tEnter:'Войти',tBad:'Неверный пароль',
-  heroH:'Смена в отеле',heroLead:'Вы — дежурный администратор. Девять дверей — девять ситуаций. Правильные ответы заранее не видны: вы задаёте вопросы, считаете, планируете, пишете. Двери можно открывать в любом порядке, но время смены ограничено.',
+  heroH:'Смена в отеле',heroLead:'Вы — дежурный администратор. Каждая дверь — отдельная ситуация. Правильные ответы заранее не видны: вы задаёте вопросы, считаете, планируете, пишете. Двери можно открывать в любом порядке, но время смены ограничено.',
   open:'открыть',min:'мин',next:'Следующее задание →',finBtn:'Получить бейдж',backTeacher:'Панель преподавателя',
   done:'Задание сдано',saveFail:'Результаты не попадают к преподавателю: нет прав на запись или нет связи. Сообщите преподавателю.',
   practice:'Режим тренировки: результаты не сохраняются.',
@@ -369,16 +374,17 @@ const UI={
   tOnline:'В сети',tStarted:'Начали',tFinished:'Дошли до бейджа',tAvg:'Средний балл',
   tMap:'Где сейчас студенты',tTable:'Студенты',tName:'Имя',tGroup:'Группа',tNow:'Сейчас в окне',tProg:'Пройдено',tScore:'Баллы',tTime:'На смене',tLang:'Язык',tSeen:'Был(а)',
   tNone:'Пока никто не вошёл. Отправьте студентам ссылку и дайте им доступ «Участник» (Contributor).',
+  tLessonH:'Состав урока',tLessonSub:'Отметьте задания для класса: студенты увидят только отмеченные. Изменения применяются сразу.',tP80:'Пресет: ~80 минут',tAll:'Все задания',tTotal:'Итого',tCfgFail:'Не удалось сохранить состав: нужны права редактора страницы.',tPts:'баллов',
   tDetail:'Подробно',tClose:'Закрыть',tTimeIn:'время',tAns:'Ответы',tCsv:'Скачать CSV',tReset:'Очистить список',tResetSure:'Нажмите ещё раз, чтобы удалить всех',
   tNoDb:'База данных недоступна в этом окне: показаны только те, кто в сети.',tNow2:'сейчас',tAgo:'назад',tMinShort:'мин',lobby:'вход'
  },
  kk:{
   gateEy:'«Сауыт» қонақ үйі · қызметкерлерді қабылдау',gateH:'Сіздің атыңыз кім?',
-  gateLead:'Бүгін сіз ауысымға шығасыз. Тоғыз жағдай: қонақпен сөйлесуден дағдарысқа дейін. Барлығы шамамен 80 минут. Атыңызды мұғалім көреді және ол соңында бейджде тұрады.',
+  gateLead:'Бүгін сіз ауысымға шығасыз. Қонақ үй өмірінен жағдайлар күтіп тұр: қонақпен сөйлесуден дағдарысқа дейін. Ауысым уақыты — шамамен {min} минут. Атыңызды мұғалім көреді және ол соңында бейджде тұрады.',
   nameL:'Аты-жөніңіз',nameP:'Мысалы, Әсел Нұрланова',groupL:'Топ (міндетті емес)',groupP:'Мысалы, ГБ-21',
   start:'Ауысымды бастау',err:'Бастау үшін атыңызды енгізіңіз.',
   tHello:'Сіз мұғалім ретінде кірдіңіз',tPanel:'Мұғалім панелін ашу',tPractice:'Сынақ режимі (нәтиже сақталмайды)',tLink:'Мен мұғаліммін',tPw:'Мұғалім құпиясөзі',tEnter:'Кіру',tBad:'Құпиясөз қате',
-  heroH:'Қонақ үйдегі ауысым',heroLead:'Сіз кезекші әкімшісіз. Тоғыз есік — тоғыз жағдай. Дұрыс жауаптар алдын ала көрінбейді: сіз сұрақ қоясыз, есептейсіз, жоспарлайсыз, жазасыз. Есіктерді кез келген ретпен ашуға болады, бірақ ауысым уақыты шектеулі.',
+  heroH:'Қонақ үйдегі ауысым',heroLead:'Сіз кезекші әкімшісіз. Әр есік — жеке жағдай. Дұрыс жауаптар алдын ала көрінбейді: сіз сұрақ қоясыз, есептейсіз, жоспарлайсыз, жазасыз. Есіктерді кез келген ретпен ашуға болады, бірақ ауысым уақыты шектеулі.',
   open:'ашу',min:'мин',next:'Келесі тапсырма →',finBtn:'Бейдж алу',backTeacher:'Мұғалім панелі',
   done:'Тапсырма тапсырылды',saveFail:'Нәтижелер мұғалімге жетпейді: жазуға құқық жоқ немесе байланыс жоқ. Мұғалімге хабарлаңыз.',
   practice:'Жаттығу режимі: нәтижелер сақталмайды.',
@@ -388,11 +394,12 @@ const UI={
   tOnline:'Желіде',tStarted:'Бастады',tFinished:'Бейджге жетті',tAvg:'Орташа ұпай',
   tMap:'Студенттер қазір қайда',tTable:'Студенттер',tName:'Аты',tGroup:'Топ',tNow:'Қазір терезеде',tProg:'Өтілді',tScore:'Ұпай',tTime:'Ауысымда',tLang:'Тіл',tSeen:'Соңғы рет',
   tNone:'Әзірге ешкім кірген жоқ. Студенттерге сілтемені жіберіп, оларға «Қатысушы» (Contributor) қолжетімділігін беріңіз.',
+  tLessonH:'Сабақ құрамы',tLessonSub:'Сыныпқа тапсырмаларды белгілеңіз: студенттер тек белгіленгенді көреді. Өзгерістер бірден қолданылады.',tP80:'Пресет: ~80 минут',tAll:'Барлық тапсырма',tTotal:'Барлығы',tCfgFail:'Құрамды сақтау мүмкін болмады: бет редакторының құқығы керек.',tPts:'ұпай',
   tDetail:'Толығырақ',tClose:'Жабу',tTimeIn:'уақыт',tAns:'Жауаптар',tCsv:'CSV жүктеу',tReset:'Тізімді тазалау',tResetSure:'Барлығын жою үшін тағы бір рет басыңыз',
   tNoDb:'Бұл терезеде дерекқор қолжетімсіз: тек желідегілер көрсетіледі.',tNow2:'қазір',tAgo:'бұрын',tMinShort:'мин',lobby:'кіреберіс'
  }
 };
-const U=k=>UI[LANG][k];
+const U=k=>String(UI[LANG][k]).replace('{min}',typeof LESSON_MIN==='function'?LESSON_MIN():80);
 const L=o=>(o&&typeof o==='object'&&!Array.isArray(o)&&('ru' in o))?(o[LANG]??o.ru):o;
 
 /* ── student state ── */
@@ -400,8 +407,8 @@ const S={id:null,name:'',group:'',startedAt:0,door:0,res:{},time:{},enter:0,fin:
 let PRACTICE=false,isTeacher=false,tPwOpen=false,caps={user:null,db:null,room:null,dl:null},dbDoc=null,saveFailed=false;
 const loadLocal=()=>{try{const j=JSON.parse(STORE.get('sauyt_state')||'null');if(j&&j.name){S.name=j.name;S.group=j.group||'';S.res=j.res||{};S.time=j.time||{};S.startedAt=j.startedAt||0;S.fin=!!j.fin}}catch(e){}};
 const saveLocal=()=>STORE.set('sauyt_state',JSON.stringify({name:S.name,group:S.group,res:S.res,time:S.time,startedAt:S.startedAt,fin:S.fin}));
-const total=()=>MODS.reduce((a,m)=>a+((S.res[m.id]||{}).s||0),0);
-const doneCount=()=>MODS.filter(m=>S.res[m.id]).length;
+const total=()=>ONMODS().reduce((a,m)=>a+((S.res[m.id]||{}).s||0),0);
+const doneCount=()=>ONMODS().filter(m=>S.res[m.id]).length;
 const key=()=>S.id||('n:'+S.name.trim().toLowerCase());
 
 function docData(){
@@ -435,11 +442,24 @@ async function initCaps(){
     caps={user,db,room,dl};
     if(user){try{S.id=await user.id()}catch(e){}}
     if(db&&S.id)dbDoc=db.doc('students/'+S.id);
+    if(db){try{db.doc('config/lesson').onSnapshot(sn=>{if(sn.exists){const d=sn.data();if(d&&Array.isArray(d.on))ENABLED=new Set(d.on)}else ENABLED=new Set(DEFAULT80);cfgChanged()},()=>{})}catch(e){}}
   }catch(e){}
   gateRender();
   if(S.name&&!$('#app').hidden)presence();
 }
 
+function cfgChanged(){
+  gateRender();
+  if(!$('#app').hidden){
+    if(!showFinal&&MODS[S.door]&&!on(MODS[S.door])){const f=MODS.findIndex(on);if(f>=0)show(f)}
+    appChrome();finalDraw();presence();
+  }
+  if(!$('#tapp').hidden)tRender();
+}
+let cfgT=0;
+function saveCfg(){clearTimeout(cfgT);cfgT=setTimeout(async()=>{
+  const msg=$('#cfgMsg');
+  try{await caps.db.doc('config/lesson').set({on:[...ENABLED],t:Date.now()});if(msg)msg.textContent=''}catch(e){if(msg)msg.textContent=U('tCfgFail')}},300)}
 /* ── gate ── */
 function gateRender(){
   const g=$('#gatecard');if(!g)return;
@@ -492,7 +512,7 @@ function appChrome(){
   $$('.pfoot').forEach((f,i)=>footDraw(i));
 }
 function drawDoors(){
-  $('#doors').innerHTML=MODS.map((m,i)=>{const r=S.res[m.id];
+  $('#doors').innerHTML=MODS.map((m,i)=>{if(!on(m))return '';const r=S.res[m.id];
     return `<button class="door ${i===S.door&&!showFinal?'on':''} ${r?'fin':''}" data-i="${i}" aria-label="${m.no} ${esc(L(m.title))}"><span class="no">${m.no}</span><span class="nm">${esc(L(m.title))}</span><span class="sb">${esc(L(m.sub))}</span><span class="mn">~${m.min} ${U('min')}</span><span class="st">${r?`${r.s} ${U('of')} ${r.m}`:U('open')}</span></button>`}).join('');
   const t=total(),mx=MAXPTS();
   $('#hudScore').textContent=`${t} / ${mx}`;$('#prog').style.width=(mx?t/mx*100:0)+'%';
@@ -504,6 +524,7 @@ function leaveDoor(){
   S.enter=Date.now();
 }
 function show(i){
+  if(i<MODS.length&&!on(MODS[i]))return;
   leaveDoor();showFinal=(i>=MODS.length);if(!showFinal)S.door=i;
   $$('.panel').forEach((p,k)=>p.classList.toggle('on',k===i));
   if(showFinal&&!S.fin){S.fin=true}
@@ -513,7 +534,7 @@ function show(i){
 function footDraw(i){
   const f=$$('.pfoot')[i];if(!f)return;const m=MODS[i],r=S.res[m.id];
   f.classList.toggle('show',!!r);
-  if(r){const last=i===MODS.length-1;f.innerHTML=`<span><b>${U('done')}</b> · ${r.s} ${U('of')} ${r.m}</span><button class="btn">${last?U('finBtn'):U('next')}</button>`;$('button',f).onclick=()=>show(last?MODS.length:i+1)}
+  if(r){const nx=MODS.findIndex((z,k)=>k>i&&on(z));const last=nx<0;f.innerHTML=`<span><b>${U('done')}</b> · ${r.s} ${U('of')} ${r.m}</span><button class="btn">${last?U('finBtn'):U('next')}</button>`;$('button',f).onclick=()=>show(last?MODS.length:nx)}
 }
 function burst(from){
   if(reduce)return;const r=from.getBoundingClientRect(),x0=r.left+r.width/2,y0=Math.min(Math.max(80,r.top+60),innerHeight-80);
@@ -554,10 +575,10 @@ function rankOf(r){return r>=.85?3:r>=.65?2:r>=.4?1:0}
 function finalDraw(){
   const root=$('#finalPanel .mod');if(!root)return;
   const t=total(),mx=MAXPTS(),r=mx?t/mx:0;
-  const weak=MODS.filter(m=>m.max>0).map(m=>[m,S.res[m.id]]).filter(([m,x])=>!x||x.s/x.m<.7).map(([m])=>L(m.title));
+  const weak=ONMODS().filter(m=>m.max>0).map(m=>[m,S.res[m.id]]).filter(([m,x])=>!x||x.s/x.m<.7).map(([m])=>L(m.title));
   root.innerHTML=`<div class="eyebrow">${U('finH')}</div><h2>${U('badge')}</h2><p class="intro">${U('finLead')}</p>
   <div class="final"><div class="badge"><div class="bh">${LANG==='kk'?'«САУЫТ» ҚОНАҚ ҮЙІ':'ОТЕЛЬ «САУЫТ»'}</div><div class="big">${esc((S.name||'?')[0].toUpperCase())}</div><div class="bn">${esc(S.name)}</div><div class="br">${U('ranks')[rankOf(r)]}</div><div class="sc">${t} ${U('of')} ${mx} ${U('pts')}</div></div>
-  <div><div class="mini">${U('res')}</div><ul class="brk">${MODS.map(m=>{const x=S.res[m.id];return `<li><span>${m.no} · ${esc(L(m.title))}</span><b>${x?x.s+' / '+x.m:U('notDone')}</b></li>`}).join('')}</ul>
+  <div><div class="mini">${U('res')}</div><ul class="brk">${ONMODS().map(m=>{const x=S.res[m.id];return `<li><span>${m.no} · ${esc(L(m.title))}</span><b>${x?x.s+' / '+x.m:U('notDone')}</b></li>`}).join('')}</ul>
   <p class="lead" style="margin-top:16px;font-size:.95rem">${weak.length?U('improve')+': '+esc(weak.join(', '))+'.':U('allGood')}</p></div></div>`;
 }
 
@@ -595,14 +616,21 @@ function tRender(){
   <header class="hero"><div class="eyebrow">${U('gateEy')}</div><h1 style="font-size:clamp(1.8rem,5vw,3rem)">${U('tH')}</h1></header>
   ${caps.db?'':`<div class="banner info">${U('tNoDb')}</div>`}
   <div class="tcards"><div class="tc"><b>${online}</b><span>${U('tOnline')}</span></div><div class="tc"><b>${rows.length}</b><span>${U('tStarted')}</span></div><div class="tc"><b>${fin}</b><span>${U('tFinished')}</span></div><div class="tc"><b>${avg}</b><span>${U('tAvg')} (${mx})</span></div></div>
-  <div class="panel on" style="margin-top:6px"><div class="mini">${U('tMap')}</div>
-   <div class="map">${MODS.map(m=>`<div class="mc ${cnt[m.id]?'hot':''}"><small>${m.no}</small><b>${esc(L(m.title))}</b><div class="pp">${(cnt[m.id]||[]).map(n=>`<i title="${esc(n)}">${esc(n.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase())}</i>`).join('')}</div></div>`).join('')}<div class="mc ${cnt.final?'hot':''}"><small>🏁</small><b>${U('badge')}</b><div class="pp">${(cnt.final||[]).map(n=>`<i title="${esc(n)}">${esc(n[0].toUpperCase())}</i>`).join('')}</div></div></div>
+  <div class="panel on" style="margin-top:6px"><div class="mini">${U('tLessonH')}</div><p class="det">${U('tLessonSub')}</p>
+   <div class="tbar"><button class="btn sm ghost" id="cP80">${U('tP80')}</button><button class="btn sm ghost" id="cAll">${U('tAll')}</button><span class="tag">${U('tTotal')}: ${LESSON_MIN()} ${U('tMinShort')} · ${MAXPTS()} ${U('tPts')}</span></div>
+   <div class="row2">${MODS.map(m=>`<button class="tile ${on(m)?'sel':''}" data-lm="${m.id}"><b>${m.no} · ${esc(L(m.title))}</b><small>~${m.min} ${U('tMinShort')} · ${m.max} ${U('tPts')}</small></button>`).join('')}</div>
+   <div class="nmerr" id="cfgMsg"></div></div>
+  <div class="panel on" style="margin-top:14px"><div class="mini">${U('tMap')}</div>
+   <div class="map">${ONMODS().map(m=>`<div class="mc ${cnt[m.id]?'hot':''}"><small>${m.no}</small><b>${esc(L(m.title))}</b><div class="pp">${(cnt[m.id]||[]).map(n=>`<i title="${esc(n)}">${esc(n.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase())}</i>`).join('')}</div></div>`).join('')}<div class="mc ${cnt.final?'hot':''}"><small>🏁</small><b>${U('badge')}</b><div class="pp">${(cnt.final||[]).map(n=>`<i title="${esc(n)}">${esc(n[0].toUpperCase())}</i>`).join('')}</div></div></div>
    <div class="mini" style="margin-top:20px">${U('tTable')}</div>
-   ${rows.length?`<div class="tw"><table><thead><tr><th></th><th>${U('tName')}</th><th>${U('tGroup')}</th><th>${U('tNow')}</th><th>${U('tProg')}</th><th>${U('tScore')}</th><th>${U('tTime')}</th><th>${U('tLang')}</th><th>${U('tSeen')}</th></tr></thead><tbody>${rows.map(r=>`<tr class="clk" data-id="${esc(r.id)}"><td><span class="dot ${r.live?'on':''}"></span></td><td><b>${esc(r.name)}</b></td><td>${esc(r.group||'')}</td><td>${esc(r.door?modTitle(r.door):U('lobby'))}</td><td>${r.k||0} / ${MODS.length}</td><td>${r.tot||0} / ${mx}</td><td>${r.startedAt?Math.round((Date.now()-r.startedAt)/60000)+' '+U('tMinShort'):'—'}</td><td>${r.lang==='kk'?'ҚАЗ':'RU'}</td><td>${r.live?U('tNow2'):ago(r.lastAt)}</td></tr>`).join('')}</tbody></table></div>`:`<p class="lead">${U('tNone')}</p>`}
+   ${rows.length?`<div class="tw"><table><thead><tr><th></th><th>${U('tName')}</th><th>${U('tGroup')}</th><th>${U('tNow')}</th><th>${U('tProg')}</th><th>${U('tScore')}</th><th>${U('tTime')}</th><th>${U('tLang')}</th><th>${U('tSeen')}</th></tr></thead><tbody>${rows.map(r=>`<tr class="clk" data-id="${esc(r.id)}"><td><span class="dot ${r.live?'on':''}"></span></td><td><b>${esc(r.name)}</b></td><td>${esc(r.group||'')}</td><td>${esc(r.door?modTitle(r.door):U('lobby'))}</td><td>${r.k||0} / ${ONMODS().length}</td><td>${r.tot||0} / ${mx}</td><td>${r.startedAt?Math.round((Date.now()-r.startedAt)/60000)+' '+U('tMinShort'):'—'}</td><td>${r.lang==='kk'?'ҚАЗ':'RU'}</td><td>${r.live?U('tNow2'):ago(r.lastAt)}</td></tr>`).join('')}</tbody></table></div>`:`<p class="lead">${U('tNone')}</p>`}
    <div class="tbar">${caps.dl?`<button class="btn sm" id="tCsv">${U('tCsv')}</button>`:''}<button class="btn sm ghost" id="tRst">${tResetArm?U('tResetSure'):U('tReset')}</button><button class="btn sm ghost" id="tToApp">${LANG==='kk'?'Студент ретінде өту':'Пройти как студент'}</button></div>
   </div>
   ${sel?tDetail(sel):''}`;
   $$('#tl button').forEach(b=>b.onclick=()=>setLang(b.dataset.l));
+  $$('[data-lm]',t).forEach(b=>b.onclick=()=>{const id=b.dataset.lm;ENABLED.has(id)?ENABLED.delete(id):ENABLED.add(id);cfgChanged();saveCfg()});
+  $('#cP80',t).onclick=()=>{ENABLED=new Set(DEFAULT80);cfgChanged();saveCfg()};
+  $('#cAll',t).onclick=()=>{ENABLED=new Set(MODS.map(m=>m.id));cfgChanged();saveCfg()};
   $$('tr.clk',t).forEach(tr=>tr.onclick=()=>{tSel=tSel===tr.dataset.id?null:tr.dataset.id;tRender();if(tSel)$('#tdet')&&$('#tdet').scrollIntoView({behavior:'smooth'})});
   const c=$('#tCsv');if(c)c.onclick=()=>tCsv(rows);
   $('#tRst').onclick=async()=>{if(!tResetArm){tResetArm=true;tRender();setTimeout(()=>{tResetArm=false},5000);return}tResetArm=false;
@@ -613,7 +641,7 @@ function tRender(){
 function tDetail(r){
   const res=r.res||{};
   return `<div class="panel on" id="tdet"><div class="eyebrow">${U('tDetail')}</div><h2>${esc(r.name)} <span class="tag">${r.tot||0} / ${MAXPTS()}</span></h2>
-  <ul class="brk">${MODS.map(m=>{const x=res[m.id];return `<li><span>${m.no} · ${esc(L(m.title))}</span><b>${x?`${x.s} / ${x.m} · ${Math.round((x.t||0)/60*10)/10} ${U('tMinShort')}`:'—'}</b></li>`}).join('')}</ul>
+  <ul class="brk">${MODS.filter(m=>on(m)||res[m.id]).map(m=>{const x=res[m.id];return `<li><span>${m.no} · ${esc(L(m.title))}</span><b>${x?`${x.s} / ${x.m} · ${Math.round((x.t||0)/60*10)/10} ${U('tMinShort')}`:'—'}</b></li>`}).join('')}</ul>
   ${MODS.map(m=>{const x=res[m.id];if(!x||!x.a||!Object.keys(x.a).length)return '';return `<div class="mini" style="margin-top:16px">${m.no} · ${esc(L(m.title))} · ${U('tAns')}</div>`+Object.entries(x.a).map(([k,v])=>`<div class="det">${esc(k)}</div><div class="ans">${esc(v)}</div>`).join('')}).join('')}
   <button class="btn sm ghost" id="tdetClose">${U('tClose')}</button></div>`;
 }
@@ -1785,6 +1813,417 @@ mount(root,api){
       });
     });
     $$('[data-zz]',root).forEach(z=>z.addEventListener('click',()=>{const k=z.dataset.zz;if(sel)place(sel,k);else if(placed[k]){delete placed[k];draw()}}));
+  }
+  api.onLang(draw);draw();
+}});
+
+/* ═════════ 555 · ГРАФИК АДМИНИСТРАТОРОВ ═════════ */
+MODS.push({id:'sched',no:'555',min:10,max:10,
+title:{ru:'График админов',kk:'Әкімшілер кестесі'},sub:{ru:'Смены на неделю',kk:'Апталық ауысымдар'},
+mount(root,api){
+  const T={ru:{
+   eb:'Номер 555 · ресепшн, планирование',h:'Составьте график администраторов на неделю',
+   intro:'Для каждой смены указано, сколько администраторов нужно: это зависит от загрузки отеля, числа заездов и выездов. У каждого сотрудника свои ограничения и навыки, они указаны в карточках. Нажимайте на инициалы в ячейках, чтобы назначить смену. Проверяйте график сколько угодно раз, затем сдайте.',
+   days:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],shifts:['Утро 07–15','Вечер 15–23','Ночь 23–07'],
+   load:'загрузка',arr:'заезды',dep:'выезды',need:'нужно',have:'есть',
+   zh:'прибывает группа из Китая',vip:'ожидается VIP-гость',
+   staff:'Сотрудники',used:'смен',of:'из',
+   rules:'Общие правила: один человек — не больше одной смены в день. После ночной смены на следующий день нельзя утреннюю. Стажёр не работает на смене один.',
+   check:'Проверить график',submit:'Сдать график',res:'Результат',
+   cov:'Смены закрыты',skl:'Особые требования',rul:'Нарушения правил',eff:'Без лишних смен',
+   zhNeed:'Вечером в день заезда группы нужен сотрудник со знанием китайского',vipNeed:'Вечером в день VIP-заезда нужен сотрудник, обученный работе с VIP',
+   v:{max:(n,k,m)=>`${n}: ${k} смен при лимите ${m}`,dup:(n,d)=>`${n}: две смены в один день (${d})`,rest:(n,d)=>`${n}: утро после ночи (${d})`,av:(n,d,s)=>`${n}: недоступен(на) — ${d}, ${s}`,alone:(n,d,s)=>`${n}: стажёр на смене один (${d}, ${s})`},
+   okAll:'Нарушений нет.',more:'и ещё',
+   st:[
+    {n:'Айгерим',tr:['каз · рус · англ','макс. 5 смен','не работает ночью']},
+    {n:'Бауыржан',tr:['каз · рус','VIP-обучен','макс. 5 смен','выходной в воскресенье']},
+    {n:'Чен Ли',tr:['рус · англ · кит','макс. 5 смен','выходной в среду']},
+    {n:'Динара',tr:['стажёр','рус · каз','макс. 4 смены','не работает ночью','не работает одна']},
+    {n:'Ержан',tr:['подработка: только Пт, Сб, Вс','VIP-обучен','макс. 3 смены']},
+    {n:'Фариза',tr:['каз · рус · англ','макс. 5 смен','выходные: Пн и Вт']}
+   ]
+  },kk:{
+   eb:'555 нөмір · ресепшн, жоспарлау',h:'Әкімшілердің апталық кестесін құрыңыз',
+   intro:'Әр ауысымға қанша әкімші керек екені көрсетілген: бұл қонақ үйдің толымдылығына, келу мен шығу санына байланысты. Әр қызметкердің өз шектеулері мен дағдылары бар, олар карточкаларда. Ауысымға тағайындау үшін ұяшықтағы бас әріптерді басыңыз. Кестені қалағаныңызша тексеріп, содан кейін тапсырыңыз.',
+   days:['Дс','Сс','Ср','Бс','Жм','Сн','Жк'],shifts:['Таң 07–15','Кеш 15–23','Түн 23–07'],
+   load:'толымдылық',arr:'келу',dep:'шығу',need:'керек',have:'бар',
+   zh:'Қытайдан топ келеді',vip:'VIP-қонақ күтіледі',
+   staff:'Қызметкерлер',used:'ауысым',of:'/',
+   rules:'Жалпы ережелер: бір адам күніне бір ауысымнан артық істемейді. Түнгі ауысымнан кейін келесі күні таңғы ауысым болмайды. Тағылымдамашы ауысымда жалғыз жұмыс істемейді.',
+   check:'Кестені тексеру',submit:'Кестені тапсыру',res:'Нәтиже',
+   cov:'Жабылған ауысымдар',skl:'Ерекше талаптар',rul:'Ереже бұзулар',eff:'Артық ауысымсыз',
+   zhNeed:'Топ келген күні кешкі ауысымда қытай тілін білетін қызметкер керек',vipNeed:'VIP келген күні кешкі ауысымда VIP-мен жұмысқа үйретілген қызметкер керек',
+   v:{max:(n,k,m)=>`${n}: ${k} ауысым, шегі ${m}`,dup:(n,d)=>`${n}: бір күнде екі ауысым (${d})`,rest:(n,d)=>`${n}: түннен кейін таң (${d})`,av:(n,d,s)=>`${n}: қолжетімсіз — ${d}, ${s}`,alone:(n,d,s)=>`${n}: тағылымдамашы ауысымда жалғыз (${d}, ${s})`},
+   okAll:'Бұзушылық жоқ.',more:'және тағы',
+   st:[
+    {n:'Айгерим',tr:['қаз · орыс · ағыл','макс. 5 ауысым','түнде жұмыс істемейді']},
+    {n:'Бауыржан',tr:['қаз · орыс','VIP-ға үйретілген','макс. 5 ауысым','жексенбі — демалыс']},
+    {n:'Чен Ли',tr:['орыс · ағыл · қыт','макс. 5 ауысым','сәрсенбі — демалыс']},
+    {n:'Динара',tr:['тағылымдамашы','орыс · қаз','макс. 4 ауысым','түнде жұмыс істемейді','жалғыз жұмыс істемейді']},
+    {n:'Ержан',tr:['қосымша жұмыс: тек Жм, Сн, Жк','VIP-ға үйретілген','макс. 3 ауысым']},
+    {n:'Фариза',tr:['қаз · орыс · ағыл','макс. 5 ауысым','демалыс: Дс және Сс']}
+   ]
+  }};
+  const S=[
+   {i:'А',max:5,noN:true,off:[],only:null,trainee:false,vip:false,zh:false},
+   {i:'Б',max:5,noN:false,off:[6],only:null,trainee:false,vip:true,zh:false},
+   {i:'Ч',max:5,noN:false,off:[2],only:null,trainee:false,vip:false,zh:true},
+   {i:'Д',max:4,noN:true,off:[],only:null,trainee:true,vip:false,zh:false},
+   {i:'Е',max:3,noN:false,off:[],only:[4,5,6],trainee:false,vip:true,zh:false},
+   {i:'Ф',max:5,noN:false,off:[0,1],only:null,trainee:false,vip:false,zh:false}
+  ];
+  const COL=['#2347ff','#d6402e','#1c9c5a','#a64bd6','#d6a42e','#2e9bd6'];
+  const R=api.rng();
+  const base=[56,60,64,68,84,94,74];
+  const load=base.map(b=>Math.max(40,Math.min(100,Math.round(b+(R()-.5)*10))));
+  const groupDay=3+Math.floor(R()*2);
+  const vipDay=[1,3,4,5][Math.floor(R()*4)];
+  const arr=load.map((l,d)=>Math.round(80*l/100*.38)+(d===groupDay?10:0));
+  const dep=arr.map((_,d)=>arr[(d+6)%7]-(((d+6)%7)===groupDay?10:0));
+  const need=load.map((l,d)=>[Math.max(1,Math.ceil(dep[d]/28)),Math.max(1,Math.ceil(arr[d]/28)),l>=92?2:1]);
+  let as=Array.from({length:7},()=>[[],[],[]]),checked=null,done=false;
+  const t=k=>T[api.lang()][k];
+  const reqTotal=need.flat().reduce((a,b)=>a+b,0);
+  function usedOf(i){let n=0;as.forEach(d=>d.forEach(s=>{if(s.includes(i))n++}));return n}
+  function validate(){
+    const x=T[api.lang()],v=[];
+    S.forEach((p,i)=>{
+      const nm=x.st[i].n,k=usedOf(i);
+      if(k>p.max)v.push(x.v.max(nm,k,p.max));
+      for(let d=0;d<7;d++){
+        const sh=[0,1,2].filter(s=>as[d][s].includes(i));
+        if(sh.length>1)v.push(x.v.dup(nm,x.days[d]));
+        sh.forEach(s=>{
+          if(p.noN&&s===2)v.push(x.v.av(nm,x.days[d],x.shifts[2]));
+          if(p.off.includes(d))v.push(x.v.av(nm,x.days[d],x.shifts[s]));
+          if(p.only&&!p.only.includes(d))v.push(x.v.av(nm,x.days[d],x.shifts[s]));
+          if(s===0&&d>0&&as[d-1][2].includes(i))v.push(x.v.rest(nm,x.days[d]));
+          if(p.trainee&&!as[d][s].some(j=>!S[j].trainee))v.push(x.v.alone(nm,x.days[d],x.shifts[s]));
+        });
+      }
+    });
+    let filled=0,excess=0;
+    for(let d=0;d<7;d++)for(let s=0;s<3;s++){const n=as[d][s].length;filled+=Math.min(n,need[d][s]);excess+=Math.max(0,n-need[d][s])}
+    const zhOk=as[groupDay][1].some(i=>S[i].zh),vipOk=as[vipDay][1].some(i=>S[i].vip);
+    const cov=Math.round(4*filled/reqTotal),skl=(zhOk?1:0)+(vipOk?1:0),rul=Math.max(0,3-v.length),eff=excess<=2?1:0;
+    return{v,filled,excess,zhOk,vipOk,cov,skl,rul,eff,score:cov+skl+rul+eff};
+  }
+  function draw(){
+    const lg=api.lang(),x=T[lg];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <div class="mini">${x.staff}</div>
+    <div class="row2">${S.map((p,i)=>`<div class="tile" style="cursor:default"><b><span class="pill" style="background:${COL[i]};color:#fff">${p.i}</span> ${x.st[i].n} · ${usedOf(i)} ${x.of} ${p.max} ${x.used}</b><small>${x.st[i].tr.join(' · ')}</small></div>`).join('')}</div>
+    <p class="det" style="margin-top:10px">${x.rules}</p>
+    <div class="tw" style="margin-top:12px"><table><thead><tr><th></th>${x.days.map((d,k)=>`<th>${d}<br><span style="text-transform:none;letter-spacing:0">${load[k]}% · ${x.arr} ${arr[k]} · ${x.dep} ${dep[k]}</span>${k===groupDay?`<br><span class="pill dnd">${x.zh}</span>`:''}${k===vipDay?`<br><span class="pill vip">${x.vip}</span>`:''}</th>`).join('')}</tr></thead>
+    <tbody>${[0,1,2].map(s=>`<tr><th>${x.shifts[s]}</th>${[0,1,2,3,4,5,6].map(d=>{const n=as[d][s].length,nd=need[d][s];
+      return `<td style="white-space:normal;min-width:96px;${n>=nd?'background:var(--ok-bg)':''}"><div class="det">${x.need} ${nd} · ${x.have} ${n}</div><div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">${S.map((p,i)=>`<button class="pill" data-c="${d}|${s}|${i}" style="border:0;cursor:pointer;opacity:${as[d][s].includes(i)?1:.35};background:${as[d][s].includes(i)?COL[i]:'var(--blue-soft)'};color:${as[d][s].includes(i)?'#fff':'var(--ink)'}" ${done?'disabled':''} aria-label="${x.st[i].n}">${p.i}</button>`).join('')}</div></td>`}).join('')}</tr>`).join('')}</tbody></table></div>
+    ${done?'':`<p style="margin-top:14px"><button class="btn ghost" id="chk">${x.check}</button> <button class="btn" id="sub">${x.submit}</button></p>`}
+    <div id="res">${checked?resHtml():''}</div>`;
+    $$('[data-c]',root).forEach(b=>b.onclick=()=>{const[d,s,i]=b.dataset.c.split('|').map(Number);const a=as[d][s];const k=a.indexOf(i);k>=0?a.splice(k,1):a.push(i);checked=null;draw()});
+    const c=$('#chk',root);if(c){c.onclick=()=>{checked=validate();draw()};$('#sub',root).onclick=()=>{checked=validate();done=true;draw();api.finish(checked.score,{'Закрыто смен':checked.filled+' / '+reqTotal,'Нарушений':checked.v.length+(checked.v.length?': '+checked.v.slice(0,4).join('; '):''),'График':as.map((d,k)=>T.ru.days[k]+': '+d.map(s=>s.map(i=>S[i].i).join('')||'—').join(' / ')).join(' | ')})}}
+  }
+  function resHtml(){
+    const x=T[api.lang()],c=checked;
+    return `<div class="note ${c.score>=8?'ok':c.score>=5?'':'bad'}" style="margin-top:14px"><div class="mini">${x.res}</div><b class="verdict">${c.score} / 10</b>
+    <ul class="crit"><li class="${c.cov>=4?'ok':'no'}"><span>${x.cov}: ${c.filled} / ${reqTotal}</span><b>${c.cov} / 4</b></li>
+    <li class="${c.skl===2?'ok':'no'}"><span>${x.skl}<br><span class="det">${c.zhOk?'✓':'✗'} ${x.zhNeed}<br>${c.vipOk?'✓':'✗'} ${x.vipNeed}</span></span><b>${c.skl} / 2</b></li>
+    <li class="${c.rul===3?'ok':'no'}"><span>${x.rul}${c.v.length?'<br><span class="det">'+c.v.slice(0,6).map(esc).join('<br>')+(c.v.length>6?'<br>'+x.more+' '+(c.v.length-6):'')+'</span>':'<br><span class="det">'+x.okAll+'</span>'}</span><b>${c.rul} / 3</b></li>
+    <li class="${c.eff?'ok':'no'}"><span>${x.eff}: +${c.excess}</span><b>${c.eff} / 1</b></li></ul></div>`;
+  }
+  api.onLang(draw);draw();
+}});
+
+/* ═════════ 666 · ПОДТВЕРЖДЕНИЕ БРОНИ ═════════ */
+MODS.push({id:'book',no:'666',min:9,max:10,
+title:{ru:'Подтвердить бронь',kk:'Брондауды растау'},sub:{ru:'Служба бронирования',kk:'Брондау қызметі'},
+mount(root,api){
+  const T={ru:{
+   eb:'Номер 666 · служба бронирования',h:'Подтвердите три заявки на бронирование',
+   intro:'Для каждой заявки выберите подходящий номер по вместимости и наличию на ВСЕ ночи, тариф, питание и посчитайте итог. Затем отметьте, что нужно запросить у гостя. Выбирайте самый выгодный для гостя вариант из тех, что подходят.',
+   avail:'Наличие номеров по ночам',rules:'Правила',
+   r1:'Вместимость считается по гостям: взрослые и дети от 6 лет. Дети до 6 лет не учитываются и спят бесплатно.',
+   r2:'Тарифы: BAR — гибкая отмена, цена без скидки. NR — невозвратный, предоплата 100%, скидка 15%. CORP — для компаний по коду, скидка 20%, счёт на организацию.',
+   r3:'Скидка действует только на цену номера. Завтрак стоит 3 500 ₸ за человека в ночь (по тем же правилам: дети до 6 лет бесплатно) и скидкой не уменьшается.',
+   r4:'Семейный номер продаётся от 2 ночей.',
+   types:{STD:'Стандарт',DLX:'Делюкс',FAM:'Семейный',STE:'Люкс'},
+   cap:'до',ppl:'чел.',night:'ночь',
+   room:'Номер',plan:'Тариф',bf:'Завтрак',total:'Итого, ₸',info:'Что запросить у гостя',
+   bfY:'с завтраком',bfN:'без завтрака',pick:'— выберите —',
+   inf:{names:'Имена всех гостей',eta:'Время прибытия',company:'Реквизиты компании для счёта',guar:'Гарантию банковской картой',prepay:'Предоплату 100%'},
+   submit:'Подтвердить все заявки',res:'Результат',rq:'Заявка',
+   ok:'верно',partial:'частично',wrong:'неверно',cr:'Правильно',yours:'у вас',
+   qu:(i,d,n)=>[
+    `«Здравствуйте! Хотим забронировать номер с ${d} на ${n} ноч. для нас с мужем и двух детей: 4 и 9 лет. Планы могут поменяться, поэтому нужна гибкая отмена. Завтрак для всей семьи включите, пожалуйста.»`,
+    `«Добрый день. Бронь для командировки: один человек, с ${d}, ${n} ноч. Код компании TNG-24, нужен счёт для бухгалтерии. Приеду поздно, около 01:00. Завтрак не нужен.»`,
+    `«Привет! Нас трое друзей, нужен номер с ${d} на ${n} ноч. Даты не изменятся, оплатим всё сразу и ищем самый выгодный тариф. Завтрак не нужен.»`][i]
+  },kk:{
+   eb:'666 нөмір · брондау қызметі',h:'Үш брондау өтінімін растаңыз',
+   intro:'Әр өтінім үшін сыйымдылығы мен БАРЛЫҚ түнге бос болуы бойынша сәйкес нөмірді, тарифті, тамақтануды таңдап, қорытындыны есептеңіз. Содан кейін қонақтан нені сұрау керегін белгілеңіз. Сәйкес келетіндердің ішінен қонаққа ең тиімдісін таңдаңыз.',
+   avail:'Түндер бойынша бос нөмірлер',rules:'Ережелер',
+   r1:'Сыйымдылық қонақтар бойынша есептеледі: ересектер және 6 жастан асқан балалар. 6 жасқа дейінгі балалар есепке алынбайды және тегін ұйықтайды.',
+   r2:'Тарифтер: BAR — икемді бас тарту, жеңілдіксіз баға. NR — қайтарылмайтын, 100% алдын ала төлем, жеңілдік 15%. CORP — компанияларға код бойынша, жеңілдік 20%, ұйымға шот.',
+   r3:'Жеңілдік тек нөмір бағасына қолданылады. Таңғы ас — түніне адамға 3 500 ₸ (сондай ережемен: 6 жасқа дейінгі балаларға тегін), жеңілдікпен азаймайды.',
+   r4:'Отбасылық нөмір кемінде 2 түнге сатылады.',
+   types:{STD:'Стандарт',DLX:'Делюкс',FAM:'Отбасылық',STE:'Люкс'},
+   cap:'дейін',ppl:'адам',night:'түн',
+   room:'Нөмір',plan:'Тариф',bf:'Таңғы ас',total:'Барлығы, ₸',info:'Қонақтан нені сұрау керек',
+   bfY:'таңғы асымен',bfN:'таңғы асыз',pick:'— таңдаңыз —',
+   inf:{names:'Барлық қонақтың аты-жөні',eta:'Келу уақыты',company:'Шот үшін компания деректемелері',guar:'Банк картасымен кепілдік',prepay:'100% алдын ала төлем'},
+   submit:'Барлық өтінімді растау',res:'Нәтиже',rq:'Өтінім',
+   ok:'дұрыс',partial:'жартылай',wrong:'қате',cr:'Дұрыс',yours:'сізде',
+   qu:(i,d,n)=>[
+    `«Сәлеметсіз бе! Күйеуім екеуміз және екі бала (4 және 9 жаста) үшін ${d} бастап ${n} түнге нөмір брондағымыз келеді. Жоспарымыз өзгеруі мүмкін, сондықтан икемді бас тарту керек. Бүкіл отбасыға таңғы ас қосыңыз.»`,
+    `«Қайырлы күн. Іссапарға брондау: бір адам, ${d} бастап, ${n} түн. Компания коды TNG-24, бухгалтерияға шот керек. Кеш келемін, түнгі сағат 01:00 шамасында. Таңғы ас керек емес.»`,
+    `«Сәлем! Үш дос болып келеміз, ${d} бастап ${n} түнге нөмір керек. Күндер өзгермейді, бәрін бірден төлейміз және ең тиімді тарифті іздейміз. Таңғы ас керек емес.»`][i]
+  }};
+  const TY={STD:{p:20000,max:2},DLX:{p:28000,max:3},FAM:{p:36000,max:4,min:2},STE:{p:52000,max:4}};
+  const ORDER=['STD','DLX','FAM','STE'];
+  const NIGHTS={ru:['Пт','Сб','Вс','Пн','Вт','Ср'],kk:['Жм','Сн','Жк','Дс','Сс','Ср']};
+  const PLAN={BAR:1,NR:.85,CORP:.8};
+  const R=api.rng();
+  const REQ=[
+   {adults:2,kids:[4,9],n:2,plan:'BAR',bf:true,info:['names','guar']},
+   {adults:1,kids:[],n:3,plan:'CORP',bf:false,info:['eta','company']},
+   {adults:3,kids:[],n:2,plan:'NR',bf:false,info:['names','prepay']}
+  ];
+  REQ.forEach(q=>{q.s=Math.floor(R()*(6-q.n+1));q.pers=q.adults+q.kids.filter(a=>a>=6).length});
+  const AV=ORDER.map(()=>Array.from({length:6},()=>Math.floor(R()*3)));
+  const set=(ty,from,n,fn)=>{for(let k=from;k<from+n;k++)AV[ORDER.indexOf(ty)][k]=fn(AV[ORDER.indexOf(ty)][k])};
+  set('STD',REQ[1].s,REQ[1].n,v=>Math.max(1,v));
+  set('DLX',REQ[2].s,REQ[2].n,v=>Math.max(1,v));
+  set('FAM',REQ[0].s,REQ[0].n,v=>Math.max(1,v));
+  AV[1][REQ[0].s+Math.floor(R()*REQ[0].n)]=0; // trap: Deluxe sold out on one of family's nights
+  const feasible=(q,ty)=>TY[ty].max>=q.pers&&(!TY[ty].min||q.n>=TY[ty].min)&&AV[ORDER.indexOf(ty)].slice(q.s,q.s+q.n).every(v=>v>0);
+  REQ.forEach(q=>{q.room=ORDER.find(ty=>feasible(q,ty))});
+  const price=(q,room,plan,bf)=>TY[room].p*q.n*PLAN[plan]+(bf?3500*q.pers*q.n:0);
+  REQ.forEach(q=>{q.total=Math.round(price(q,q.room,q.plan,q.bf))});
+  const ans=REQ.map(()=>({room:'',plan:'',bf:'',total:'',info:[]}));
+  let done=false,res=null;
+  const t=k=>T[api.lang()][k];
+  function draw(){
+    const lg=api.lang(),x=T[lg],nn=NIGHTS[lg];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <div class="mini">${x.avail}</div>
+    <div class="tw"><table><thead><tr><th></th>${nn.map(n=>`<th>${n}</th>`).join('')}<th>${x.cap}</th></tr></thead><tbody>${ORDER.map((ty,i)=>`<tr><td><b>${x.types[ty]}</b><br><span class="det">${fmt(TY[ty].p)} ₸</span></td>${AV[i].map(v=>`<td style="${v===0?'background:var(--bad-bg);color:var(--bad);font-weight:700':''}">${v}</td>`).join('')}<td>${TY[ty].max} ${x.ppl}${TY[ty].min?' · '+TY[ty].min+'+ '+x.night:''}</td></tr>`).join('')}</tbody></table></div>
+    <details style="margin-top:12px"><summary>${x.rules}</summary><ul class="log"><li>${x.r1}</li><li>${x.r2}</li><li>${x.r3}</li><li>${x.r4}</li></ul></details>
+    ${REQ.map((q,i)=>{const a=ans[i];return `<div class="day" style="margin-top:16px"><h3>${x.rq} ${i+1} · ${nn[q.s]} → ${q.n} ${x.night}</h3><div class="msg gu" style="max-width:100%;margin-bottom:12px">${esc(x.qu(i,nn[q.s],q.n))}</div>
+     <div class="fieldrow"><label>${x.room}</label><select data-f="room|${i}" ${done?'disabled':''}><option value="">${x.pick}</option>${ORDER.map(ty=>`<option value="${ty}" ${a.room===ty?'selected':''}>${x.types[ty]}</option>`).join('')}</select></div>
+     <div class="fieldrow"><label>${x.plan}</label><select data-f="plan|${i}" ${done?'disabled':''}><option value="">${x.pick}</option>${['BAR','NR','CORP'].map(p=>`<option value="${p}" ${a.plan===p?'selected':''}>${p}</option>`).join('')}</select></div>
+     <div class="fieldrow"><label>${x.bf}</label><select data-f="bf|${i}" ${done?'disabled':''}><option value="">${x.pick}</option><option value="1" ${a.bf==='1'?'selected':''}>${x.bfY}</option><option value="0" ${a.bf==='0'?'selected':''}>${x.bfN}</option></select></div>
+     <div class="fieldrow"><label for="tt${i}">${x.total}</label><input class="num" type="number" id="tt${i}" data-f="total|${i}" value="${esc(a.total)}" ${done?'disabled':''}></div>
+     <div class="mini">${x.info}</div><div class="chips">${Object.keys(x.inf).map(k=>`<button class="chip ${a.info.includes(k)?'sel':''}" data-i="${i}|${k}" ${done?'disabled':''}>${x.inf[k]}</button>`).join('')}</div></div>`}).join('')}
+    ${done?'':`<p style="margin-top:16px"><button class="btn" id="sub">${x.submit}</button></p>`}
+    <div id="res">${res?resHtml():''}</div>`;
+    if(done)return;
+    $$('[data-f]',root).forEach(el=>{const[f,i]=el.dataset.f.split('|');const h=()=>{ans[+i][f]=el.value};el.onchange=h;el.oninput=h});
+    $$('[data-i]',root).forEach(b=>b.onclick=()=>{const[i,k]=b.dataset.i.split('|');const a=ans[+i].info;const j=a.indexOf(k);j>=0?a.splice(j,1):a.push(k);b.classList.toggle('sel',a.includes(k))});
+    $('#sub',root).onclick=submit;
+  }
+  function submit(){
+    let pts=0;const rows=[];
+    REQ.forEach((q,i)=>{const a=ans[i];let p=0;const det={};
+      // room
+      if(a.room===q.room){det.room=1}else if(a.room&&feasible(q,a.room)){det.room=.5}else det.room=0;
+      det.plan=a.plan===q.plan?1:0;
+      const own=a.room&&a.plan&&a.bf!==''?Math.round(price(q,a.room,a.plan,a.bf==='1')):null;
+      const tv=parseFloat(a.total);
+      det.total=Math.abs(tv-q.total)<1?1:(own!=null&&Math.abs(tv-own)<1?.5:0);
+      const ex=q.info.filter(k=>!a.info.includes(k)).length+a.info.filter(k=>!q.info.includes(k)).length;
+      det.info=ex===0?1:ex===1?.5:0;
+      p=det.room+det.plan+det.total+det.info;pts+=p;rows.push({p,det});
+    });
+    const sc=Math.round(pts*10/12);res={sc,rows};done=true;draw();
+    api.finish(sc,{'Ответы':ans.map((a,i)=>`#${i+1}: ${a.room}/${a.plan}/bf${a.bf}/${a.total}/${a.info.join('+')}`).join(' | '),'Эталон':REQ.map((q,i)=>`#${i+1}: ${q.room}/${q.plan}/${q.total}`).join(' | ')});
+  }
+  function resHtml(){
+    const lg=api.lang(),x=T[lg];
+    return `<div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}" style="margin-top:14px"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b>
+    <ul class="crit">${REQ.map((q,i)=>`<li class="${res.rows[i].p>=3.5?'ok':'no'}"><span>${x.rq} ${i+1}<br><span class="det">${x.cr}: ${x.types[q.room]} · ${q.plan} · ${q.bf?x.bfY:x.bfN} · ${fmt(q.total)} ₸ · ${q.info.map(k=>x.inf[k]).join(', ')}</span></span><b>${res.rows[i].p} / 4</b></li>`).join('')}</ul></div>`;
+  }
+  api.onLang(draw);draw();
+}});
+
+/* ═════════ 777 · ОТДЕЛ ПРОДАЖ ═════════ */
+MODS.push({id:'sales',no:'777',min:9,max:10,
+title:{ru:'Отдел продаж',kk:'Сату бөлімі'},sub:{ru:'Предложение для компании',kk:'Компанияға ұсыныс'},
+mount(root,api){
+  const T={ru:{
+   eb:'Номер 777 · отдел продаж',h:'Корпоративная конференция: соберите предложение',
+   intro:'Компания «Тенгри Групп» хочет провести конференцию: 40 участников, 2 дня, 20 одноместных номеров на 2 ночи, зал, два кофе-брейка и обед в день. Сначала выясните потребности клиента, задав 3 вопроса из 8. Затем соберите предложение: скидки и условия. Скидки уменьшают прибыль, поэтому дарите только то, что ценно этому клиенту. Политика отеля: валовая маржа не ниже 55%.',
+   q:'Вопросы закупщику клиента',left:'Осталось вопросов',
+   Q:[['budget','Какой бюджет выделен на мероприятие?'],['crit','По каким критериям вы выберете площадку?'],['comp','Есть ли у вас предложения от других отелей?'],['pay','Как у вас устроена оплата и согласование?'],['size','Может ли измениться число участников?'],['food','Есть ли пожелания по питанию?'],['hall','Какие требования к залу?'],['who','Кто принимает решение и к какому сроку?']],
+   rack:'Прайс-лист',items:{rooms:'Номера (20 × 2 ночи × 30 000 ₸)',hall:'Зал (2 дня × 300 000 ₸)',coffee:'Кофе-брейки (40 чел × 4 × 2 500 ₸)',lunch:'Обеды (40 чел × 2 × 6 000 ₸)'},
+   disc:'Скидка',cons:'Дополнительные условия',
+   C:{flex:'Гибкое число участников: изменение до −10% без штрафа за 7 дней',defer:'Отсрочка оплаты на 14 дней после мероприятия',tech:'Проектор, звук и тех. поддержка в подарок',halal:'Халяль и вегетарианское меню включены',late:'Поздний выезд до 16:00 всем участникам'},
+   offer:'Цена предложения',margin:'Валовая маржа отеля',submit:'Отправить клиенту',res:'Результат',
+   accepted:'Клиент согласился',refused:'Клиент отказался',
+   mOk:'Маржа не ниже 55%',mNo:'Маржа ниже политики отеля',cOk:'Условия точно под приоритет клиента',cNo:'Условия не закрыли главный приоритет клиента',dOk:'Лишних уступок нет',
+   real:'Что на самом деле нужно клиенту',
+   ans:{
+    price:{budget:'У нас утверждено до 2 250 000 ₸ на всё.',crit:'Главное — цена. Остальное вторично.',comp:'Да, у соседнего отеля вышло на 2 300 000 ₸ за такой же пакет.',pay:'Предоплата 50% нас устраивает.',size:'Состав стабильный: 40 человек.',food:'Обычное меню подойдёт.',hall:'Подойдёт любой зал с проектором.',who:'Решаем в пятницу, решает директор по закупкам.'},
+    flex:{budget:'Бюджет — до 2 500 000 ₸, но нужна уверенность.',crit:'Для нас важнее всего гибкость: состав участников меняется.',comp:'Смотрим ещё один отель, у них жёсткие условия.',pay:'Нам удобна отсрочка платежа после мероприятия.',size:'Да, число участников может сократиться на 10–15%.',food:'Обычное меню подойдёт.',hall:'Любой зал подойдёт.',who:'Решает коммерческий директор, срок — две недели.'},
+    quality:{budget:'Выделено до 2 400 000 ₸.',crit:'Для нас главное — качество зала и обслуживание.',comp:'Смотрели два отеля, но зал там тёмный.',pay:'Предоплата 50%, остальное по факту.',size:'Состав стабильный.',food:'Половина участников — мусульмане, нужно халяль и вегетарианские блюда.',hall:'Нужен светлый зал с проектором, звуком и техником.',who:'Решает директор, срок — на этой неделе.'}
+   },
+   rn:{price:'клиенту важна только цена: бюджет 2 250 000 ₸',flex:'клиенту важна гибкость по числу участников (и отсрочка): бюджет 2 500 000 ₸',quality:'клиенту важны халяль-меню и техническое оснащение зала: бюджет 2 400 000 ₸'}
+  },kk:{
+   eb:'777 нөмір · сату бөлімі',h:'Корпоративтік конференция: ұсыныс жинаңыз',
+   intro:'«Тенгри Групп» компаниясы конференция өткізгісі келеді: 40 қатысушы, 2 күн, 2 түнге 20 бір орындық нөмір, зал, күніне екі кофе-брейк пен түскі ас. Алдымен 8 сұрақтың 3-ін қойып, клиенттің қажеттілігін анықтаңыз. Содан кейін ұсынысты жинаңыз: жеңілдіктер мен шарттар. Жеңілдіктер пайданы азайтады, сондықтан осы клиентке құнды нәрсені ғана беріңіз. Қонақ үй саясаты: жалпы маржа 55%-дан төмен емес.',
+   q:'Клиенттің сатып алушысына сұрақтар',left:'Қалған сұрақ',
+   Q:[['budget','Іс-шараға қандай бюджет бөлінген?'],['crit','Алаңды қандай өлшемдермен таңдайсыз?'],['comp','Басқа қонақ үйлерден ұсыныстарыңыз бар ма?'],['pay','Төлем мен келісу қалай жүреді?'],['size','Қатысушылар саны өзгеруі мүмкін бе?'],['food','Тамақтануға қатысты тілектер бар ма?'],['hall','Залға қандай талаптар бар?'],['who','Шешімді кім қабылдайды және қашанға дейін?']],
+   rack:'Прайс-парақ',items:{rooms:'Нөмірлер (20 × 2 түн × 30 000 ₸)',hall:'Зал (2 күн × 300 000 ₸)',coffee:'Кофе-брейктер (40 адам × 4 × 2 500 ₸)',lunch:'Түскі астар (40 адам × 2 × 6 000 ₸)'},
+   disc:'Жеңілдік',cons:'Қосымша шарттар',
+   C:{flex:'Қатысушылар саны икемді: іс-шараға 7 күн қалғанда −10%-ға дейін айыппұлсыз өзгерту',defer:'Іс-шарадан кейін 14 күнге төлемді кейінге қалдыру',tech:'Проектор, дыбыс және техникалық қолдау сыйға',halal:'Халал және вегетариандық мәзір қосылған',late:'Барлық қатысушыларға 16:00-ге дейін кеш шығу'},
+   offer:'Ұсыныс бағасы',margin:'Қонақ үйдің жалпы маржасы',submit:'Клиентке жіберу',res:'Нәтиже',
+   accepted:'Клиент келісті',refused:'Клиент бас тартты',
+   mOk:'Маржа 55%-дан кем емес',mNo:'Маржа қонақ үй саясатынан төмен',cOk:'Шарттар клиенттің басымдығына дөп келді',cNo:'Шарттар клиенттің басты басымдығын жапқан жоқ',dOk:'Артық жеңілдіктер жоқ',
+   real:'Клиентке шын мәнінде не керек',
+   ans:{
+    price:{budget:'Бәріне бекітілгені — 2 250 000 ₸-ге дейін.',crit:'Бастысы — баға. Қалғаны екінші кезекте.',comp:'Иә, көрші қонақ үйдің дәл осындай пакетке ұсынысы 2 300 000 ₸ болды.',pay:'50% алдын ала төлем бізге жарайды.',size:'Құрамы тұрақты: 40 адам.',food:'Қарапайым мәзір жарайды.',hall:'Проекторы бар кез келген зал жарайды.',who:'Жұма күні шешеміз, шешімді сатып алу директоры қабылдайды.'},
+    flex:{budget:'Бюджет — 2 500 000 ₸-ге дейін, бірақ сенімділік керек.',crit:'Біз үшін ең бастысы — икемділік: қатысушылар құрамы өзгереді.',comp:'Тағы бір қонақ үйді қарап жатырмыз, олардың шарттары қатал.',pay:'Бізге іс-шарадан кейін төлемді кейінге қалдыру ыңғайлы.',size:'Иә, қатысушылар саны 10–15%-ға азаюы мүмкін.',food:'Қарапайым мәзір жарайды.',hall:'Кез келген зал жарайды.',who:'Коммерциялық директор шешеді, мерзімі — екі апта.'},
+    quality:{budget:'2 400 000 ₸-ге дейін бөлінген.',crit:'Біз үшін басты нәрсе — залдың сапасы мен қызмет көрсету.',comp:'Екі қонақ үйді қарадық, бірақ олардың залы қараңғы.',pay:'50% алдын ала төлем, қалғаны нәтижесі бойынша.',size:'Құрамы тұрақты.',food:'Қатысушылардың жартысы мұсылман, халал және вегетариандық тағамдар керек.',hall:'Проекторы, дыбысы және технигі бар жарық зал керек.',who:'Директор шешеді, мерзімі — осы апта.'}
+   },
+   rn:{price:'клиентке тек баға маңызды: бюджет 2 250 000 ₸',flex:'клиентке қатысушылар санындағы икемділік (және төлемді кейінге қалдыру) маңызды: бюджет 2 500 000 ₸',quality:'клиентке халал мәзір мен залдың техникалық жабдықталуы маңызды: бюджет 2 400 000 ₸'}
+  }};
+  const RACK={rooms:1200000,hall:600000,coffee:400000,lunch:480000};
+  const COSTR={rooms:.25,hall:.10,coffee:.45,lunch:.45};
+  const CC={flex:60000,defer:40000,tech:30000,halal:25000,late:20000};
+  const PER={price:{budget:2250000,need:[]},flex:{budget:2500000,need:['flex']},quality:{budget:2400000,need:['tech','halal']}};
+  const R=api.rng();const pk=['price','flex','quality'][Math.floor(R()*3)];const P=PER[pk];
+  const relevant={price:['defer'],flex:['flex','defer'],quality:['tech','halal']}[pk];
+  let asked=[],disc={rooms:0,hall:0,coffee:0,lunch:0},cons=new Set(),done=false,res=null;
+  const t=k=>T[api.lang()][k];
+  function calc(){
+    let offer=0,cost=0;for(const k in RACK){offer+=RACK[k]*(1-disc[k]/100);cost+=RACK[k]*COSTR[k]}
+    cons.forEach(c=>{cost+=CC[c]});
+    return{offer,cost,margin:(offer-cost)/offer};
+  }
+  function draw(){
+    const lg=api.lang(),x=T[lg],c=calc(),left=3-asked.length;
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <div class="mini">${x.q} · ${x.left}: <span class="tok">${left}</span></div>
+    <div class="row2">${x.Q.map(([id,q])=>`<button class="tile ${asked.includes(id)?'used':''}" data-q="${id}" ${asked.includes(id)||left<=0||done?'disabled':''}>${q}</button>`).join('')}</div>
+    ${asked.length?`<div class="chat">${asked.map(id=>`<div class="msg me">${esc(x.Q.find(z=>z[0]===id)[1])}</div><div class="msg gu">${esc(x.ans[pk][id])}</div>`).join('')}</div>`:''}
+    <div class="mini" style="margin-top:20px">${x.rack}</div>
+    ${Object.keys(RACK).map(k=>`<div class="fieldrow"><label for="d_${k}">${x.items[k]}<span class="det" style="display:block;font-weight:400">${fmt(RACK[k])} ₸ → <b>${fmt(RACK[k]*(1-disc[k]/100))} ₸</b></span></label><div style="flex:1 1 220px"><input type="range" id="d_${k}" min="0" max="40" step="1" value="${disc[k]}" ${done?'disabled':''} style="width:100%;accent-color:var(--blue)"><div class="det">${x.disc}: <b id="dv_${k}">${disc[k]}%</b></div></div></div>`).join('')}
+    <div class="mini" style="margin-top:12px">${x.cons}</div>
+    <div class="row2">${Object.keys(x.C).map(k=>`<button class="tile ${cons.has(k)?'sel':''}" data-c="${k}" ${done?'disabled':''}>${x.C[k]}</button>`).join('')}</div>
+    <div class="sticky-stat" style="margin-top:16px"><span>${x.offer}: <span class="tok" id="of">${fmt(c.offer)} ₸</span></span><span>${x.margin}: <span class="tok" id="mg" style="color:${c.margin>=.55?'var(--ok)':'var(--bad)'}">${(c.margin*100).toFixed(1)}%</span></span>${done?'':`<button class="btn" id="sub">${x.submit}</button>`}</div>
+    <div id="res">${res?resHtml():''}</div>`;
+    if(done)return;
+    $$('[data-q]',root).forEach(b=>b.onclick=()=>{if(asked.length<3){asked.push(b.dataset.q);draw()}});
+    $$('[data-c]',root).forEach(b=>b.onclick=()=>{const k=b.dataset.c;cons.has(k)?cons.delete(k):cons.add(k);draw()});
+    Object.keys(RACK).forEach(k=>{const s=$('#d_'+k,root);s.oninput=()=>{disc[k]=+s.value;const cc=calc();$('#dv_'+k,root).textContent=disc[k]+'%';$('#of',root).textContent=fmt(cc.offer)+' ₸';const m=$('#mg',root);m.textContent=(cc.margin*100).toFixed(1)+'%';m.style.color=cc.margin>=.55?'var(--ok)':'var(--bad)'};s.onchange=draw});
+    $('#sub',root).onclick=submit;
+  }
+  function submit(){
+    const c=calc();
+    const priceOk=c.offer<=P.budget;
+    const needOk=P.need.every(n=>cons.has(n))&&(pk!=='flex'||cons.has('flex'));
+    const accepted=priceOk&&needOk;
+    const marginOk=c.margin>=.55;
+    const extras=[...cons].filter(k=>!relevant.includes(k)).length;
+    const dsc=extras===0?2:extras===1?1:0;
+    let sc=(accepted?5:0)+(marginOk?3:0)+dsc;
+    if(!accepted&&priceOk)sc=Math.max(sc,0);
+    res={sc,accepted,marginOk,needOk,priceOk,dsc,c};done=true;draw();
+    api.finish(sc,{'Клиент':pk,'Вопросы':asked.join(', '),'Цена / маржа':fmt(c.offer)+' / '+(c.margin*100).toFixed(1)+'%','Условия':[...cons].join(', '),'Скидки %':JSON.stringify(disc)});
+  }
+  function resHtml(){
+    const x=T[api.lang()],r=res;
+    return `<div class="note ${r.sc>=8?'ok':r.sc>=5?'':'bad'}" style="margin-top:14px"><div class="mini">${x.res}</div><b class="verdict">${r.sc} / 10</b>
+    <ul class="crit"><li class="${r.accepted?'ok':'no'}"><span>${r.accepted?x.accepted:x.refused}<br><span class="det">${r.priceOk?'':(api.lang()==='kk'?'Баға бюджеттен жоғары. ':'Цена выше бюджета. ')}${r.needOk?'':x.cNo}${r.accepted?x.cOk:''}</span></span><b>${r.accepted?5:0} / 5</b></li>
+    <li class="${r.marginOk?'ok':'no'}"><span>${r.marginOk?x.mOk:x.mNo}: ${(r.c.margin*100).toFixed(1)}%</span><b>${r.marginOk?3:0} / 3</b></li>
+    <li class="${r.dsc===2?'ok':'no'}"><span>${x.dOk}</span><b>${r.dsc} / 2</b></li></ul>
+    <p class="det">${x.real}: ${x.rn[pk]}.</p></div>`;
+  }
+  api.onLang(draw);draw();
+}});
+
+/* ═════════ 888 · НОМЕР ПОД ГОСТЕЙ ═════════ */
+MODS.push({id:'ready',no:'888',min:7,max:10,
+title:{ru:'Номер под гостей',kk:'Қонақтарға нөмір'},sub:{ru:'Комплектация и вместимость',kk:'Жабдықтау және сыйымдылық'},
+mount(root,api){
+  const T={ru:{
+   eb:'Номер 888 · подготовка номеров',h:'Проверьте, готов ли номер к заезду именно этих гостей',
+   intro:'Для каждой брони сверьте состав гостей с номером. Сначала решите, помещаются ли гости в этот номер по нормам. Если да, поправьте комплектацию так, чтобы всего хватало, но не было лишнего. Если не помещаются, отметьте, что номер не подходит.',
+   norms:'Нормы комплектации',
+   n:['Спальное место нужно каждому взрослому и ребёнку от 2 лет. Младенец до 2 лет спит в детской кроватке и места не занимает.','Двуспальная кровать = 2 места, односпальная = 1 место. Раскладная кровать даёт +1 место, максимум одна на номер.','Подушки, одеяла, тапочки, косметические наборы: по одному на каждого взрослого и ребёнка от 2 лет.','Банных полотенец: 2 на взрослого, 1 на ребёнка и 1 на младенца. Полотенец для рук: 1 на каждого, включая младенца.','Халаты: только взрослым. Чашки: по одной на взрослого.'],
+   party:'Состав гостей',adults:'взр.',kids:'дет.',inf:'младенец',kidsAge:'лет',
+   cur:'Сейчас в номере',fits:'Подходит ли номер',yes:'Подходит',no:'Не подходит, нужен другой номер',
+   it:{extra:'Раскладная кровать',cot:'Детская кроватка',pillow:'Подушки',blanket:'Одеяла',bath:'Банные полотенца',hand:'Полотенца для рук',slip:'Тапочки (пары)',robe:'Халаты',kit:'Косметические наборы',cup:'Чашки'},
+   rooms:{std:'Стандарт: 1 двуспальная кровать',twin:'Твин: 2 односпальные кровати'},
+   submit:'Сдать проверку',res:'Результат',rm:'Номер',
+   fit1:'Решение о вместимости',itm:'Комплектация',need:'нужно',has:'у вас',
+   notfit:(p,m)=>`Нужно ${p} мест, а в номере максимум ${m}.`
+  },kk:{
+   eb:'888 нөмір · нөмірлерді дайындау',h:'Нөмірдің дәл осы қонақтарға дайын екенін тексеріңіз',
+   intro:'Әр брондау үшін қонақтар құрамын нөмірмен салыстырыңыз. Алдымен қонақтардың нормаға сай нөмірге сыятынын шешіңіз. Сыйса, жабдықтауды бәріне жететіндей, бірақ артығы жоқ етіп түзетіңіз. Сыймаса, нөмір жарамайтынын белгілеңіз.',
+   norms:'Жабдықтау нормалары',
+   n:['Ұйықтайтын орын әр ересекке және 2 жастан асқан балаға керек. 2 жасқа дейінгі нәресте бала керуетінде ұйықтайды және орын алмайды.','Қос кереует = 2 орын, жеке кереует = 1 орын. Жиналмалы кереует +1 орын береді, бір нөмірде көбі біреу.','Жастықтар, көрпелер, тәпіштер, косметикалық жинақтар: әр ересекке және 2 жастан асқан балаға біреуден.','Монша сүлгілері: ересекке 2, балаға 1 және нәрестеге 1. Қол сүлгілері: нәрестені қоса әрқайсысына 1.','Халаттар: тек ересектерге. Шыныаяқтар: ересекке біреуден.'],
+   party:'Қонақтар құрамы',adults:'ер.',kids:'бала',inf:'нәресте',kidsAge:'жас',
+   cur:'Қазір нөмірде',fits:'Нөмір сәйкес пе',yes:'Сәйкес',no:'Сәйкес емес, басқа нөмір керек',
+   it:{extra:'Жиналмалы кереует',cot:'Бала керуеті',pillow:'Жастықтар',blanket:'Көрпелер',bath:'Монша сүлгілері',hand:'Қол сүлгілері',slip:'Тәпіштер (жұп)',robe:'Халаттар',kit:'Косметикалық жинақтар',cup:'Шыныаяқтар'},
+   rooms:{std:'Стандарт: 1 қос кереует',twin:'Твин: 2 жеке кереует'},
+   submit:'Тексеруді тапсыру',res:'Нәтиже',rm:'Нөмір',
+   fit1:'Сыйымдылық шешімі',itm:'Жабдықтау',need:'керек',has:'сізде',
+   notfit:(p,m)=>`${p} орын керек, ал нөмірде ең көбі ${m}.`
+  }};
+  const KEYS=['extra','cot','pillow','blanket','bath','hand','slip','robe','kit','cup'];
+  const R=api.rng();
+  const ROOMS={std:{places:2},twin:{places:2}};
+  const PARTIES=[
+   {a:2,k:[5],i:1,room:'std'},{a:3,k:[],i:0,room:'twin'},{a:2,k:[4,7],i:0,room:'std'},
+   {a:1,k:[3],i:0,room:'twin'},{a:2,k:[10],i:1,room:'twin'},{a:2,k:[1],i:0,room:'std'}
+  ];
+  // choose 3 parties: exactly one that does not fit
+  const places=p=>p.a+p.k.filter(x=>x>=2).length;
+  const fits=p=>places(p)<=ROOMS[p.room].places+1;
+  const okP=shufR(PARTIES.filter(fits),R),badP=shufR(PARTIES.filter(p=>!fits(p)),R);
+  const sel=shufR([okP[0],okP[1],badP[0]],R).filter(Boolean);
+  const need=p=>{const pl=places(p),inf=p.i+p.k.filter(x=>x<2).length,ch=p.k.filter(x=>x>=2).length;
+    return{extra:Math.max(0,pl-ROOMS[p.room].places),cot:inf,pillow:pl,blanket:pl,bath:2*p.a+ch+inf,hand:p.a+p.k.length+p.i,slip:pl,robe:p.a,kit:pl,cup:p.a}};
+  const def={extra:0,cot:0,pillow:2,blanket:2,bath:4,hand:2,slip:2,robe:2,kit:2,cup:2};
+  const St=sel.map(p=>({p,fit:'',vals:{...def}}));
+  let done=false,res=null;
+  const t=k=>T[api.lang()][k];
+  function bedsSvg(p,v){
+    const base=p.room==='std'?[{w:70,x:20}]:[{w:34,x:20},{w:34,x:62}];
+    let s=`<svg viewBox="0 0 200 60" style="width:100%;max-width:260px;height:auto"><rect x="0" y="50" width="200" height="4" style="fill:var(--line)"/>`;
+    base.forEach(b=>{s+=`<rect x="${b.x}" y="22" width="${b.w}" height="28" rx="6" style="fill:var(--blue)"/><rect x="${b.x+4}" y="16" width="${Math.min(b.w-8,24)}" height="10" rx="5" style="fill:var(--r-bed);stroke:var(--line)"/>`});
+    for(let k=0;k<v.extra;k++)s+=`<rect x="${112+k*40}" y="30" width="34" height="20" rx="5" style="fill:var(--sun)"/>`;
+    for(let k=0;k<v.cot;k++)s+=`<rect x="${150+k*24}" y="26" width="22" height="24" rx="3" fill="none" stroke="var(--ok)" stroke-width="3" stroke-dasharray="3 2"/>`;
+    return s+'</svg>';
+  }
+  function draw(){
+    const lg=api.lang(),x=T[lg];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <details open><summary>${x.norms}</summary><ul class="log">${x.n.map(s=>`<li>${s}</li>`).join('')}</ul></details>
+    ${St.map((s,i)=>{const p=s.p,nd=need(p);const kids=p.k.map(a=>`${a} ${x.kidsAge}`).join(', ');
+      return `<div class="day" style="margin-top:16px"><h3>${x.rm} ${i+1} · ${x.rooms[p.room]}</h3>
+      <p><b>${x.party}:</b> ${p.a} ${x.adults}${p.k.length?` · ${x.kids}: ${kids}`:''}${p.i?` · ${p.i} ${x.inf}`:''}</p>
+      <div class="mini">${x.fits}</div><div class="chips"><button class="chip ${s.fit==='yes'?'sel':''}" data-f="${i}|yes" ${done?'disabled':''}>${x.yes}</button><button class="chip ${s.fit==='no'?'sel':''}" data-f="${i}|no" ${done?'disabled':''}>${x.no}</button></div>
+      ${s.fit==='yes'||done&&fits(p)?`<div style="margin-top:12px">${bedsSvg(p,s.vals)}</div><div class="mini" style="margin-top:8px">${x.cur}</div>
+      <div class="row2">${KEYS.map(k=>`<div class="tile" style="cursor:default;${done?(s.vals[k]===nd[k]?'border-color:var(--ok);background:var(--ok-bg)':'border-color:var(--bad);background:var(--bad-bg)'):''}"><b>${x.it[k]}</b><div style="display:flex;align-items:center;gap:10px;margin-top:6px"><button class="btn sm ghost" data-m="${i}|${k}|-1" ${done?'disabled':''}>−</button><span class="tok" style="min-width:1.6em;text-align:center">${s.vals[k]}</span><button class="btn sm ghost" data-m="${i}|${k}|1" ${done?'disabled':''}>+</button>${done?`<small>${x.need}: ${nd[k]}</small>`:''}</div></div>`).join('')}</div>`:''}
+      </div>`}).join('')}
+    ${done?'':`<p style="margin-top:16px"><button class="btn" id="sub">${x.submit}</button></p>`}
+    <div id="res">${res?resHtml():''}</div>`;
+    if(done)return;
+    $$('[data-f]',root).forEach(b=>b.onclick=()=>{const[i,f]=b.dataset.f.split('|');St[+i].fit=f;draw()});
+    $$('[data-m]',root).forEach(b=>b.onclick=()=>{const[i,k,d]=b.dataset.m.split('|');const v=St[+i].vals;v[k]=Math.max(0,Math.min(6,v[k]+ +d));draw()});
+    $('#sub',root).onclick=submit;
+  }
+  function submit(){
+    let pts=0,rows=[];const nSuit=St.filter(s=>fits(s.p)).length;
+    St.forEach((s,i)=>{const p=s.p,f=fits(p);let dec=(f&&s.fit==='yes')||(!f&&s.fit==='no')?1:0;let it=0;
+      if(f&&s.fit==='yes'){const nd=need(p);it=KEYS.filter(k=>s.vals[k]===nd[k]).length/KEYS.length*(7/Math.max(1,nSuit))}
+      pts+=dec+it;rows.push({dec,it,f});});
+    const sc=Math.round(Math.min(10,pts));res={sc,rows};done=true;draw();
+    api.finish(sc,{'Решения':St.map((s,i)=>`#${i+1}: ${s.fit||'-'} (норма: ${fits(s.p)?'yes':'no'})`).join('; '),'Комплектация':St.map((s,i)=>`#${i+1}: ${KEYS.map(k=>k+'='+s.vals[k]).join(',')}`).join(' | ')});
+  }
+  function resHtml(){
+    const lg=api.lang(),x=T[lg];
+    return `<div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}" style="margin-top:14px"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b>
+    <ul class="crit">${St.map((s,i)=>{const r=res.rows[i],p=s.p;return `<li class="${r.dec?'ok':'no'}"><span>${x.rm} ${i+1}: ${x.fit1}${r.f?'':'<br><span class="det">'+x.notfit(places(p),ROOMS[p.room].places+1)+'</span>'}</span><b>${r.dec} / 1</b></li>`}).join('')}</ul></div>`;
   }
   api.onLang(draw);draw();
 }});
