@@ -375,6 +375,7 @@ const UI={
   tMap:'Где сейчас студенты',tTable:'Студенты',tName:'Имя',tGroup:'Группа',tNow:'Сейчас в окне',tProg:'Пройдено',tScore:'Баллы',tTime:'На смене',tLang:'Язык',tSeen:'Был(а)',
   tNone:'Пока никто не вошёл. Отправьте студентам ссылку и дайте им доступ «Участник» (Contributor).',
   tLessonH:'Состав урока',tLessonSub:'Отметьте задания для класса: студенты увидят только отмеченные. Изменения применяются сразу.',tP80:'Пресет: ~80 минут',tAll:'Все задания',tTotal:'Итого',tCfgFail:'Не удалось сохранить состав: нужны права редактора страницы.',tPts:'баллов',
+  connWait:'Проверяю связь с преподавателем…',connOk:'Связь с преподавателем есть: ваши результаты будут видны.',connNo:'Преподаватель вас не увидит: вы не вошли в аккаунт или у вас нет доступа «Участник». Войдите в аккаунт и откройте ссылку снова. Пока можно проходить задания, а в конце скопировать результат и отправить преподавателю.',copyRes:'Скопировать результат',copied:'Скопировано. Отправьте это преподавателю.',
   tDb:'База',tRoom:'Присутствие',tRecs:'Записей',tPeersN:'Окон открыто',tRefresh:'Обновить',
   tDetail:'Подробно',tClose:'Закрыть',tTimeIn:'время',tAns:'Ответы',tCsv:'Скачать CSV',tReset:'Очистить список',tResetSure:'Нажмите ещё раз, чтобы удалить всех',
   tNoDb:'База данных недоступна в этом окне: показаны только те, кто в сети.',tNow2:'сейчас',tAgo:'назад',tMinShort:'мин',lobby:'вход'
@@ -396,6 +397,7 @@ const UI={
   tMap:'Студенттер қазір қайда',tTable:'Студенттер',tName:'Аты',tGroup:'Топ',tNow:'Қазір терезеде',tProg:'Өтілді',tScore:'Ұпай',tTime:'Ауысымда',tLang:'Тіл',tSeen:'Соңғы рет',
   tNone:'Әзірге ешкім кірген жоқ. Студенттерге сілтемені жіберіп, оларға «Қатысушы» (Contributor) қолжетімділігін беріңіз.',
   tLessonH:'Сабақ құрамы',tLessonSub:'Сыныпқа тапсырмаларды белгілеңіз: студенттер тек белгіленгенді көреді. Өзгерістер бірден қолданылады.',tP80:'Пресет: ~80 минут',tAll:'Барлық тапсырма',tTotal:'Барлығы',tCfgFail:'Құрамды сақтау мүмкін болмады: бет редакторының құқығы керек.',tPts:'ұпай',
+  connWait:'Мұғалімді байланыс тексерілуде…',connOk:'Мұғаліммен байланыс бар: нәтижелеріңіз көрінеді.',connNo:'Мұғалім сізді көрмейді: аккаунтқа кірмегенсіз немесе «Қатысушы» қолжетімділігі жоқ. Аккаунтқа кіріп, сілтемені қайта ашыңыз. Әзірге тапсырмаларды орындай аласыз, ал соңында нәтижені көшіріп мұғалімге жібересіз.',copyRes:'Нәтижені көшіру',copied:'Көшірілді. Мұны мұғалімге жіберіңіз.',
   tDb:'Дерекқор',tRoom:'Қатысу',tRecs:'Жазба',tPeersN:'Ашық терезе',tRefresh:'Жаңарту',
   tDetail:'Толығырақ',tClose:'Жабу',tTimeIn:'уақыт',tAns:'Жауаптар',tCsv:'CSV жүктеу',tReset:'Тізімді тазалау',tResetSure:'Барлығын жою үшін тағы бір рет басыңыз',
   tNoDb:'Бұл терезеде дерекқор қолжетімсіз: тек желідегілер көрсетіледі.',tNow2:'қазір',tAgo:'бұрын',tMinShort:'мин',lobby:'кіреберіс'
@@ -406,6 +408,7 @@ const L=o=>(o&&typeof o==='object'&&!Array.isArray(o)&&('ru' in o))?(o[LANG]??o.
 
 /* ── student state ── */
 const S={id:null,name:'',group:'',startedAt:0,door:0,res:{},time:{},enter:0,fin:false};
+let connState='wait';
 let PRACTICE=false,isTeacher=false,tPwOpen=false,caps={user:null,db:null,room:null,dl:null},dbDoc=null,saveFailed=false;
 const loadLocal=()=>{try{const j=JSON.parse(STORE.get('sauyt_state')||'null');if(j&&j.name){S.name=j.name;S.group=j.group||'';S.res=j.res||{};S.time=j.time||{};S.startedAt=j.startedAt||0;S.fin=!!j.fin}}catch(e){}};
 const saveLocal=()=>STORE.set('sauyt_state',JSON.stringify({name:S.name,group:S.group,res:S.res,time:S.time,startedAt:S.startedAt,fin:S.fin}));
@@ -431,9 +434,10 @@ function presence(){
 }
 function banner(){
   const b=$('#banner');if(!b)return;
-  b.hidden=!(saveFailed||PRACTICE);
-  b.className='banner'+(PRACTICE&&!saveFailed?' info':'');
-  b.textContent=saveFailed?U('saveFail'):U('practice');
+  const noConn=connState==='no'&&!PRACTICE;
+  b.hidden=!(saveFailed||PRACTICE||noConn);
+  b.className='banner'+(PRACTICE&&!saveFailed&&!noConn?' info':'');
+  b.textContent=saveFailed?U('saveFail'):noConn?U('connNo'):U('practice');
 }
 
 /* ── capabilities (light up later) ── */
@@ -444,9 +448,12 @@ async function initCaps(){
     caps={user,db,room,dl};
     if(user){try{S.id=await user.id()}catch(e){}}
     if(db&&S.id)dbDoc=db.doc('students/'+S.id);
+    let cw=null;if(user&&user.can){try{cw=await user.can('data.write')}catch(e){}}
+    connState=(dbDoc&&cw!==false)?'ok':'no';
     if(db){try{db.doc('config/lesson').onSnapshot(sn=>{if(sn.exists){const d=sn.data();if(d&&Array.isArray(d.on))ENABLED=new Set(d.on)}else ENABLED=new Set(DEFAULT80);cfgChanged()},()=>{})}catch(e){}}
   }catch(e){}
-  gateRender();
+  if(connState==='wait')connState='no';
+  gateRender();banner();
   if(!$('#tapp').hidden)tConnect();
   if(S.name&&!$('#app').hidden){persist()}
 }
@@ -474,6 +481,7 @@ function gateRender(){
   <label class="mini" for="gp0">${U('groupL')}</label><input type="text" id="gp0" maxlength="20" placeholder="${U('groupP')}" autocomplete="off">
   <div id="nmerr" class="nmerr" role="alert"></div>
   <button class="btn sun" id="go">${U('start')}</button>
+  <div class="${connState==='no'?'banner':'banner info'}" style="margin-top:12px">${U(connState==='ok'?'connOk':connState==='no'?'connNo':'connWait')}</div>
   ${isTeacher?`<div class="tg"><div class="eyebrow">${U('tHello')}</div><button class="btn" id="goT">${U('tPanel')}</button><button class="btn ghost" id="goP">${U('tPractice')}</button></div>`
    :tPwOpen?`<div class="tg"><label class="mini" for="tpw">${U('tPw')}</label><input type="password" id="tpw" inputmode="numeric" autocomplete="off" maxlength="12" class="num"><div id="tperr" class="nmerr" role="alert"></div><button class="btn ghost" id="tpwGo">${U('tEnter')}</button></div>`
    :`<p style="margin-top:22px"><button class="finalbtn" id="tLink">${U('tLink')}</button></p>`}`;
@@ -582,9 +590,21 @@ function finalDraw(){
   root.innerHTML=`<div class="eyebrow">${U('finH')}</div><h2>${U('badge')}</h2><p class="intro">${U('finLead')}</p>
   <div class="final"><div class="badge"><div class="bh">${LANG==='kk'?'«САУЫТ» ҚОНАҚ ҮЙІ':'ОТЕЛЬ «САУЫТ»'}</div><div class="big">${esc((S.name||'?')[0].toUpperCase())}</div><div class="bn">${esc(S.name)}</div><div class="br">${U('ranks')[rankOf(r)]}</div><div class="sc">${t} ${U('of')} ${mx} ${U('pts')}</div></div>
   <div><div class="mini">${U('res')}</div><ul class="brk">${ONMODS().map(m=>{const x=S.res[m.id];return `<li><span>${m.no} · ${esc(L(m.title))}</span><b>${x?x.s+' / '+x.m:U('notDone')}</b></li>`}).join('')}</ul>
+  <p style="margin-top:12px"><button class="btn sm ghost" id="cpRes">${U('copyRes')}</button> <span class="det" id="cpMsg"></span></p>
   <p class="lead" style="margin-top:16px;font-size:.95rem">${weak.length?U('improve')+': '+esc(weak.join(', '))+'.':U('allGood')}</p></div></div>`;
 }
 
+function resultText(){
+  const lines=[`${S.name}${S.group?' ('+S.group+')':''} — ${total()} / ${MAXPTS()}`].concat(ONMODS().map(m=>{const x=S.res[m.id];return `${m.no} ${L(m.title)}: ${x?x.s+'/'+x.m+', '+Math.round((x.t||0)/60)+' мин':'—'}`}));
+  return lines.join('\n');
+}
+document.addEventListener('click',e=>{
+  if(e.target&&e.target.id==='cpRes'){
+    const txt=resultText(),msg=$('#cpMsg');
+    const ok=()=>{if(msg)msg.textContent=U('copied')};
+    try{navigator.clipboard.writeText(txt).then(ok,()=>{window.prompt&&0;const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='width:100%;min-height:140px';e.target.parentNode.appendChild(ta);ta.select()})}catch(err){const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='width:100%;min-height:140px';e.target.parentNode.appendChild(ta);ta.select()}
+  }
+});
 /* ── teacher ── */
 let tUnsub=[],tDocs={},tPeers=[],tSel=null,tReady=false,tResetArm=false,tRaf=0;
 let tSubDb=false,tSubRoom=false,tErr='';
