@@ -375,6 +375,7 @@ const UI={
   tMap:'Где сейчас студенты',tTable:'Студенты',tName:'Имя',tGroup:'Группа',tNow:'Сейчас в окне',tProg:'Пройдено',tScore:'Баллы',tTime:'На смене',tLang:'Язык',tSeen:'Был(а)',
   tNone:'Пока никто не вошёл. Отправьте студентам ссылку и дайте им доступ «Участник» (Contributor).',
   tLessonH:'Состав урока',tLessonSub:'Отметьте задания для класса: студенты увидят только отмеченные. Изменения применяются сразу.',tP80:'Пресет: ~80 минут',tAll:'Все задания',tTotal:'Итого',tCfgFail:'Не удалось сохранить состав: нужны права редактора страницы.',tPts:'баллов',
+  tDb:'База',tRoom:'Присутствие',tRecs:'Записей',tPeersN:'Окон открыто',tRefresh:'Обновить',
   tDetail:'Подробно',tClose:'Закрыть',tTimeIn:'время',tAns:'Ответы',tCsv:'Скачать CSV',tReset:'Очистить список',tResetSure:'Нажмите ещё раз, чтобы удалить всех',
   tNoDb:'База данных недоступна в этом окне: показаны только те, кто в сети.',tNow2:'сейчас',tAgo:'назад',tMinShort:'мин',lobby:'вход'
  },
@@ -395,6 +396,7 @@ const UI={
   tMap:'Студенттер қазір қайда',tTable:'Студенттер',tName:'Аты',tGroup:'Топ',tNow:'Қазір терезеде',tProg:'Өтілді',tScore:'Ұпай',tTime:'Ауысымда',tLang:'Тіл',tSeen:'Соңғы рет',
   tNone:'Әзірге ешкім кірген жоқ. Студенттерге сілтемені жіберіп, оларға «Қатысушы» (Contributor) қолжетімділігін беріңіз.',
   tLessonH:'Сабақ құрамы',tLessonSub:'Сыныпқа тапсырмаларды белгілеңіз: студенттер тек белгіленгенді көреді. Өзгерістер бірден қолданылады.',tP80:'Пресет: ~80 минут',tAll:'Барлық тапсырма',tTotal:'Барлығы',tCfgFail:'Құрамды сақтау мүмкін болмады: бет редакторының құқығы керек.',tPts:'ұпай',
+  tDb:'Дерекқор',tRoom:'Қатысу',tRecs:'Жазба',tPeersN:'Ашық терезе',tRefresh:'Жаңарту',
   tDetail:'Толығырақ',tClose:'Жабу',tTimeIn:'уақыт',tAns:'Жауаптар',tCsv:'CSV жүктеу',tReset:'Тізімді тазалау',tResetSure:'Барлығын жою үшін тағы бір рет басыңыз',
   tNoDb:'Бұл терезеде дерекқор қолжетімсіз: тек желідегілер көрсетіледі.',tNow2:'қазір',tAgo:'бұрын',tMinShort:'мин',lobby:'кіреберіс'
  }
@@ -445,7 +447,8 @@ async function initCaps(){
     if(db){try{db.doc('config/lesson').onSnapshot(sn=>{if(sn.exists){const d=sn.data();if(d&&Array.isArray(d.on))ENABLED=new Set(d.on)}else ENABLED=new Set(DEFAULT80);cfgChanged()},()=>{})}catch(e){}}
   }catch(e){}
   gateRender();
-  if(S.name&&!$('#app').hidden)presence();
+  if(!$('#tapp').hidden)tConnect();
+  if(S.name&&!$('#app').hidden){persist()}
 }
 
 function cfgChanged(){
@@ -584,14 +587,23 @@ function finalDraw(){
 
 /* ── teacher ── */
 let tUnsub=[],tDocs={},tPeers=[],tSel=null,tReady=false,tResetArm=false,tRaf=0;
+let tSubDb=false,tSubRoom=false,tErr='';
+function tConnect(){
+  if(caps.db&&!tSubDb){tSubDb=true;
+    try{tUnsub.push(caps.db.collection('students').onSnapshot(s=>{tErr='';tDocs={};s.docs.forEach(d=>{tDocs[d.id]=d.data()});tSched()},e=>{tErr=(e&&e.code)||'error';tSubDb=false;tSched()}))}catch(e){tSubDb=false;tErr='error'}}
+  if(caps.room&&!tSubRoom){tSubRoom=true;
+    try{tPeers=[...caps.room.peers()];tUnsub.push(caps.room.onPeers(c=>{tPeers=[...c.peers];tSched()},e=>{tSubRoom=false}))}catch(e){tSubRoom=false}}
+}
 function openTeacher(){
   $('#gate').hidden=true;$('#tapp').hidden=false;
-  if(!tReady){tReady=true;
-    if(caps.db){try{tUnsub.push(caps.db.collection('students').onSnapshot(s=>{tDocs={};s.docs.forEach(d=>{tDocs[d.id]=d.data()});tSched()},()=>tSched()))}catch(e){}}
-    if(caps.room){try{tPeers=[...caps.room.peers()];tUnsub.push(caps.room.onPeers(c=>{tPeers=[...c.peers];tSched()}))}catch(e){}}
-    setInterval(()=>{if(!$('#tapp').hidden)tSched()},15000);
-  }
+  tConnect();
+  if(!tReady){tReady=true;setInterval(()=>{if(!$('#tapp').hidden){tConnect();tSched()}},5000)}
   tRender();window.scrollTo(0,0);
+}
+async function tRefresh(){
+  if(!caps.db)return;
+  try{const sn=await caps.db.collection('students').get();tDocs={};sn.docs.forEach(d=>{tDocs[d.id]=d.data()});tErr=''}catch(e){tErr=(e&&e.code)||'error'}
+  tSched();
 }
 function tSched(){if(tRaf)return;tRaf=requestAnimationFrame(()=>{tRaf=0;if(!$('#tapp').hidden)tRender()})}
 function tStudents(){
@@ -614,6 +626,7 @@ function tRender(){
   const sel=tSel&&rows.find(r=>r.id===tSel);
   t.innerHTML=`<div class="topbar"><div class="who">${U('tSub')}</div><div class="lang" id="tl"><button data-l="ru" class="${LANG==='ru'?'on':''}">RU</button><button data-l="kk" class="${LANG==='kk'?'on':''}">ҚАЗ</button></div></div>
   <header class="hero"><div class="eyebrow">${U('gateEy')}</div><h1 style="font-size:clamp(1.8rem,5vw,3rem)">${U('tH')}</h1></header>
+  <div class="tbar"><span class="tag">${U('tDb')}: ${caps.db?(tErr?'✗ '+esc(tErr):'✓'):'✗'}</span><span class="tag">${U('tRoom')}: ${caps.room?'✓':'✗'}</span><span class="tag">${U('tRecs')}: ${Object.keys(tDocs).length}</span><span class="tag">${U('tPeersN')}: ${tPeers.filter(p=>p.kind==='viewer').length}</span><button class="btn sm ghost" id="tRef">${U('tRefresh')}</button></div>
   ${caps.db?'':`<div class="banner info">${U('tNoDb')}</div>`}
   <div class="tcards"><div class="tc"><b>${online}</b><span>${U('tOnline')}</span></div><div class="tc"><b>${rows.length}</b><span>${U('tStarted')}</span></div><div class="tc"><b>${fin}</b><span>${U('tFinished')}</span></div><div class="tc"><b>${avg}</b><span>${U('tAvg')} (${mx})</span></div></div>
   <div class="panel on" style="margin-top:6px"><div class="mini">${U('tLessonH')}</div><p class="det">${U('tLessonSub')}</p>
@@ -633,6 +646,7 @@ function tRender(){
   $('#cAll',t).onclick=()=>{ENABLED=new Set(MODS.map(m=>m.id));cfgChanged();saveCfg()};
   $$('tr.clk',t).forEach(tr=>tr.onclick=()=>{tSel=tSel===tr.dataset.id?null:tr.dataset.id;tRender();if(tSel)$('#tdet')&&$('#tdet').scrollIntoView({behavior:'smooth'})});
   const c=$('#tCsv');if(c)c.onclick=()=>tCsv(rows);
+  $('#tRef').onclick=tRefresh;
   $('#tRst').onclick=async()=>{if(!tResetArm){tResetArm=true;tRender();setTimeout(()=>{tResetArm=false},5000);return}tResetArm=false;
     try{await Promise.all(Object.keys(tDocs).map(id=>caps.db.doc('students/'+id).delete()))}catch(e){}tRender()};
   $('#tToApp').onclick=()=>{$('#tapp').hidden=true;$('#gate').hidden=false;gateRender()};
