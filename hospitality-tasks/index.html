@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Интерактивные задания — гостиничный бизнес</title>
+<style>
+  :root{--bg:#f4f8fc;--card:#fff;--primary:#1a56db;--primary-soft:#e8f0fe;--text:#0f172a;--muted:#475569;--border:#e2e8f0;--ok:#15803d;--ok-bg:#dcfce7;--bad:#b91c1c;--bad-bg:#fee2e2;--radius:16px}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+  header{background:var(--primary);color:#fff;padding:28px 16px;text-align:center}
+  header h1{font-size:1.5rem}header p{opacity:.85;margin-top:4px}
+  nav{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--border);display:flex;gap:6px;overflow-x:auto;padding:10px 16px;align-items:center}
+  nav button{white-space:nowrap;border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:.9rem}
+  nav button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  nav button.done::after{content:" ✓"}
+  #score{margin-left:auto;font-weight:600;white-space:nowrap;color:var(--primary)}
+  main{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+  section{display:none}section.active{display:block}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(15,23,42,.04)}
+  h2{font-size:1.25rem;margin-bottom:6px}.hint{color:var(--muted);font-size:.92rem;margin-bottom:14px}
+  .q{font-weight:600;margin-bottom:10px}
+  .opt{display:block;width:100%;text-align:left;border:1px solid var(--border);background:#fff;border-radius:12px;padding:10px 14px;margin-bottom:8px;cursor:pointer;font-size:1rem}
+  .opt:hover:not(:disabled){background:var(--primary-soft)}
+  .opt.ok{background:var(--ok-bg);border-color:var(--ok)}.opt.bad{background:var(--bad-bg);border-color:var(--bad)}
+  .fb{margin-top:8px;font-size:.92rem;padding:8px 12px;border-radius:10px;display:none}
+  .fb.show{display:block}.fb.ok{background:var(--ok-bg);color:var(--ok)}.fb.bad{background:var(--bad-bg);color:var(--bad)}
+  .btn{background:var(--primary);color:#fff;border:0;border-radius:12px;padding:10px 18px;font-size:1rem;cursor:pointer}
+  .btn.ghost{background:#fff;color:var(--primary);border:1px solid var(--primary)}
+  .btn:hover{opacity:.9}
+  .row{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+  .row .term{flex:0 0 150px;font-weight:600}
+  select,input[type=number]{padding:9px 10px;border:1px solid var(--border);border-radius:10px;font-size:1rem;flex:1;min-width:160px;background:#fff}
+  select.ok,input.ok{border-color:var(--ok);background:var(--ok-bg)}select.bad,input.bad{border-color:var(--bad);background:var(--bad-bg)}
+  ol.order{list-style:none}
+  ol.order li{display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:12px;padding:8px 12px;margin-bottom:8px;background:#fff}
+  ol.order li span{flex:1}ol.order li.ok{background:var(--ok-bg);border-color:var(--ok)}ol.order li.bad{background:var(--bad-bg);border-color:var(--bad)}
+  ol.order button{border:1px solid var(--border);background:#fff;border-radius:8px;width:34px;height:34px;cursor:pointer}
+  .guest{background:var(--primary-soft);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-style:italic}
+  .result{font-weight:600;margin-top:12px}
+  .final{text-align:center}.final .big{font-size:2.4rem;font-weight:700;color:var(--primary)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏨 Интерактивные задания</h1>
+  <p>Практикум для студентов гостиничного бизнеса</p>
+</header>
+<nav id="nav"></nav>
+<main>
+
+<!-- 1. ТЕСТ -->
+<section id="s0" class="active">
+  <div class="card"><h2>1. Тест: основы отрасли</h2><p class="hint">Выберите один ответ — подсказка появится сразу. За каждый верный ответ с первой попытки — 1 балл.</p><div id="quiz"></div></div>
+</section>
+
+<!-- 2. ТЕРМИНЫ -->
+<section id="s1">
+  <div class="card"><h2>2. Сопоставьте термины</h2><p class="hint">Подберите определение к каждому термину. 1 балл за каждое верное соответствие.</p>
+    <div id="match"></div>
+    <button class="btn" onclick="checkMatch()">Проверить</button>
+    <div class="result" id="matchRes"></div></div>
+</section>
+
+<!-- 3. ПОРЯДОК -->
+<section id="s2">
+  <div class="card"><h2>3. Процедура заселения (check-in)</h2><p class="hint">Расставьте шаги в правильном порядке кнопками ▲ ▼. Максимум 4 балла: по баллу за каждые 2 шага на своём месте.</p>
+    <ol class="order" id="order"></ol>
+    <button class="btn" onclick="checkOrder()">Проверить</button>
+    <button class="btn ghost" onclick="shuffleOrder()">Перемешать</button>
+    <div class="result" id="orderRes"></div></div>
+</section>
+
+<!-- 4. КЕЙС -->
+<section id="s3">
+  <div class="card"><h2>4. Кейс: жалоба гостя</h2><p class="hint">Вы — администратор ресепшн. Выбирайте действия; каждый шаг оценивается.</p>
+    <div id="caseBox"></div></div>
+</section>
+
+<!-- 5. РАСЧЁТ -->
+<section id="s4">
+  <div class="card"><h2>5. Расчёт показателей отеля</h2>
+    <p class="hint">В отеле 40 номеров. За сутки продано 28 номеров, выручка от номеров — 840 000 ₸. Округляйте до целых. 1 балл за каждый показатель.</p>
+    <div class="row"><div class="term">Загрузка, %</div><input type="number" id="c_occ" placeholder="Occupancy"></div>
+    <div class="row"><div class="term">ADR, ₸</div><input type="number" id="c_adr" placeholder="Средняя цена проданного номера"></div>
+    <div class="row"><div class="term">RevPAR, ₸</div><input type="number" id="c_rev" placeholder="Доход на доступный номер"></div>
+    <button class="btn" onclick="checkCalc()">Проверить</button>
+    <div class="result" id="calcRes"></div></div>
+</section>
+
+<!-- ИТОГ -->
+<section id="s5">
+  <div class="card final"><h2>Итоги</h2><div class="big" id="total">0</div><p id="verdict" class="hint"></p>
+    <button class="btn" onclick="location.reload()">Пройти заново</button></div>
+</section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const sections=['Тест','Термины','Check-in','Кейс','Расчёт','Итоги'];
+const max=[6,6,4,3,3];
+const pts=[0,0,0,0,0], doneFlags=[false,false,false,false,false];
+
+function renderNav(){
+  $('nav').innerHTML=sections.map((s,i)=>`<button class="${doneFlags[i]?'done':''}" onclick="go(${i})" id="nb${i}">${s}</button>`).join('')+`<span id="score"></span>`;
+  updScore();
+}
+function go(i){
+  document.querySelectorAll('section').forEach((s,k)=>s.classList.toggle('active',k===i));
+  document.querySelectorAll('nav button').forEach((b,k)=>b.classList.toggle('active',k===i));
+  if(i===5)showTotal();window.scrollTo(0,0);
+}
+function updScore(){const t=pts.reduce((a,b)=>a+b,0);const m=max.reduce((a,b)=>a+b,0);$('score').textContent=`${t} / ${m}`}
+function setDone(i,p){pts[i]=p;doneFlags[i]=true;const b=$('nb'+i);if(b)b.classList.add('done');updScore()}
+function showTotal(){
+  const t=pts.reduce((a,b)=>a+b,0),m=max.reduce((a,b)=>a+b,0),r=t/m;
+  $('total').textContent=`${t} из ${m}`;
+  $('verdict').textContent=r>=.85?'Отлично! Вы готовы к практике на ресепшн.':r>=.6?'Хороший результат. Повторите термины и порядок процедур.':'Стоит повторить материал и попробовать ещё раз.';
+}
+
+/* 1. QUIZ */
+const quiz=[
+ {q:'Что означает аббревиатура OTA?',o:['Online Travel Agency','Official Tourist Association','Open Table Allocation'],a:0,e:'OTA — онлайн-агентство путешествий (Booking.com, Ostrovok и др.).'},
+ {q:'Овербукинг — это…',o:['Бронирование сверх доступного числа номеров','Бронь на длительный срок','Скидка за раннее бронирование'],a:0,e:'Отель намеренно продаёт больше номеров, чем есть, рассчитывая на отмены и no-show.'},
+ {q:'Кто такой «no-show»?',o:['Гость, не приехавший и не отменивший бронь','Гость без документов','VIP-гость'],a:0,e:'No-show — неявка без отмены; обычно удерживается плата за первую ночь.'},
+ {q:'Какая служба отвечает за уборку номеров?',o:['Housekeeping','Front Office','F&B'],a:0,e:'Housekeeping — служба горничных и поддержания номерного фонда.'},
+ {q:'Тип питания BB (Bed & Breakfast) означает…',o:['Проживание и завтрак','Полный пансион','Только проживание'],a:0,e:'BB — bed and breakfast. RO — без питания, FB — полный пансион.'},
+ {q:'Как лучше реагировать на негативный отзыв гостя?',o:['Вежливо ответить, извиниться и предложить решение','Игнорировать','Оспорить публично, доказывая неправоту гостя'],a:0,e:'Публичный профессиональный ответ повышает доверие будущих гостей.'}
+];
+let quizPts=0,quizAns=0;
+$('quiz').innerHTML=quiz.map((x,i)=>`<div class="card" id="qq${i}"><div class="q">${i+1}. ${x.q}</div>${x.o.map((o,j)=>`<button class="opt" onclick="ans(${i},${j})">${o}</button>`).join('')}<div class="fb" id="qf${i}"></div></div>`).join('');
+function ans(i,j){
+  const x=quiz[i],box=$('qq'+i);if(box.dataset.d)return;box.dataset.d=1;
+  const btns=box.querySelectorAll('.opt');
+  btns.forEach((b,k)=>{b.disabled=true;if(k===x.a)b.classList.add('ok');else if(k===j)b.classList.add('bad')});
+  const ok=j===x.a;if(ok)quizPts++;
+  const f=$('qf'+i);f.className='fb show '+(ok?'ok':'bad');f.textContent=(ok?'Верно! ':'Неверно. ')+x.e;
+  if(++quizAns===quiz.length)setDone(0,quizPts);
+}
+
+/* 2. MATCH */
+const defs=['Средняя цена проданного номера','Доля проданных номеров от доступных','Доход на один доступный номер','Бронирование сверх наличия номеров','Неявка гостя без отмены','Онлайн-агентство путешествий'];
+const terms=[['ADR',0],['Occupancy',1],['RevPAR',2],['Overbooking',3],['No-show',4],['OTA',5]];
+const shuffled=[...defs.keys()].sort(()=>Math.random()-.5);
+$('match').innerHTML=terms.map(([t,a],i)=>`<div class="row"><div class="term">${t}</div><select id="m${i}"><option value="">— выберите —</option>${shuffled.map(k=>`<option value="${k}">${defs[k]}</option>`).join('')}</select></div>`).join('');
+function checkMatch(){
+  let p=0;terms.forEach(([t,a],i)=>{const s=$('m'+i);const ok=s.value!==''&&+s.value===a;s.className=ok?'ok':'bad';if(ok)p++});
+  $('matchRes').textContent=`Верно: ${p} из ${terms.length}`+(p<terms.length?' — исправьте красные поля и проверьте снова.':' 🎉');
+  setDone(1,p);
+}
+
+/* 3. ORDER */
+const steps=['Поприветствовать гостя и найти бронь','Проверить документы, удостоверяющие личность','Подтвердить даты, тип номера и условия оплаты','Принять оплату или гарантию, оформить регистрационную карту','Выдать ключ-карту и рассказать о завтраке и Wi-Fi','Проводить гостя / указать путь к номеру и пожелать приятного отдыха'];
+let ord=[...steps.keys()].sort(()=>Math.random()-.5);
+function drawOrder(res){
+  $('order').innerHTML=ord.map((k,pos)=>`<li class="${res?(k===pos?'ok':'bad'):''}"><span>${pos+1}. ${steps[k]}</span><button onclick="mv(${pos},-1)">▲</button><button onclick="mv(${pos},1)">▼</button></li>`).join('');
+}
+function mv(p,d){const q=p+d;if(q<0||q>=ord.length)return;[ord[p],ord[q]]=[ord[q],ord[p]];drawOrder();}
+function shuffleOrder(){ord.sort(()=>Math.random()-.5);drawOrder();$('orderRes').textContent=''}
+function checkOrder(){
+  const c=ord.filter((k,i)=>k===i).length;drawOrder(true);
+  const p=Math.min(4,Math.floor(c*4/steps.length));
+  $('orderRes').textContent=`На своих местах: ${c} из ${steps.length}`+(c===steps.length?' — идеально! 🎉':'');
+  setDone(2,c===steps.length?4:Math.min(p,3));
+}
+drawOrder();
+
+/* 4. CASE */
+const caseSteps=[
+ {t:'Гость в 23:00 жалуется: в номере шумно из-за соседней вечеринки, он устал после перелёта. Что делаете первым?',
+  o:[['Извиняюсь, выражаю сочувствие и уточняю номер комнаты',1,'Верно: сначала эмпатия и сбор фактов.'],['Объясняю, что «после 23:00 тишина и это не наша вина»',0,'Это звучит как отказ в помощи и усиливает конфликт.'],['Предлагаю подождать до утра',0,'Гость остаётся без решения проблемы.']]},
+ {t:'Вы выяснили: шумят из 214 номера. Следующий шаг?',
+  o:[['Звоню/иду в 214 и вежливо прошу соблюдать тишину, сообщаю гостю',1,'Верно: решаете причину и информируете гостя.'],['Ничего не делаю — гость сам разберётся',0,'Проблема остаётся неустранённой.'],['Сразу выселяю шумных гостей без предупреждения',0,'Слишком радикально, нарушает процедуру предупреждения.']]},
+ {t:'Гость всё ещё недоволен. Что предложите?',
+  o:[['Перевод в тихий номер + небольшой комплимент (напиток/поздний завтрак), согласовав с менеджером',1,'Верно: компенсация в рамках полномочий + эскалация.'],['Полный возврат за всё проживание сразу',0,'Выходит за ваши полномочия и несоразмерно.'],['Предложить оставить плохой отзыв, если ему так легче',0,'Недопустимо: вы провоцируете негатив вместо решения.']]}
+];
+let cs=0,cp=0;
+function drawCase(){
+  const box=$('caseBox');
+  if(cs>=caseSteps.length){setDone(3,cp);box.innerHTML=`<div class="result">Кейс завершён: ${cp} из ${caseSteps.length}. Алгоритм работы с жалобой: выслушать → посочувствовать → решить → компенсировать → зафиксировать.</div><button class="btn ghost" onclick="cs=0;cp=0;drawCase()">Пройти заново</button>`;return}
+  const s=caseSteps[cs];
+  box.innerHTML=`<div class="guest">«${s.t}»</div>`+s.o.map((o,j)=>`<button class="opt" onclick="pick(${j})">${o[0]}</button>`).join('')+`<div class="fb" id="cf"></div>`;
+}
+function pick(j){
+  const o=caseSteps[cs].o[j];cp+=o[1];
+  const f=$('cf');f.className='fb show '+(o[1]?'ok':'bad');f.innerHTML=o[2]+'<br><br><button class="btn" onclick="cs++;drawCase()">Далее</button>';
+  document.querySelectorAll('#caseBox .opt').forEach(b=>b.disabled=true);
+}
+drawCase();
+
+/* 5. CALC */
+function checkCalc(){
+  const ans={c_occ:70,c_adr:30000,c_rev:21000};let p=0;
+  for(const id in ans){const el=$(id);const ok=Math.round(+el.value)===ans[id];el.className=ok?'ok':'bad';if(ok)p++}
+  $('calcRes').innerHTML=`Верно: ${p} из 3.`+(p===3?' 🎉':'<br>Подсказки: Загрузка = проданные / все × 100; ADR = выручка / проданные; RevPAR = выручка / все номера (или ADR × загрузка).');
+  setDone(4,p);
+}
+
+renderNav();go(0);
+</script>
+</body>
+</html>
