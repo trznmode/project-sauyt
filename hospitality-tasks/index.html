@@ -285,6 +285,39 @@ details summary{cursor:pointer;font-weight:600}
 .ans{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;white-space:pre-wrap;overflow-wrap:anywhere;margin-block:6px 14px;font-size:.92rem}
 .tbar{display:flex;flex-wrap:wrap;gap:8px;margin-block:10px}
 @media (max-width:720px){.hkr{grid-template-columns:1fr 1fr}.msg{max-width:96%}}
+.hotn{cursor:pointer}.hotn:hover{filter:brightness(1.06)}
+.scenebox{min-width:0}
+.rushwrap{position:relative}
+.desks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.desk{border:2px solid var(--line);border-radius:16px;padding:10px 12px;background:var(--bg);min-height:76px}
+.desk.busy{border-color:var(--blue);background:var(--blue-soft)}
+.desk small{display:block;color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em}
+.pbar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.pbar i{display:block;height:100%;width:0;background:var(--blue);border-radius:99px}
+.queue{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;min-height:140px}
+.gq{position:relative;border:2px solid var(--line);border-radius:16px;padding:10px 12px;background:var(--card);cursor:pointer;text-align:left;animation:slidein .45s cubic-bezier(.2,.9,.3,1);min-width:0}
+.gq:hover{border-color:var(--blue)}
+.gq b{display:block;font-size:.92rem}
+.gq small{display:block;color:var(--muted);font-size:.78rem}
+.gq .pbar i{background:var(--ok)}
+.gq.vip{border-color:var(--sun)}
+.gq.out{animation:fly .5s forwards}
+.gq.lost{animation:lost .6s forwards}
+@keyframes slidein{from{opacity:0;transform:translateX(-30px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes fly{to{opacity:0;transform:translateY(-30px) scale(.8)}}
+@keyframes lost{20%{transform:translateX(-6px)}to{opacity:0;transform:translateX(60px) rotate(8deg)}}
+.timebar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-bottom:12px}.timebar i{display:block;height:100%;width:100%;background:var(--sun);transition:width .25s linear}
+.tsvg{width:100%;height:auto;display:block;border-radius:18px;border:2px solid var(--line);background:var(--r-wall);touch-action:none;user-select:none}
+.tray{display:flex;flex-wrap:wrap;gap:10px;margin-block:12px}
+.titem{width:78px;height:70px;border:2px solid var(--line);border-radius:14px;background:var(--bg);display:grid;place-items:center;cursor:grab;touch-action:none;user-select:none}
+.titem svg{width:64px;height:56px;pointer-events:none}
+.titem.sel{border-color:var(--blue);background:var(--blue-soft)}
+.titem.gone{visibility:hidden}
+.dragging{position:fixed;z-index:60;pointer-events:none;opacity:.9;transform:translate(-50%,-50%);width:78px;height:70px;display:grid;place-items:center}
+.zone{fill:transparent;stroke:var(--muted);stroke-width:1.6;stroke-dasharray:4 4;opacity:.8}
+.zone.over{stroke:var(--blue);stroke-width:2.6;fill:var(--blue-soft)}
+.zone.ok{stroke:var(--ok);fill:var(--ok-bg);stroke-dasharray:none}
+.zone.no{stroke:var(--bad);fill:var(--bad-bg);stroke-dasharray:none}
 </style>
 </head>
 <body>
@@ -1419,6 +1452,339 @@ mount(root,api){
     <ul class="log">${D.map(d=>`<li><b>${esc(d[lg])}</b>: ${x.cls[d.k]} → ${x.act[d.k]}</li>`).join('')}</ul>${hintUsed?`<p class="det">${x.pen}</p>`:''}</div>`;
     draw();
     api.finish(sc,{'Классы':D.map((d,i)=>d.ru+'='+(sel[i]||'-')+'('+d.k+')').join('; '),'Фудкост / цена':(vals.fc||'-')+' / '+(vals.pr||'-')+' (верно '+trueFc+' / '+truePrice+')'});
+  }
+  api.onLang(draw);draw();
+}});
+
+/* ═════════ СЦЕНЫ «НАЙДИ ДЕФЕКТЫ»: номер и зал ресторана ═════════ */
+function sceneMount(cfg,root,api){
+  const R=api.rng();
+  const keys=cfg.defs.map(d=>d.k);
+  const chosen=new Set(shufR(keys,R).slice(0,cfg.show));
+  let found=new Set(),miss=0,done=false,note={k:'start',txt:''},t0=0,res=null,tick=null;
+  const t=k=>cfg.T[api.lang()][k];
+  const nm=d=>d[api.lang()][0],why=d=>d[api.lang()][1];
+  function svg(){
+    const lg=api.lang();
+    return cfg.svg(chosen,found,(msg)=>msg[lg],lg);
+  }
+  function draw(){
+    const lg=api.lang(),x=cfg.T[lg];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <div class="insp"><div><div class="scenebox">${svg()}</div><div class="sticky-stat" style="margin-top:10px"><span>${x.timer}: <span class="tok" id="tm">0:00</span></span><span>${x.miss}: <span class="tok" id="ms">${miss}</span></span></div></div>
+    <div><div class="mini">${x.check} · <span id="cnt">${found.size}/${chosen.size}</span></div><ul class="chk" id="ck">${[...chosen].map((k,i)=>{const d=cfg.defs.find(z=>z.k===k);const on=found.has(k);return `<li class="${on?'on':''}" data-k="${k}">${on?`<b>${esc(nm(d))}</b>${esc(why(d))}`:`${x.defect} ${i+1}: ???`}</li>`}).join('')}</ul></div></div>
+    <div class="note ${note.c||''}" id="nt">${esc(note.txt||x.start)}</div>
+    ${done?resHtml():`<p style="margin-top:12px"><button class="btn ghost" id="fin">${x.finish}</button></p>`}`;
+    bind();
+  }
+  function bind(){
+    const sv=$('.scenebox svg',root);if(!sv||done)return;
+    sv.onclick=e=>{
+      const g=e.target.closest('g[data-d],g[data-n]');if(!g||done)return;
+      if(!t0){t0=Date.now();tick=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000),el=$('#tm',root);if(el)el.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0')},500)}
+      if(g.dataset.d){
+        const k=g.dataset.d;if(found.has(k))return;found.add(k);
+        const d=cfg.defs.find(z=>z.k===k);note={c:'ok',txt:nm(d)};
+        if(found.size===chosen.size)return finish();
+        draw();
+      }else{miss++;note={c:'bad',txt:g.dataset.n};draw();
+        const s2=$('.scenebox svg',root);}
+    };
+    const f=$('#fin',root);if(f)f.onclick=finish;
+  }
+  function finish(){
+    if(done)return;done=true;clearInterval(tick);
+    const secs=t0?Math.round((Date.now()-t0)/1000):0;
+    const base=Math.round(10*found.size/chosen.size);
+    const pen=Math.floor(miss/2);
+    const sc=Math.max(0,base-pen);
+    res={sc,base,pen,secs};
+    draw();
+    api.finish(sc,{'Найдено / было':found.size+' / '+chosen.size,'Ложных нажатий':miss,'Время, с':secs,'Пропущено':[...chosen].filter(k=>!found.has(k)).map(k=>cfg.defs.find(z=>z.k===k).ru[0]).join(', ')});
+  }
+  function resHtml(){
+    const lg=api.lang(),x=cfg.T[lg];
+    const missed=[...chosen].filter(k=>!found.has(k)).map(k=>cfg.defs.find(z=>z.k===k));
+    return `<div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b>
+    <p>${x.found}: ${found.size} / ${chosen.size} · ${x.miss}: ${miss} (−${res.pen}) · ${Math.floor(res.secs/60)}:${String(res.secs%60).padStart(2,'0')}</p>
+    ${missed.length?`<p style="margin-top:8px"><b>${x.missed}:</b></p><ul class="log">${missed.map(d=>`<li><b>${esc(nm(d))}</b>. ${esc(why(d))}</li>`).join('')}</ul>`:''}</div>`;
+  }
+  api.onLang(draw);draw();
+}
+
+/* ── сцена 1: номер ── */
+(function(){
+const F=(s)=>s;
+const defs=[
+ {k:'pillow',ru:['Пятно на наволочке','Бельё с пятном меняют до заселения, даже если оно чистое на вид.'],kk:['Жастық тысындағы дақ','Дақты төсек жапқыш қонақ келгенге дейін ауыстырылады.']},
+ {k:'lamp',ru:['Треснувший абажур','Повреждённый светильник — риск и плохое впечатление. Заменить до заселения.'],kk:['Жарықшақ кеткен шам плафоны','Зақымдалған шам қауіпті және жағымсыз әсер қалдырады. Қонақ келгенше ауыстырылады.']},
+ {k:'curtain',ru:['Порванная занавеска','Шторы должны быть целыми и полностью закрываться: от этого зависит приватность гостя.'],kk:['Жыртылған перде','Перде бүтін болып, толық жабылуы керек: қонақтың жеке өмірі соған байланысты.']},
+ {k:'towel',ru:['Полотенце на полу','Использованный текстиль выносят при уборке. Это значит, номер убран не полностью.'],kk:['Едендегі сүлгі','Қолданылған тоқыма бұйымдар жинау кезінде шығарылады. Бұл нөмір толық жиналмағанын білдіреді.']},
+ {k:'bin',ru:['Переполненная корзина','Корзина должна быть пустой и чистой — это проверяют в первую очередь.'],kk:['Толып кеткен қоқыс себеті','Себет бос әрі таза болуы керек — алдымен осыны тексереді.']},
+ {k:'frame',ru:['Криво висящая картина','Мелочи создают общее впечатление о чистоте и порядке.'],kk:['Қисық ілінген сурет','Ұсақ-түйек тазалық пен тәртіп туралы жалпы әсер қалыптастырады.']},
+ {k:'minibar',ru:['Открытый мини-бар','Дверца ослаблена, бутылка вскрыта: нужно проверить и пополнить мини-бар.'],kk:['Ашық мини-бар','Есігі ашық, бөтелке ашылған: мини-барды тексеріп, толтыру керек.']},
+ {k:'window',ru:['Грязное окно','Следы на стекле заметны на свету. Окна протирают при каждой уборке.'],kk:['Лас терезе','Әйнектегі іздер жарықта көрінеді. Терезені әр жинауда сүртеді.']}
+];
+const T={ru:{eb:'Номер 111 · осмотр номера',h:'Проверка номера перед заселением',
+ intro:'Горничная сдала номер, но кое-что пропустила. Нажимайте на то, что считаете нарушением стандарта. Неверное нажатие тоже считается: каждые два лишних клика снимают балл. Когда решите, что нашли всё, нажмите «Закончить осмотр».',
+ timer:'Время',miss:'Лишних кликов',check:'Чек-лист',defect:'Дефект',start:'Осмотрите номер. Не всё здесь в порядке.',finish:'Закончить осмотр',res:'Итог осмотра',found:'Найдено',missed:'Что вы пропустили'},
+ kk:{eb:'111 нөмір · нөмірді тексеру',h:'Қонақ келер алдында нөмірді тексеру',
+ intro:'Бөлме қызметкері нөмірді тапсырды, бірақ бірдеңені қалдырып кеткен. Стандартты бұзады деп санайтын нәрсені басыңыз. Қате басу да есепке алынады: әр екі артық басу бір ұпайды алып тастайды. Бәрін таптым деп ойласаңыз, «Тексеруді аяқтау» батырмасын басыңыз.',
+ timer:'Уақыт',miss:'Артық басулар',check:'Чек-парақ',defect:'Ақау',start:'Нөмірді мұқият қараңыз. Мұндағы бәрі ретті емес.',finish:'Тексеруді аяқтау',res:'Тексеру қорытындысы',found:'Табылды',missed:'Нені өткізіп алдыңыз'}};
+const OKM={bed:{ru:'Кровать заправлена безупречно. Здесь всё в порядке.',kk:'Керует мінсіз жиналған. Мұнда бәрі дұрыс.'},stand:{ru:'Тумбочка чистая, всё на месте.',kk:'Тумба таза, бәрі орнында.'},rug:{ru:'Коврик чистый.',kk:'Кілемше таза.'},
+ pillow:{ru:'Подушка чистая. Здесь всё в порядке.',kk:'Жастық таза. Мұнда бәрі дұрыс.'},lamp:{ru:'Светильник целый и исправный.',kk:'Шам бүтін әрі жұмыс істейді.'},curtain:{ru:'Штора целая.',kk:'Перде бүтін.'},towel:{ru:'Полотенце аккуратно сложено на кровати.',kk:'Сүлгі керуетке ұқыпты жиналған.'},bin:{ru:'Корзина пустая и чистая.',kk:'Себет бос әрі таза.'},frame:{ru:'Картина висит ровно.',kk:'Сурет тік ілулі.'},minibar:{ru:'Мини-бар закрыт, пломбы целы.',kk:'Мини-бар жабық, пломбалар бүтін.'},window:{ru:'Стекло чистое.',kk:'Әйнек таза.'}};
+function svgRoom(on,found,pick,lg){
+  const D=k=>on.has(k),F=k=>found.has(k)?' found':'';
+  const hot=(k,ring,inner)=>D(k)?`<g class="hot${F(k)}" data-d="${k}">${inner(true)}${ring}</g>`:`<g class="hotn" data-n="${esc(OKM[k][lg])}">${inner(false)}</g>`;
+  const ok=(k,inner)=>`<g class="hotn" data-n="${esc(OKM[k][lg])}">${inner}</g>`;
+  return `<svg class="room" viewBox="0 0 400 260" role="img" aria-label="Room">
+  <rect width="400" height="260" style="fill:var(--r-wall)"/><polygon points="0,190 400,190 400,260 0,260" style="fill:var(--r-floor)"/>
+  ${ok('rug',`<ellipse cx="200" cy="232" rx="110" ry="14" style="fill:var(--r-bed2)" opacity=".18"/>`)}
+  ${hot('frame',`<circle class="ring" cx="128" cy="53" r="44"/>`,d=>`<g ${d?'transform="rotate(-13 128 53)"':''}><rect x="90" y="28" width="76" height="50" rx="3" style="fill:var(--r-bed)"/><rect x="96" y="34" width="64" height="38" style="fill:var(--r-glass)"/><path d="M96 66 L112 50 L124 60 L138 44 L160 66Z" style="fill:var(--blue)"/></g>`)}
+  ${hot('window',`<circle class="ring" cx="314" cy="70" r="52"/>`,d=>`<rect x="262" y="28" width="104" height="84" rx="4" style="fill:var(--r-glass)"/><path d="M314 28V112M262 70H366" stroke="var(--r-bed)" stroke-width="4"/>${d?`<path d="M274 44 q10 6 8 16 M290 84 q12 -4 18 8 M330 40 q-8 10 2 20 M344 86 q-10 6 -2 16" stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none" opacity=".55"/>`:''}<rect x="252" y="22" width="122" height="6" rx="3" style="fill:var(--r-wood)"/><path d="M254 28 H284 L278 128 Q268 136 258 128Z" style="fill:var(--r-curt)"/>`)}
+  ${hot('curtain',`<circle class="ring" cx="352" cy="80" r="46"/>`,d=>d?`<path d="M372 28 H346 L330 96 L350 112 L336 140 L372 100Z" style="fill:var(--r-curt)"/><path d="M346 28 L334 70" stroke="var(--ink)" stroke-width="2" stroke-dasharray="3 3" opacity=".5"/>`:`<path d="M346 28 H374 L378 128 H346Z" style="fill:var(--r-curt)"/>`)}
+  ${ok('bed',`<rect x="34" y="96" width="180" height="26" rx="6" style="fill:var(--r-wood)"/><rect x="26" y="132" width="196" height="58" rx="10" style="fill:var(--r-bed)"/><rect x="26" y="156" width="196" height="34" rx="8" style="fill:var(--r-bed2)"/><rect x="34" y="188" width="8" height="14" style="fill:var(--r-wood)"/><rect x="206" y="188" width="8" height="14" style="fill:var(--r-wood)"/>`)}
+  ${hot('pillow',`<circle class="ring" cx="88" cy="125" r="30"/>`,d=>`<rect x="52" y="112" width="70" height="26" rx="12" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/>${d?`<ellipse cx="88" cy="125" rx="14" ry="8" fill="#9b6a3e" opacity=".75"/><circle cx="82" cy="123" r="4" fill="#6f4522" opacity=".7"/>`:''}`)}
+  <rect x="130" y="112" width="70" height="26" rx="12" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/>
+  ${ok('stand',`<rect x="236" y="150" width="54" height="46" rx="4" style="fill:var(--r-wood)"/><rect x="242" y="160" width="42" height="12" rx="2" fill="#00000026"/>`)}
+  ${hot('lamp',`<circle class="ring" cx="261" cy="116" r="28"/>`,d=>d?`<rect x="258" y="130" width="6" height="22" style="fill:var(--r-bin)"/><path d="M240 130 L282 130 L272 100 L250 100Z" style="fill:var(--r-bin)"/><path d="M262 100 L258 112 L266 116 L260 130" fill="none" stroke="var(--ink)" stroke-width="2"/>`:`<circle cx="261" cy="116" r="30" fill="var(--sun)" opacity=".28"><animate attributeName="opacity" values=".22;.34;.22" dur="3s" repeatCount="indefinite"/></circle><rect x="258" y="130" width="6" height="22" style="fill:var(--r-bin)"/><path d="M240 130 L282 130 L272 100 L250 100Z" style="fill:var(--sun)"/>`)}
+  ${hot('minibar',`<circle class="ring" cx="336" cy="170" r="38"/>`,d=>`<rect x="306" y="150" width="62" height="46" rx="4" style="fill:var(--r-bin)"/>${d?`<path d="M368 152 L388 160 L388 204 L368 196Z" style="fill:var(--r-bin)" opacity=".75"/><rect x="326" y="136" width="8" height="16" rx="2" fill="#2e7d32"/><rect x="326" y="132" width="8" height="5" fill="#ccc"/><path d="M330 154 q-2 12 -8 18" stroke="#7bd" stroke-width="3" fill="none" opacity=".7"/>`:`<rect x="312" y="156" width="50" height="3" fill="#ffffff55"/><circle cx="360" cy="176" r="2.5" fill="#fff"/>`}`)}
+  ${hot('towel',`<circle class="ring" cx="${on.has('towel')?127:182}" cy="${on.has('towel')?224:156}" r="46"/>`,d=>d?`<g transform="rotate(-6 127 224)"><rect x="86" y="212" width="82" height="24" rx="9" style="fill:var(--r-towel);stroke:var(--line);stroke-width:2"/><rect x="100" y="212" width="6" height="24" fill="var(--blue)"/></g>`:`<rect x="160" y="146" width="44" height="14" rx="4" style="fill:var(--r-towel);stroke:var(--line);stroke-width:2"/><rect x="172" y="146" width="4" height="14" fill="var(--blue)"/>`)}
+  ${hot('bin',`<circle class="ring" cx="344" cy="228" r="34"/>`,d=>`<path d="M326 206 H362 L358 252 H330Z" style="fill:var(--r-bin)"/>${d?`<circle cx="336" cy="203" r="8" fill="#fff"/><circle cx="350" cy="200" r="7" fill="#ffd1d1"/><path d="M342 207 l8 -10 l5 8z" fill="#f3f3f3"/><circle cx="344" cy="196" r="6" fill="#fff"/>`:''}`)}
+  </svg>`;
+}
+MODS.push({id:'inspect',no:'111',min:5,max:10,title:{ru:'Осмотр номера',kk:'Нөмірді тексеру'},sub:{ru:'Найди дефекты',kk:'Ақауларды табу'},
+ mount(root,api){sceneMount({T,defs,show:6,svg:svgRoom},root,api)}});
+})();
+
+/* ── сцена 2: зал ресторана ── */
+(function(){
+const defs=[
+ {k:'puddle',ru:['Лужа без знака','Мокрый пол без предупреждающего знака — травмоопасно. Нужно вытереть и выставить табличку.'],kk:['Белгісіз су','Ескерту белгісіз ылғал еден жарақат алуға әкеледі. Сүртіп, тақтайша қою керек.']},
+ {k:'glass',ru:['Бокал со сколом','Посуду с трещинами и сколами убирают сразу: риск пореза.'],kk:['Жиегі сынған бокал','Жарықшақ пен сынығы бар ыдыстарды дереу алып тастайды: кесіп алу қаупі бар.']},
+ {k:'cloth',ru:['Пятно на скатерти','Скатерть с пятном заменяют до посадки гостей.'],kk:['Дастарқандағы дақ','Дақ түскен дастарқанды қонақтарды отырғызғанға дейін ауыстырады.']},
+ {k:'plate',ru:['Грязная посуда на столе','Использованную посуду забирают сразу после ухода гостей.'],kk:['Үстелдегі лас ыдыс','Қолданылған ыдысты қонақ кеткен бойда жинап алады.']},
+ {k:'chair',ru:['Упавший стул','Стулья всегда стоят ровно: упавший стул мешает проходу и выглядит небрежно.'],kk:['Құлаған орындық','Орындықтар әрдайым тік тұрады: құлаған орындық жолға кедергі және ұқыпсыз көрінеді.']},
+ {k:'napkin',ru:['Салфетка на полу','Мусор и упавшие предметы убирают сразу, до подхода гостей.'],kk:['Едендегі майлық','Қоқыс пен құлаған заттарды қонақ келмей тұрып жинайды.']},
+ {k:'exit',ru:['Заблокированный выход','Эвакуационный выход должен быть свободен всегда. Это требование безопасности.'],kk:['Бөгелген шығу есігі','Эвакуациялық шығу әрдайым бос болуы тиіс. Бұл қауіпсіздік талабы.']},
+ {k:'lamp',ru:['Перегоревший светильник','Одна тёмная лампа в зале заметна гостям. Заменяют до открытия.'],kk:['Жанбайтын шам','Залдағы бір сөнген шам қонақтарға көрінеді. Ашылар алдында ауыстырады.']}
+];
+const T={ru:{eb:'Номер 222 · зал ресторана',h:'Проверка зала перед открытием',
+ intro:'До открытия ресторана 15 минут. Обойдите зал глазами менеджера смены и найдите нарушения стандартов сервиса и безопасности. Лишние клики по нормальным местам снимают баллы.',
+ timer:'Время',miss:'Лишних кликов',check:'Чек-лист',defect:'Нарушение',start:'Осмотрите зал. Что здесь не так?',finish:'Зал готов',res:'Итог',found:'Найдено',missed:'Что вы пропустили'},
+ kk:{eb:'222 нөмір · мейрамхана залы',h:'Ашылар алдында залды тексеру',
+ intro:'Мейрамхана ашылуына 15 минут қалды. Залды ауысым менеджерінің көзімен аралап, қызмет көрсету мен қауіпсіздік стандарттарының бұзылуын табыңыз. Қалыпты жерлерге артық басу ұпайды азайтады.',
+ timer:'Уақыт',miss:'Артық басулар',check:'Чек-парақ',defect:'Бұзушылық',start:'Залды қараңыз. Мұнда не дұрыс емес?',finish:'Зал дайын',res:'Қорытынды',found:'Табылды',missed:'Нені өткізіп алдыңыз'}};
+const OKM={bar:{ru:'Барная стойка в порядке.',kk:'Бар үстелі қалыпты.'},plant:{ru:'Растение ухожено.',kk:'Өсімдік күтімді.'},win:{ru:'Окно чистое.',kk:'Терезе таза.'},menu:{ru:'Меню на стойке актуально.',kk:'Үстелдегі мәзір өзекті.'},
+ puddle:{ru:'Пол чистый и сухой, коврик на месте.',kk:'Еден таза әрі құрғақ, кілемше орнында.'},glass:{ru:'Бокал целый, без сколов.',kk:'Бокал бүтін, сынығы жоқ.'},cloth:{ru:'Скатерть чистая и выглажена.',kk:'Дастарқан таза әрі үтіктелген.'},plate:{ru:'Стол сервирован чисто.',kk:'Үстел таза сервировкаланған.'},chair:{ru:'Стул стоит ровно.',kk:'Орындық тік тұр.'},napkin:{ru:'Салфетка аккуратно сложена.',kk:'Майлық ұқыпты бүктелген.'},exit:{ru:'Выход свободен, указатель горит.',kk:'Шығу есігі бос, көрсеткіш жанып тұр.'},lamp:{ru:'Светильник горит ровно.',kk:'Шам бірқалыпты жанып тұр.'}};
+function svgHall(on,found,pick,lg){
+  const D=k=>on.has(k),F=k=>found.has(k)?' found':'';
+  const hot=(k,ring,inner)=>D(k)?`<g class="hot${F(k)}" data-d="${k}">${inner(true)}${ring}</g>`:`<g class="hotn" data-n="${esc(OKM[k][lg])}">${inner(false)}</g>`;
+  const ok=(k,inner)=>`<g class="hotn" data-n="${esc(OKM[k][lg])}">${inner}</g>`;
+  const chairUp=(x,y)=>`<rect x="${x}" y="${y}" width="22" height="6" rx="3" style="fill:var(--r-wood)"/><rect x="${x+2}" y="${y-22}" width="3" height="24" style="fill:var(--r-wood)"/><rect x="${x+17}" y="${y-22}" width="3" height="24" style="fill:var(--r-wood)"/><rect x="${x}" y="${y-24}" width="22" height="5" rx="2" style="fill:var(--r-wood)"/>`;
+  return `<svg class="room" viewBox="0 0 400 260" role="img" aria-label="Hall">
+  <rect width="400" height="260" style="fill:var(--r-wall)"/><polygon points="0,170 400,170 400,260 0,260" style="fill:var(--r-floor)"/>
+  ${hot('exit',`<circle class="ring" cx="40" cy="132" r="48"/>`,d=>`<rect x="14" y="86" width="52" height="86" rx="3" style="fill:var(--r-wood)"/><rect x="22" y="72" width="36" height="12" rx="2" fill="#1c9c5a"/><text x="40" y="81" font-size="8" text-anchor="middle" fill="#fff" font-weight="700">EXIT</text>${d?`<rect x="18" y="138" width="22" height="30" rx="2" fill="#b98a58"/><rect x="38" y="148" width="24" height="20" rx="2" fill="#a67845"/><rect x="24" y="118" width="20" height="20" rx="2" fill="#c89a66"/>`:''}`)}
+  ${hot('lamp',`<circle class="ring" cx="200" cy="40" r="32"/>`,d=>`<line x1="200" y1="0" x2="200" y2="24" stroke="var(--r-bin)" stroke-width="2"/>${d?`<path d="M184 24 H216 L208 44 H192Z" style="fill:var(--r-bin)"/><path d="M190 44 l-4 14 M200 44 v16 M210 44 l4 12" stroke="var(--muted)" stroke-width="1.2"/>`:`<circle cx="200" cy="38" r="34" fill="var(--sun)" opacity=".25"><animate attributeName="opacity" values=".2;.32;.2" dur="3.2s" repeatCount="indefinite"/></circle><path d="M184 24 H216 L208 44 H192Z" style="fill:var(--sun)"/>`}`)}
+  ${ok('win',`<rect x="90" y="40" width="70" height="60" rx="3" style="fill:var(--r-glass)"/><path d="M125 40V100M90 70H160" stroke="var(--r-bed)" stroke-width="3"/>`)}
+  ${ok('menu',`<rect x="300" y="50" width="56" height="40" rx="3" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/><path d="M308 62H348M308 72H340M308 82H344" stroke="var(--muted)" stroke-width="2"/>`)}
+  ${ok('bar',`<rect x="296" y="110" width="94" height="56" rx="4" style="fill:var(--r-wood)"/><rect x="292" y="104" width="102" height="8" rx="3" fill="#00000030"/>`)}
+  ${ok('plant',`<path d="M74 168 L96 168 L92 186 L78 186Z" style="fill:var(--r-curt)"/><path d="M85 168 q-14 -24 -4 -40 q10 12 4 40 M85 168 q16 -22 10 -42 q-10 14 -10 42" fill="#2e8b57"/>`)}
+  <!-- tables -->
+  <rect x="118" y="188" width="6" height="40" style="fill:var(--r-wood)"/><ellipse cx="121" cy="188" rx="50" ry="13" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/>
+  ${hot('glass',`<circle class="ring" cx="128" cy="174" r="22"/>`,d=>`<path d="M118 160 H138 L134 184 H122Z" style="fill:var(--r-glass)" opacity=".9" stroke="var(--muted)" stroke-width="1.2"/><rect x="127" y="184" width="3" height="8" style="fill:var(--muted)"/>${d?`<path d="M134 160 l-4 6 l4 3 l-3 6" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M134 160 l4 0 l-2 5z" style="fill:var(--r-wall)"/>`:''}`)}
+  ${hot('chair',`<circle class="ring" cx="${on.has('chair')?58:56}" cy="${on.has('chair')?212:200}" r="32"/>`,d=>d?`<g transform="translate(30 224) rotate(-84)">${chairUp(0,0)}</g>`:chairUp(44,214))}
+  <rect x="248" y="188" width="6" height="40" style="fill:var(--r-wood)"/>
+  ${hot('cloth',`<circle class="ring" cx="251" cy="190" r="48"/>`,d=>`<ellipse cx="251" cy="188" rx="50" ry="13" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/>${d?`<ellipse cx="236" cy="188" rx="13" ry="5" fill="#a0522d" opacity=".65"/><path d="M262 183 q10 3 20 -1" stroke="var(--line)" stroke-width="2" fill="none"/>`:''}`)}
+  ${hot('napkin',`<circle class="ring" cx="${on.has('napkin')?205:262}" cy="${on.has('napkin')?238:180}" r="26"/>`,d=>d?`<path d="M190 236 l12 -8 l16 4 l4 10 l-14 6z" fill="#fff" stroke="var(--line)" stroke-width="1.5"/>`:`<path d="M258 178 l10 -8 l8 6 l-6 10z" fill="#fff" stroke="var(--line)" stroke-width="1.5"/>`)}
+  ${hot('plate',`<circle class="ring" cx="337" cy="196" r="36"/>`,d=>`<rect x="332" y="206" width="6" height="30" style="fill:var(--r-wood)"/><ellipse cx="335" cy="206" rx="40" ry="11" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/><ellipse cx="335" cy="203" rx="17" ry="5" fill="#fff" stroke="var(--muted)" stroke-width="1.5"/>${d?`<circle cx="330" cy="202" r="3" fill="#c0792e"/><circle cx="338" cy="204" r="2.5" fill="#6d8b3a"/><path d="M350 198 l14 4 M354 196 l12 2" stroke="var(--muted)" stroke-width="2"/>`:''}`)}
+  ${hot('puddle',`<circle class="ring" cx="112" cy="236" r="40"/>`,d=>d?`<ellipse cx="112" cy="238" rx="38" ry="9" fill="#6bb8ee" opacity=".55"><animate attributeName="rx" values="36;39;36" dur="4s" repeatCount="indefinite"/></ellipse>`:`<rect x="90" y="232" width="44" height="10" rx="3" style="fill:var(--r-bin)" opacity=".4"/>`)}
+  </svg>`;
+}
+MODS.push({id:'hall',no:'222',min:4,max:10,title:{ru:'Зал ресторана',kk:'Мейрамхана залы'},sub:{ru:'Найди нарушения',kk:'Бұзушылықты табу'},
+ mount(root,api){sceneMount({T,defs,show:6,svg:svgHall},root,api)}});
+})();
+
+/* ═════════ 333 · ЧАС ПИК ═════════ */
+MODS.push({id:'rush',no:'333',min:4,max:10,
+title:{ru:'Час пик',kk:'Қарбалас сәт'},sub:{ru:'Очередь у стойки',kk:'Ресепшндегі кезек'},
+mount(root,api){
+  const DUR=60;
+  const T={ru:{
+   eb:'Номер 333 · стойка ресепшн',h:'Час пик: 60 секунд у стойки',
+   intro:'Утренний наплыв гостей. У вас две стойки. Нажмите на гостя, чтобы начать обслуживание: у каждого свой запрос, своё терпение и своя ценность. Гость, который ждал слишком долго, уйдёт. Успеть всех нельзя: решайте, кого брать первым.',
+   desk:'Стойка',free:'свободна',serving:'обслуживание',start:'Начать час пик',again:'Сыграть ещё раз',
+   t:{q:'Вопрос',out:'Выезд',inn:'Заселение',cmp:'Жалоба',vip:'VIP-заселение'},
+   res:'Итог',served:'Обслужено',lost:'Ушли недовольными',value:'Набрано очков ценности',
+   tip:'Совет: сначала берите тех, у кого терпение скоро кончится и кто обслуживается быстро.',
+   gname:['Айбек','Лена','Тимур','Дана','Олег','Марат','Сауле','Игорь','Зарина','Антон','Алия','Рустам','Нина','Бауыржан','Камила','Эдуард']
+  },kk:{
+   eb:'333 нөмір · ресепшн үстелі',h:'Қарбалас сәт: үстел басындағы 60 секунд',
+   intro:'Таңертеңгі қонақтар легі. Сізде екі үстел бар. Қызмет көрсетуді бастау үшін қонақты басыңыз: әрқайсысының өз сұрауы, шыдамы және құндылығы бар. Тым ұзақ күткен қонақ кетіп қалады. Бәріне үлгеру мүмкін емес: кімнен бастау керегін өзіңіз шешіңіз.',
+   desk:'Үстел',free:'бос',serving:'қызмет көрсету',start:'Қарбаласты бастау',again:'Тағы ойнау',
+   t:{q:'Сұрақ',out:'Шығу',inn:'Орналасу',cmp:'Шағым',vip:'VIP орналасу'},
+   res:'Қорытынды',served:'Қызмет көрсетілді',lost:'Наразы болып кетті',value:'Жиналған құндылық ұпайы',
+   tip:'Кеңес: шыдамы тез таусылатын және тез қызмет көрсетілетін қонақтардан бастаңыз.',
+   gname:['Айбек','Лена','Тимур','Дана','Олег','Марат','Сауле','Игорь','Зарина','Антон','Алия','Рустам','Нина','Бауыржан','Камила','Эдуард']
+  }};
+  const TY={q:{svc:3,pat:9,val:1,col:'#2e9bd6'},out:{svc:4,pat:11,val:2,col:'#6b5bd6'},inn:{svc:7,pat:15,val:3,col:'#2347ff'},cmp:{svc:9,pat:14,val:4,col:'#d6402e'},vip:{svc:6,pat:9,val:5,col:'#d6a42e'}};
+  const R=api.rng();
+  const plan=[];let tt=1;const types=['q','out','inn','inn','cmp','q','out','vip','inn','q','cmp','out','inn','q','vip','inn'];
+  const names=shufR(T.ru.gname,R);
+  for(let i=0;i<26;i++){plan.push({id:i,at:tt,type:types[Math.floor(R()*types.length)],name:names[i%names.length]});tt+=1.2+R()*1.4}
+  let st='idle',timer=null,t0=0,G=[],desks=[null,null],score=0,lostVal=0,served=0,lost=0,total=0,res=null;
+  const t=k=>T[api.lang()][k];
+  function start(){
+    st='run';G=plan.map(p=>({...p,pat:TY[p.type].pat,max:TY[p.type].pat,state:'wait',spawned:false}));desks=[null,null];score=0;lostVal=0;served=0;lost=0;total=plan.reduce((a,p)=>a+TY[p.type].val,0);t0=performance.now();last=t0;
+    buildRun();timer=setInterval(step,100);
+  }
+  let last=0;
+  function el(id){return $('#g'+id,root)}
+  function gHtml(g){const x=T[api.lang()],y=TY[g.type];return `<b>${esc(g.name)}</b><small style="color:${y.col};font-weight:700">${x.t[g.type]} · ★${y.val}</small><small>⏱ ${y.svc} c</small><div class="pbar"><i></i></div>`}
+  function buildRun(){
+    const x=T[api.lang()];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2>
+    <div class="timebar"><i id="tb"></i></div>
+    <div class="desks">${[0,1].map(i=>`<div class="desk" id="dk${i}"><small>${x.desk} ${i+1}</small><b>${x.free}</b><div class="pbar"><i></i></div></div>`).join('')}</div>
+    <div class="queue" id="q"></div>`;
+  }
+  function step(){
+    const now=performance.now(),dt=(now-last)/1000;last=now;const el0=(now-t0)/1000;
+    const q=$('#q',root);if(!q)return;
+    $('#tb',root).style.width=Math.max(0,(1-el0/DUR)*100)+'%';
+    G.forEach(g=>{
+      if(!g.spawned&&el0>=g.at&&g.state==='wait'){g.spawned=true;const b=document.createElement('button');b.className='gq'+(g.type==='vip'?' vip':'');b.id='g'+g.id;b.innerHTML=gHtml(g);b.onclick=()=>take(g);q.appendChild(b)}
+      if(g.spawned&&g.state==='wait'){g.pat-=dt;const e=el(g.id);if(e){const r=Math.max(0,g.pat/g.max);const bar=$('.pbar i',e);bar.style.width=r*100+'%';bar.style.background=r>.5?'var(--ok)':r>.25?'var(--sun)':'var(--bad)'}
+        if(g.pat<=0){g.state='lost';lost++;lostVal+=TY[g.type].val;const e2=el(g.id);if(e2){e2.classList.add('lost');setTimeout(()=>e2.remove(),600)}}}
+    });
+    desks.forEach((d,i)=>{if(!d)return;d.left-=dt;const dk=$('#dk'+i,root);$('.pbar i',dk).style.width=(1-d.left/d.svc)*100+'%';
+      if(d.left<=0){const g=d.g;g.state='done';served++;score+=TY[g.type].val;const e=el(g.id);if(e)e.remove();desks[i]=null;dk.classList.remove('busy');$('b',dk).textContent=t('free');$('.pbar i',dk).style.width='0'}});
+    if(el0>=DUR||(G.every(g=>g.spawned&&g.state!=='wait'&&g.state!=='serving')&&!desks.some(Boolean)))end();
+  }
+  function take(g){
+    if(g.state!=='wait')return;const i=desks.findIndex(d=>!d);if(i<0)return;
+    g.state='serving';desks[i]={g,left:TY[g.type].svc,svc:TY[g.type].svc};
+    const e=el(g.id);if(e)e.classList.add('out');setTimeout(()=>e&&e.remove(),500);
+    const dk=$('#dk'+i,root);dk.classList.add('busy');$('b',dk).textContent=g.name+' · '+t('t')[g.type];
+  }
+  function end(){
+    clearInterval(timer);st='end';
+    const missed=G.filter(g=>g.state==='wait'||g.state==='serving'||!g.spawned).length;
+    const spawnedVal=G.filter(g=>g.spawned).reduce((a,g)=>a+TY[g.type].val,0);
+    const raw=(score-0.5*lostVal)/Math.max(1,spawnedVal*0.85);
+    const sc=Math.max(0,Math.min(10,Math.round(10*raw)));
+    res={sc,served,lost,score,lostVal};
+    drawEnd();
+    api.finish(sc,{'Обслужено':served,'Ушли':lost,'Очки':score+' (потеряно '+lostVal+')'});
+  }
+  function drawEnd(){
+    const x=T[api.lang()];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2>
+    <div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b>
+    <p>${x.served}: ${res.served} · ${x.lost}: ${res.lost} · ${x.value}: ${res.score}</p><p class="det">${x.tip}</p></div>
+    <p style="margin-top:14px"><button class="btn" id="go">${x.again}</button></p>`;
+    $('#go',root).onclick=start;
+  }
+  function drawIdle(){
+    const x=T[api.lang()];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <div class="row2">${Object.keys(TY).map(k=>`<div class="tile"><b style="color:${TY[k].col}">${x.t[k]}</b><small>⏱ ${TY[k].svc} c · ★${TY[k].val}</small></div>`).join('')}</div>
+    <p style="margin-top:16px"><button class="btn sun" id="go">${x.start}</button></p>`;
+    $('#go',root).onclick=start;
+  }
+  api.onLang(()=>{if(st==='idle')drawIdle();else if(st==='end')drawEnd()});
+  drawIdle();
+}});
+
+/* ═════════ 444 · СЕРВИРОВКА ═════════ */
+MODS.push({id:'table',no:'444',min:4,max:10,
+title:{ru:'Сервировка',kk:'Дастарқан жаюу'},sub:{ru:'Накрой стол',kk:'Үстелді жаю'},
+mount(root,api){
+  const T={ru:{
+   eb:'Номер 444 · ресторан',h:'Накройте стол для ужина из трёх блюд',
+   intro:'В центре стоит тарелка. Перетащите предметы из лотка на правильные места вокруг неё (или нажмите на предмет, затем на место). Подписи не показаны. Подсказка со схемой снимает 2 балла.',
+   items:{fork:'Вилка',knife:'Нож',spoon:'Суповая ложка',dess:'Десертная ложка',bread:'Хлебная тарелка',water:'Бокал для воды',wine:'Бокал для вина',napkin:'Салфетка'},
+   hint:'Показать подписи (−2 балла)',check:'Проверить стол',res:'Итог',right:'верно',wrong:'не на месте',
+   expl:{fork:'Вилка слева от тарелки.',knife:'Нож справа от тарелки, лезвием к тарелке.',spoon:'Суповая ложка справа, рядом с ножом.',dess:'Десертная ложка лежит выше тарелки, ручкой вправо.',bread:'Хлебная тарелка слева, выше вилки.',water:'Бокал для воды стоит над ножом.',wine:'Бокал для вина правее бокала для воды.',napkin:'Салфетка слева от вилки.'},
+   hintUsed:'Использована подсказка: −2.',reset:'Начать заново'
+  },kk:{
+   eb:'444 нөмір · мейрамхана',h:'Үш тағамды кешкі асқа үстелді жайыңыз',
+   intro:'Ортада табақ тұр. Заттарды науадан оның айналасындағы дұрыс орындарға сүйреңіз (немесе затты, содан кейін орынды басыңыз). Жазулар көрсетілмейді. Схемасы бар кеңес 2 ұпайды алады.',
+   items:{fork:'Шанышқы',knife:'Пышақ',spoon:'Көже қасығы',dess:'Десерт қасығы',bread:'Нан табағы',water:'Су бокалы',wine:'Шарап бокалы',napkin:'Майлық'},
+   hint:'Жазуларды көрсету (−2 ұпай)',check:'Үстелді тексеру',res:'Қорытынды',right:'дұрыс',wrong:'орнында емес',
+   expl:{fork:'Шанышқы табақтың сол жағында.',knife:'Пышақ табақтың оң жағында, жүзі табаққа қарайды.',spoon:'Көже қасығы оң жақта, пышақтың қасында.',dess:'Десерт қасығы табақтың жоғарғы жағында, сабы оңға қарай жатады.',bread:'Нан табағы сол жақта, шанышқыдан жоғары.',water:'Су бокалы пышақтың үстінде тұрады.',wine:'Шарап бокалы су бокалының оң жағында.',napkin:'Майлық шанышқының сол жағында.'},
+   hintUsed:'Кеңес қолданылды: −2.',reset:'Қайтадан бастау'
+  }};
+  // zone geometry in viewBox 360x260
+  const Z={fork:{x:112,y:122,w:18,h:56},napkin:{x:84,y:120,w:22,h:60},bread:{x:92,y:54,w:34,h:34,c:1},dess:{x:150,y:76,w:60,h:12},knife:{x:236,y:122,w:12,h:56},spoon:{x:254,y:122,w:14,h:56},water:{x:222,y:60,w:30,h:36,c:1},wine:{x:262,y:60,w:30,h:36,c:1}};
+  const ICON={
+   fork:`<svg viewBox="0 0 40 70"><path d="M12 4v18M20 4v18M28 4v18M12 22q0 10 8 12q8 -2 8 -12M20 34v32" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`,
+   knife:`<svg viewBox="0 0 40 70"><path d="M24 4q10 14 2 34h-6V4z" fill="currentColor"/><path d="M20 38v28" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`,
+   spoon:`<svg viewBox="0 0 40 70"><ellipse cx="20" cy="16" rx="9" ry="13" fill="currentColor"/><path d="M20 28v38" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>`,
+   dess:`<svg viewBox="0 0 70 40"><ellipse cx="54" cy="20" rx="13" ry="8" fill="currentColor"/><path d="M42 20H8" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>`,
+   bread:`<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="30" cy="30" r="14" fill="none" stroke="currentColor" stroke-width="2" opacity=".6"/></svg>`,
+   water:`<svg viewBox="0 0 50 70"><path d="M10 6h30l-4 38q-4 6-11 6t-11-6z" fill="none" stroke="currentColor" stroke-width="3"/><path d="M25 50v14M15 66h20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M13 22h24" stroke="currentColor" stroke-width="2" opacity=".5"/></svg>`,
+   wine:`<svg viewBox="0 0 50 70"><path d="M12 4h26q2 24 -12 30q-14 -6 -14 -30z" fill="none" stroke="currentColor" stroke-width="3"/><path d="M25 34v28M15 66h20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M14 16h22" stroke="#b03a5c" stroke-width="5" opacity=".7"/></svg>`,
+   napkin:`<svg viewBox="0 0 40 70"><path d="M6 6h28v58H6z" fill="none" stroke="currentColor" stroke-width="3"/><path d="M6 22h28" stroke="currentColor" stroke-width="2" opacity=".6"/></svg>`
+  };
+  const keys=Object.keys(Z);
+  const R=api.rng();
+  let placed={},sel=null,hintOn=false,hintUsed=false,done=false,res=null;
+  const order=shufR(keys,R);
+  const t=k=>T[api.lang()][k];
+  function itemSvg(k,x,y,w,h,color){return `<g transform="translate(${x} ${y})" style="color:${color||'var(--ink)'}"><svg x="0" y="0" width="${w}" height="${h}" viewBox="${ICON[k].match(/viewBox="([^"]+)"/)[1]}" preserveAspectRatio="xMidYMid meet" overflow="visible">${ICON[k].replace(/<svg[^>]*>|<\/svg>/g,'')}</svg></g>`}
+  function draw(){
+    const x=T[api.lang()];
+    const zones=keys.map(k=>{const z=Z[k],cl=done?(placed[k]===k?'ok':'no'):'';
+      return `<g data-z="${k}"><${z.c?`ellipse cx="${z.x+z.w/2}" cy="${z.y+z.h/2}" rx="${z.w/2+3}" ry="${z.h/2+3}"`:`rect x="${z.x-3}" y="${z.y-3}" width="${z.w+6}" height="${z.h+6}" rx="6"`} class="zone ${cl}" data-zz="${k}"/>
+      ${placed[k]?itemSvg(placed[k],z.x,z.y,z.w,z.h):''}${hintOn&&!placed[k]?`<text x="${z.x+z.w/2}" y="${z.y+z.h+14}" font-size="8" text-anchor="middle" fill="var(--muted)">${esc(x.items[k])}</text>`:''}</g>`}).join('');
+    const free=order.filter(k=>!Object.values(placed).includes(k));
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <svg class="tsvg" id="tv" viewBox="0 0 360 260" role="img" aria-label="Table">
+      <rect width="360" height="260" style="fill:var(--r-wood)" opacity=".3"/><rect x="40" y="26" width="280" height="210" rx="10" style="fill:var(--r-bed)"/>
+      <circle cx="180" cy="150" r="40" style="fill:var(--r-bed);stroke:var(--line);stroke-width:3"/><circle cx="180" cy="150" r="27" fill="none" stroke="var(--line)" stroke-width="2"/>${zones}</svg>
+    <div class="tray" id="tr">${keys.map(k=>`<div class="titem ${sel===k?'sel':''} ${Object.values(placed).includes(k)?'gone':''}" data-k="${k}" title="${esc(x.items[k])}" style="color:var(--ink)">${ICON[k]}</div>`).join('')}</div>
+    <div class="note">${x.items[sel]||''}${sel?'':'&nbsp;'}</div>
+    <p style="margin-top:12px">${done?`<button class="btn ghost" id="rs">${x.reset}</button>`:`<button class="btn" id="ck" ${Object.keys(placed).length<keys.length?'disabled':''}>${x.check}</button> <button class="btn ghost sm" id="hn">${x.hint}</button>`}</p>
+    ${done?resHtml():''}`;
+    bind();
+  }
+  function resHtml(){
+    const x=T[api.lang()];
+    return `<div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}" style="margin-top:12px"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b><p>${res.c} / ${keys.length} ${x.right}</p>
+    <ul class="log">${keys.map(k=>`<li style="${placed[k]===k?'':'background:var(--bad-bg)'}"><b>${esc(x.items[k])}</b>: ${esc(x.expl[k])}</li>`).join('')}</ul>${hintUsed?`<p class="det">${x.hintUsed}</p>`:''}</div>`;
+  }
+  function place(k,z){
+    if(done||!z)return;
+    if(placed[z])delete placed[z];
+    // remove k from previous zone
+    for(const zz in placed)if(placed[zz]===k)delete placed[zz];
+    placed[z]=k;sel=null;draw();
+  }
+  function zoneAt(cx,cy){
+    const els=document.elementsFromPoint(cx,cy);const e=els.find(n=>n.dataset&&n.dataset.zz);return e?e.dataset.zz:null;
+  }
+  function bind(){
+    if(done){const rs=$('#rs',root);if(rs)rs.onclick=()=>{placed={};sel=null;done=false;res=null;hintOn=false;draw()};return}
+    $('#hn',root).onclick=()=>{hintOn=true;hintUsed=true;draw()};
+    const ck=$('#ck',root);ck.onclick=()=>{
+      const c=keys.filter(k=>placed[k]===k).length;let sc=Math.round(10*c/keys.length);if(hintUsed)sc=Math.max(0,sc-2);
+      res={sc,c};done=true;draw();api.finish(sc,{'Верных':c+' / '+keys.length,'Расстановка':keys.map(z=>z+'='+(placed[z]||'-')).join(', ')});};
+    $$('.titem',root).forEach(it=>{
+      const k=it.dataset.k;
+      it.addEventListener('pointerdown',e=>{
+        if(it.classList.contains('gone'))return;
+        e.preventDefault();const sx=e.clientX,sy=e.clientY;let ghost=null,moved=false;
+        const mv=ev=>{if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)<6)return;moved=true;
+          if(!ghost){ghost=document.createElement('div');ghost.className='titem dragging';ghost.style.color='var(--ink)';ghost.innerHTML=ICON[k];document.body.appendChild(ghost)}
+          ghost.style.left=ev.clientX+'px';ghost.style.top=ev.clientY+'px';
+          $$('.zone',root).forEach(z=>z.classList.remove('over'));const zz=zoneAt(ev.clientX,ev.clientY);if(zz){const zn=root.querySelector(`[data-zz="${zz}"]`);if(zn)zn.classList.add('over')}};
+        const up=ev=>{window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up);if(ghost)ghost.remove();
+          if(moved){const zz=zoneAt(ev.clientX,ev.clientY);if(zz)place(k,zz);else draw()}else{sel=sel===k?null:k;draw()}};
+        window.addEventListener('pointermove',mv);window.addEventListener('pointerup',up);
+      });
+    });
+    $$('[data-zz]',root).forEach(z=>z.addEventListener('click',()=>{const k=z.dataset.zz;if(sel)place(sel,k);else if(placed[k]){delete placed[k];draw()}}));
   }
   api.onLang(draw);draw();
 }});
