@@ -316,6 +316,7 @@ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 let LANG=STORE.get('sauyt_lang')==='kk'?'kk':'ru';
 const MODS=[];
+const TPW=12551026;
 const MAXPTS=()=>MODS.reduce((a,m)=>a+m.max,0);
 
 const UI={
@@ -324,7 +325,7 @@ const UI={
   gateLead:'Сегодня вы выходите на смену. Девять ситуаций — от общения с гостем до кризиса. Всего около 80 минут. Имя увидит преподаватель и оно будет на бейдже в конце.',
   nameL:'Имя и фамилия',nameP:'Например, Асель Нурланова',groupL:'Группа (необязательно)',groupP:'Например, ГБ-21',
   start:'Начать смену',err:'Введите имя, чтобы начать.',
-  tHello:'Вы вошли как преподаватель',tPanel:'Открыть панель преподавателя',tPractice:'Пройти как студент (результаты не сохраняются)',
+  tHello:'Вы вошли как преподаватель',tPanel:'Открыть панель преподавателя',tPractice:'Пробное прохождение (результаты не сохраняются)',tLink:'Я преподаватель',tPw:'Пароль преподавателя',tEnter:'Войти',tBad:'Неверный пароль',
   heroH:'Смена в отеле',heroLead:'Вы — дежурный администратор. Девять дверей — девять ситуаций. Правильные ответы заранее не видны: вы задаёте вопросы, считаете, планируете, пишете. Двери можно открывать в любом порядке, но время смены ограничено.',
   open:'открыть',min:'мин',next:'Следующее задание →',finBtn:'Получить бейдж',backTeacher:'Панель преподавателя',
   done:'Задание сдано',saveFail:'Результаты не попадают к преподавателю: нет прав на запись или нет связи. Сообщите преподавателю.',
@@ -343,7 +344,7 @@ const UI={
   gateLead:'Бүгін сіз ауысымға шығасыз. Тоғыз жағдай: қонақпен сөйлесуден дағдарысқа дейін. Барлығы шамамен 80 минут. Атыңызды мұғалім көреді және ол соңында бейджде тұрады.',
   nameL:'Аты-жөніңіз',nameP:'Мысалы, Әсел Нұрланова',groupL:'Топ (міндетті емес)',groupP:'Мысалы, ГБ-21',
   start:'Ауысымды бастау',err:'Бастау үшін атыңызды енгізіңіз.',
-  tHello:'Сіз мұғалім ретінде кірдіңіз',tPanel:'Мұғалім панелін ашу',tPractice:'Студент ретінде өту (нәтиже сақталмайды)',
+  tHello:'Сіз мұғалім ретінде кірдіңіз',tPanel:'Мұғалім панелін ашу',tPractice:'Сынақ режимі (нәтиже сақталмайды)',tLink:'Мен мұғаліммін',tPw:'Мұғалім құпиясөзі',tEnter:'Кіру',tBad:'Құпиясөз қате',
   heroH:'Қонақ үйдегі ауысым',heroLead:'Сіз кезекші әкімшісіз. Тоғыз есік — тоғыз жағдай. Дұрыс жауаптар алдын ала көрінбейді: сіз сұрақ қоясыз, есептейсіз, жоспарлайсыз, жазасыз. Есіктерді кез келген ретпен ашуға болады, бірақ ауысым уақыты шектеулі.',
   open:'ашу',min:'мин',next:'Келесі тапсырма →',finBtn:'Бейдж алу',backTeacher:'Мұғалім панелі',
   done:'Тапсырма тапсырылды',saveFail:'Нәтижелер мұғалімге жетпейді: жазуға құқық жоқ немесе байланыс жоқ. Мұғалімге хабарлаңыз.',
@@ -363,7 +364,7 @@ const L=o=>(o&&typeof o==='object'&&!Array.isArray(o)&&('ru' in o))?(o[LANG]??o.
 
 /* ── student state ── */
 const S={id:null,name:'',group:'',startedAt:0,door:0,res:{},time:{},enter:0,fin:false};
-let PRACTICE=false,isTeacher=false,caps={user:null,db:null,room:null,dl:null},dbDoc=null,saveFailed=false;
+let PRACTICE=false,isTeacher=false,tPwOpen=false,caps={user:null,db:null,room:null,dl:null},dbDoc=null,saveFailed=false;
 const loadLocal=()=>{try{const j=JSON.parse(STORE.get('sauyt_state')||'null');if(j&&j.name){S.name=j.name;S.group=j.group||'';S.res=j.res||{};S.time=j.time||{};S.startedAt=j.startedAt||0;S.fin=!!j.fin}}catch(e){}};
 const saveLocal=()=>STORE.set('sauyt_state',JSON.stringify({name:S.name,group:S.group,res:S.res,time:S.time,startedAt:S.startedAt,fin:S.fin}));
 const total=()=>MODS.reduce((a,m)=>a+((S.res[m.id]||{}).s||0),0);
@@ -399,7 +400,7 @@ async function initCaps(){
     if(!window.claude||!window.claude.use)return;
     const [user,db,room,dl]=await Promise.all(['user','db','room','downloads'].map(n=>window.claude.use(n).catch(()=>null)));
     caps={user,db,room,dl};
-    if(user){try{S.id=await user.id()}catch(e){}try{isTeacher=!!(await user.canEdit())}catch(e){}}
+    if(user){try{S.id=await user.id()}catch(e){}}
     if(db&&S.id)dbDoc=db.doc('students/'+S.id);
   }catch(e){}
   gateRender();
@@ -417,12 +418,16 @@ function gateRender(){
   <label class="mini" for="gp0">${U('groupL')}</label><input type="text" id="gp0" maxlength="20" placeholder="${U('groupP')}" autocomplete="off">
   <div id="nmerr" class="nmerr" role="alert"></div>
   <button class="btn sun" id="go">${U('start')}</button>
-  ${isTeacher?`<div class="tg"><div class="eyebrow">${U('tHello')}</div><button class="btn" id="goT">${U('tPanel')}</button><button class="btn ghost" id="goP">${U('tPractice')}</button></div>`:''}`;
+  ${isTeacher?`<div class="tg"><div class="eyebrow">${U('tHello')}</div><button class="btn" id="goT">${U('tPanel')}</button><button class="btn ghost" id="goP">${U('tPractice')}</button></div>`
+   :tPwOpen?`<div class="tg"><label class="mini" for="tpw">${U('tPw')}</label><input type="password" id="tpw" inputmode="numeric" autocomplete="off" maxlength="12" class="num"><div id="tperr" class="nmerr" role="alert"></div><button class="btn ghost" id="tpwGo">${U('tEnter')}</button></div>`
+   :`<p style="margin-top:22px"><button class="finalbtn" id="tLink">${U('tLink')}</button></p>`}`;
   $('#nm0').value=keep.n!=null&&keep.n!==''?keep.n:S.name;$('#gp0').value=keep.g!=null&&keep.g!==''?keep.g:S.group;
   $$('.lang button',g).forEach(b=>b.onclick=()=>setLang(b.dataset.l));
   $('#go').onclick=()=>startStudent(false);
   $('#nm0').addEventListener('keydown',e=>{if(e.key==='Enter')startStudent(false)});
   if(isTeacher){$('#goT').onclick=openTeacher;$('#goP').onclick=()=>startStudent(true)}
+  else if(tPwOpen){const go=()=>{if(hash('sauyt-'+$('#tpw').value.trim())===TPW){isTeacher=true;tPwOpen=false;gateRender()}else{$('#tperr').textContent=U('tBad');$('#tpw').select()}};$('#tpwGo').onclick=go;$('#tpw').addEventListener('keydown',e=>{if(e.key==='Enter')go()});$('#tpw').focus()}
+  else{$('#tLink').onclick=()=>{tPwOpen=true;gateRender()}}
 }
 function setLang(l){
   LANG=l;STORE.set('sauyt_lang',l);
