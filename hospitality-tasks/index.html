@@ -2558,6 +2558,134 @@ mount(root,api){
   api.onLang(draw);draw();
 }});
 
+/* ═════════ 151 · ПОДГОТОВКА КОНФЕРЕНЦ-ЗАЛА ═════════ */
+MODS.push({id:'conf',no:'151',min:10,max:10,
+title:{ru:'Конференц-зал',kk:'Конференц-зал'},sub:{ru:'Подготовка по заявке',kk:'Өтінім бойынша дайындау'},
+mount(root,api){
+  const AREA=96;
+  const T={ru:{
+   eb:'Номер 151 · служба мероприятий',h:'Подготовьте зал по заявке клиента',
+   intro:'Прочитайте заявку и подготовьте зал: выберите рассадку, закажите всё необходимое в правильном количестве и расставьте оборудование на плане. Лишнее заказывать не нужно. Нормы указаны ниже, а количество вы считаете сами.',
+   norms:'Нормы',
+   n:['Запасных стульев: 5% от числа гостей, округлить вверх.','Вода: на каждого гостя столько бутылок 0,5 л, сколько полных блоков по 2 часа в мероприятии (округлить вверх).','Ручки и блокноты: по одному на человека, если гости ведут записи. Бейджи или именные карточки: по одному на человека, если они нужны.','Круглый стол (кабаре): 1 стол на 6 человек. Переговорный стол: 1. Партер без столов.','Флипчарт: по одному на команду и один тренеру, к каждому флипчарту один набор маркеров.','Микрофон: докладчику и ещё один для вопросов из зала, если вопросы предусмотрены. Спикерфон для видеосвязи считается микрофоном.','Удлинители: 2, если нужны проектор и экран.','Кофе-станция: 1, если кофе в заявке. Стол регистрации: 1, если нужна регистрация.'],
+   layouts:{theater:'Партер (ряды стульев)',classroom:'Класс (столы рядами)',cabaret:'Кабаре (круглые столы)',ushape:'П-образная',boardroom:'Переговорный стол'},
+   lay:'Рассадка',cap:'Вместимость зала (96 м²)',persons:'чел.',
+   item:{chairs:'Стулья',tables:'Столы',water:'Вода, бутылки',pens:'Ручки',pads:'Блокноты',badges:'Бейджи / карточки',flip:'Флипчарты',markers:'Наборы маркеров',proj:'Проектор',screen:'Экран',mic:'Микрофоны',cords:'Удлинители',coffee:'Кофе-станция',reg:'Стол регистрации'},
+   order:'Заказ',plan:'План зала',planHint:'Выберите предмет и нажмите на план, чтобы поставить его. Нажмите на поставленный предмет, чтобы убрать. На плане: окна наверху, вход внизу слева, аварийный выход справа, жёлтые точки — розетки.',
+   tray:{screen:'Экран',proj:'Проектор',reg:'Регистрация',coffee:'Кофе',flip:'Флипчарт'},
+   submit:'Сдать подготовку',res:'Результат',layS:'Рассадка',ordS:'Заказ',plS:'Расстановка',ok:'верно',
+   pr:{screen:'Экран: на стене без окон (нет бликов) и не у аварийного выхода: слева.',proj:'Проектор: по центральной оси зала, на расстоянии от экрана. Розеток рядом нет, нужен удлинитель.',reg:'Регистрация: у входа, но не перекрывая дверь, чтобы не было очереди в проходе.',coffee:'Кофе: рядом с розеткой, но далеко от входа и аварийного выхода, чтобы не создавать очередей.',flip:'Флипчарт: рядом с экраном сбоку, чтобы не загораживать проекцию.'},
+   reasonLay:{theater:'презентация без записей и работы за столом: партер',cabaret:'работа в командах за круглыми столами',boardroom:'совещание за общим столом'},
+   needed:'было нужно',got:'у вас',notPl:'не расставлено'
+  },kk:{
+   eb:'151 нөмір · іс-шаралар қызметі',h:'Клиент өтінімі бойынша залды дайындаңыз',
+   intro:'Өтінімді оқып, залды дайындаңыз: отырғызуды таңдап, қажеттінің бәрін дұрыс санмен тапсырыс беріп, жабдықты залдың жоспарына орналастырыңыз. Артығын тапсырыс берудің қажеті жоқ. Нормалар төменде, ал санды өзіңіз есептейсіз.',
+   norms:'Нормалар',
+   n:['Қосымша орындықтар: қонақ санының 5%-ы, жоғарыға дөңгелектеу.','Су: іс-шарадағы әр толық 2 сағаттық блокқа әр қонаққа 0,5 л бөтелке (жоғарыға дөңгелектеу).','Қаламдар мен блокноттар: қонақтар жазба жүргізсе, адамға біреуден. Бейджиктер немесе аты жазылған карточкалар: қажет болса, адамға біреуден.','Дөңгелек үстел (кабаре): 6 адамға 1 үстел. Келіссөз үстелі: 1. Партерде үстел жоқ.','Флипчарт: әр командаға біреуден және жаттықтырушыға біреу, әр флипчартқа бір маркер жинағы.','Микрофон: баяндамашыға және залдан сұрақ көзделсе, тағы біреу. Бейнебайланысқа арналған спикерфон микрофон болып саналады.','Ұзартқыштар: проектор мен экран керек болса, 2.','Кофе-станция: өтінімде кофе болса, 1. Тіркеу үстелі: тіркеу керек болса, 1.'],
+   layouts:{theater:'Партер (орындық қатарлары)',classroom:'Сынып (үстелдер қатарымен)',cabaret:'Кабаре (дөңгелек үстелдер)',ushape:'П-тәрізді',boardroom:'Келіссөз үстелі'},
+   lay:'Отырғызу',cap:'Зал сыйымдылығы (96 м²)',persons:'адам',
+   item:{chairs:'Орындықтар',tables:'Үстелдер',water:'Су, бөтелке',pens:'Қаламдар',pads:'Блокноттар',badges:'Бейджиктер / карточкалар',flip:'Флипчарттар',markers:'Маркер жинақтары',proj:'Проектор',screen:'Экран',mic:'Микрофондар',cords:'Ұзартқыштар',coffee:'Кофе-станция',reg:'Тіркеу үстелі'},
+   order:'Тапсырыс',plan:'Зал жоспары',planHint:'Затты таңдап, қою үшін жоспарды басыңыз. Қойылған затты алып тастау үшін оны басыңыз. Жоспарда: терезелер жоғарыда, кіреберіс төменде сол жақта, авариялық шығу оң жақта, сары нүктелер — розеткалар.',
+   tray:{screen:'Экран',proj:'Проектор',reg:'Тіркеу',coffee:'Кофе',flip:'Флипчарт'},
+   submit:'Дайындықты тапсыру',res:'Нәтиже',layS:'Отырғызу',ordS:'Тапсырыс',plS:'Орналастыру',ok:'дұрыс',
+   pr:{screen:'Экран: терезесіз қабырғада (шағылыс жоқ) және авариялық шығудан алыс: сол жақта.',proj:'Проектор: залдың орталық осінде, экраннан қашықтықта. Жақын розетка жоқ, ұзартқыш керек.',reg:'Тіркеу: кіреберісте, бірақ есікті жаппай, өтпелі жолда кезек болмауы үшін.',coffee:'Кофе: розеткаға жақын, бірақ кіреберіс пен авариялық шығудан алыс, кезек болмауы үшін.',flip:'Флипчарт: экранның қасында бүйірінде, проекцияны жаппауы үшін.'},
+   reasonLay:{theater:'жазбасыз және үстел басында жұмыссыз презентация: партер',cabaret:'дөңгелек үстелдерде командалық жұмыс',boardroom:'ортақ үстелдегі кеңес'},
+   needed:'керек болды',got:'сізде',notPl:'орналастырылмаған'
+  }};
+  const REQ=[
+   {id:'A',n:60,h:2,lay:'theater',ru:'Заявка №17. Компания «Орхон» проводит презентацию нового продукта для 60 партнёров. Начало 10:00, длительность 2 часа. Нужны презентация на экране со звуком, вопросы из зала, на входе регистрация и бейджи с именами, кофе для встречи гостей. Записи гости не ведут.',
+    kk:'№17 өтінім. «Орхон» компаниясы 60 серіктеске жаңа өнімнің презентациясын өткізеді. Басталуы 10:00, ұзақтығы 2 сағат. Экранда презентация мен дыбыс, залдан сұрақтар, кіреберісте тіркеу және аты жазылған бейджиктер, қонақтарды қарсы алуға кофе керек. Қонақтар жазба жүргізбейді.',
+    need:{chairs:63,tables:0,water:60,pens:0,pads:0,badges:60,flip:0,markers:0,proj:1,screen:1,mic:2,cords:2,coffee:1,reg:1}},
+   {id:'B',n:24,h:4,lay:'cabaret',ru:'Заявка №18. Тренинг по продажам для 24 менеджеров, 4 часа с 9:00. Работа в 4 командах, презентация тренера, записи на бумаге у всех, схемы на флипчартах (по одному на команду и один тренеру). Бейджи с именами, кофе в перерыве. Регистрации не нужно, вопросов с микрофоном не будет.',
+    kk:'№18 өтінім. 24 менеджерге сату бойынша тренинг, 9:00-ден 4 сағат. 4 команда болып жұмыс, жаттықтырушының презентациясы, барлығында қағазға жазба, флипчарттағы сызбалар (әр командаға біреуден және жаттықтырушыға біреу). Аты жазылған бейджиктер, үзілісте кофе. Тіркеу керек емес, микрофонмен сұрақтар болмайды.',
+    need:{chairs:26,tables:4,water:48,pens:24,pads:24,badges:24,flip:5,markers:5,proj:1,screen:1,mic:0,cords:2,coffee:1,reg:0}},
+   {id:'C',n:14,h:3,lay:'boardroom',ru:'Заявка №19. Заседание совета директоров, 14 человек, 3 часа. Один участник подключается по видеосвязи: нужны экран для трансляции, проектор и спикерфон. Каждому бумага и ручка, именные карточки. Кофе на входе. Регистрации нет, докладчика с микрофоном нет.',
+    kk:'№19 өтінім. Директорлар кеңесінің отырысы, 14 адам, 3 сағат. Бір қатысушы бейнебайланыспен қосылады: трансляцияға экран, проектор және спикерфон керек. Әрқайсысына қағаз және қалам, аты жазылған карточкалар. Кіреберісте кофе. Тіркеу жоқ, микрофонмен баяндамашы жоқ.',
+    need:{chairs:15,tables:1,water:28,pens:14,pads:14,badges:14,flip:0,markers:0,proj:1,screen:1,mic:1,cords:2,coffee:1,reg:0}}
+  ];
+  const PPS={theater:.8,classroom:1.8,cabaret:1.5,ushape:3,boardroom:3.5};
+  const OUT=[{x:20,y:60},{x:20,y:220},{x:330,y:260}],ENT={x:85,y:260},EXIT={x:380,y:170};
+  const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  const RULE={
+    screen:p=>p.x<=62&&p.y>=80&&p.y<=200,
+    proj:p=>p.x>=160&&p.x<=300&&p.y>=100&&p.y<=200,
+    reg:p=>d(p,ENT)<=85&&d(p,ENT)>=35,
+    coffee:p=>OUT.some(o=>d(p,o)<=75)&&d(p,EXIT)>=110&&d(p,ENT)>=90,
+    flip:p=>p.x<=130&&(p.y<90||p.y>200)
+  };
+  const R=api.rng();const rq=REQ[Math.floor(R()*REQ.length)];
+  const KEYS=['chairs','tables','water','pens','pads','badges','flip','markers','proj','screen','mic','cords','coffee','reg'];
+  const vals={};KEYS.forEach(k=>vals[k]=0);
+  let lay='',sel=null,placed={},done=false,res=null;
+  const t=k=>T[api.lang()][k];
+  function chairsSvg(){
+    if(!lay)return '';
+    const n=Math.min(vals.chairs,80);let s='';
+    if(lay==='theater'){const cols=Math.ceil(Math.sqrt(n*1.4)),rows=Math.ceil(n/cols);for(let i=0;i<n;i++){const r=Math.floor(i/cols),c=i%cols;s+=`<rect x="${100+r*(200/Math.max(rows,1))}" y="${50+c*(180/Math.max(cols,1))}" width="9" height="9" rx="2" style="fill:var(--blue)" opacity=".5"/>`}}
+    else if(lay==='cabaret'){const tbl=Math.max(vals.tables,1);for(let i=0;i<tbl;i++){const cx=130+(i%3)*90,cy=100+Math.floor(i/3)*90;s+=`<circle cx="${cx}" cy="${cy}" r="18" style="fill:var(--r-wood)"/>`;for(let k=0;k<6;k++){const a=k/6*6.283;s+=`<rect x="${cx+Math.cos(a)*28-4}" y="${cy+Math.sin(a)*28-4}" width="8" height="8" rx="2" style="fill:var(--blue)" opacity=".5"/>`}}}
+    else if(lay==='boardroom'){s+=`<rect x="140" y="110" width="140" height="60" rx="10" style="fill:var(--r-wood)"/>`;for(let k=0;k<Math.min(n,16);k++){const top=k%2===0,i=Math.floor(k/2);s+=`<rect x="${148+i*18}" y="${top?98:176}" width="9" height="9" rx="2" style="fill:var(--blue)" opacity=".5"/>`}}
+    else if(lay==='classroom'){for(let i=0;i<Math.min(Math.ceil(n/2),24);i++){s+=`<rect x="${110+(i%6)*34}" y="${60+Math.floor(i/6)*44}" width="28" height="14" rx="3" style="fill:var(--r-wood)"/>`}}
+    else if(lay==='ushape'){s+=`<path d="M120 70 H300 V210 M120 70 V210" fill="none" stroke="var(--r-wood)" stroke-width="12"/>`}
+    return s;
+  }
+  function planSvg(){
+    const marks=Object.keys(placed).map(k=>{const p=placed[k],c={screen:'#2e9bd6',proj:'#a64bd6',reg:'#d6a42e',coffee:'#8a5a33',flip:'#1c9c5a'}[k];
+      return `<g data-p="${k}" style="cursor:pointer"><circle cx="${p.x}" cy="${p.y}" r="13" fill="${c}" stroke="var(--card)" stroke-width="2"/><text x="${p.x}" y="${p.y+4}" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">${{screen:'Э',proj:'П',reg:'Р',coffee:'К',flip:'Ф'}[k]}</text></g>`}).join('');
+    return `<svg class="tsvg" id="hp" viewBox="0 0 400 280" role="img" aria-label="Plan">
+     <rect x="0" y="0" width="400" height="280" style="fill:var(--r-floor)" opacity=".5"/><rect x="20" y="20" width="360" height="240" style="fill:var(--r-bed)" stroke="var(--ink)" stroke-width="3"/>
+     <rect x="60" y="16" width="280" height="8" style="fill:var(--r-glass)"/><text x="200" y="12" text-anchor="middle" font-size="9" fill="var(--muted)">${api.lang()==='kk'?'терезелер':'окна'}</text>
+     <rect x="60" y="256" width="50" height="8" style="fill:var(--r-bed)"/><path d="M60 260 q25 -26 50 0" fill="none" stroke="var(--muted)" stroke-dasharray="3 3"/><text x="85" y="276" text-anchor="middle" font-size="9" fill="var(--muted)">${api.lang()==='kk'?'кіреберіс':'вход'}</text>
+     <rect x="376" y="150" width="8" height="40" fill="#1c9c5a"/><text x="364" y="172" text-anchor="end" font-size="9" fill="#1c9c5a" font-weight="700">EXIT</text>
+     ${OUT.map(o=>`<circle cx="${o.x}" cy="${o.y}" r="5" fill="#ffcf3f" stroke="var(--ink)"/>`).join('')}
+     ${chairsSvg()}${marks}</svg>`;
+  }
+  function draw(){
+    const lg=api.lang(),x=T[lg],cap=Object.fromEntries(Object.keys(PPS).map(k=>[k,Math.floor(AREA/PPS[k])]));
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <div class="note" style="margin-bottom:14px">${esc(rq[lg])}</div>
+    <details><summary>${x.norms}</summary><ul class="log">${x.n.map(s=>`<li>${s}</li>`).join('')}</ul></details>
+    <div class="mini" style="margin-top:16px">${x.lay}</div>
+    <div class="chips">${Object.keys(PPS).map(k=>`<button class="chip ${lay===k?'sel':''}" data-l="${k}" ${done?'disabled':''}>${x.layouts[k]} · ${x.cap.split(' (')[0]} ${cap[k]}</button>`).join('')}</div>
+    <div class="mini" style="margin-top:18px">${x.order}</div>
+    <div class="row2">${KEYS.map(k=>`<div class="tile" style="cursor:default;${done?(vals[k]===rq.need[k]?'border-color:var(--ok);background:var(--ok-bg)':'border-color:var(--bad);background:var(--bad-bg)'):''}"><b>${x.item[k]}</b><div style="display:flex;align-items:center;gap:8px;margin-top:6px"><button class="btn sm ghost" data-m="${k}|-1" ${done?'disabled':''}>−</button><span class="tok" style="min-width:2em;text-align:center">${vals[k]}</span><button class="btn sm ghost" data-m="${k}|1" ${done?'disabled':''}>+</button><button class="btn sm ghost" data-m="${k}|5" ${done?'disabled':''}>+5</button>${done?`<small>${x.needed}: ${rq.need[k]}</small>`:''}</div></div>`).join('')}</div>
+    <div class="mini" style="margin-top:20px">${x.plan}</div><p class="det">${x.planHint}</p>
+    <div class="tray">${Object.keys(x.tray).filter(k=>vals[k]>0).map(k=>`<button class="chip ${sel===k?'sel':''} ${placed[k]?'':''}" data-t="${k}" ${done?'disabled':''}>${x.tray[k]}${placed[k]?' ✓':''}</button>`).join('')}</div>
+    ${planSvg()}
+    ${done?'':`<p style="margin-top:14px"><button class="btn" id="sub" ${lay?'':'disabled'}>${x.submit}</button></p>`}
+    <div id="res">${res?resHtml():''}</div>`;
+    if(done)return;
+    $$('[data-l]',root).forEach(b=>b.onclick=()=>{lay=b.dataset.l;draw()});
+    $$('[data-m]',root).forEach(b=>b.onclick=()=>{const[k,dv]=b.dataset.m.split('|');vals[k]=Math.max(0,Math.min(200,vals[k]+ +dv));if(vals[k]===0&&placed[k])delete placed[k];draw()});
+    $$('[data-t]',root).forEach(b=>b.onclick=()=>{sel=sel===b.dataset.t?null:b.dataset.t;draw()});
+    const sv=$('#hp',root);
+    sv.onclick=e=>{
+      const pg=e.target.closest('[data-p]');if(pg){delete placed[pg.dataset.p];draw();return}
+      if(!sel)return;const r=sv.getBoundingClientRect();const pt={x:Math.round((e.clientX-r.left)/r.width*400),y:Math.round((e.clientY-r.top)/r.height*280)};
+      placed[sel]=pt;sel=null;draw();
+    };
+    const sb=$('#sub',root);if(sb)sb.onclick=submit;
+  }
+  function submit(){
+    const layPts=lay===rq.lay?2:(Math.floor(AREA/PPS[lay])>=rq.n?1:0);
+    const okItems=KEYS.filter(k=>vals[k]===rq.need[k]).length;const ordPts=4*okItems/KEYS.length;
+    const req=['screen','proj','reg','coffee','flip'].filter(k=>rq.need[k]>0);
+    const plOk=req.filter(k=>placed[k]&&RULE[k](placed[k]));
+    const plPts=4*plOk.length/req.length;
+    const sc=Math.round(layPts+ordPts+plPts);
+    res={sc,layPts,ordPts,plPts,okItems,req,plOk};done=true;draw();
+    api.finish(sc,{'Заявка':rq.id,'Рассадка':lay+' (нужна '+rq.lay+')','Заказ':KEYS.map(k=>k+'='+vals[k]+'/'+rq.need[k]).join(', '),'План':JSON.stringify(placed)});
+  }
+  function resHtml(){
+    const x=T[api.lang()],r=res;
+    return `<div class="note ${r.sc>=8?'ok':r.sc>=5?'':'bad'}" style="margin-top:14px"><div class="mini">${x.res}</div><b class="verdict">${r.sc} / 10</b>
+    <ul class="crit"><li class="${r.layPts===2?'ok':'no'}"><span>${x.layS}: ${x.layouts[lay]}<br><span class="det">${x.reasonLay[rq.lay]} (${x.layouts[rq.lay]})</span></span><b>${r.layPts} / 2</b></li>
+    <li class="${r.okItems>=13?'ok':'no'}"><span>${x.ordS}: ${r.okItems} / ${KEYS.length}</span><b>${r.ordPts.toFixed(1)} / 4</b></li>
+    <li class="${r.plOk.length===r.req.length?'ok':'no'}"><span>${x.plS}: ${r.plOk.length} / ${r.req.length}</span><b>${r.plPts.toFixed(1)} / 4</b></li></ul>
+    <ul class="log">${r.req.map(k=>`<li style="${r.plOk.includes(k)?'':'background:var(--bad-bg)'}"><b>${x.tray[k]}</b>${placed[k]?'':' ('+x.notPl+')'}: ${x.pr[k]}</li>`).join('')}</ul></div>`;
+  }
+  api.onLang(draw);draw();
+}});
+
 /* ═════════ 909 · РЕФЛЕКСИЯ ═════════ */
 MODS.push({id:'reflect',no:'909',min:3,max:0,
 title:{ru:'Рефлексия',kk:'Рефлексия'},sub:{ru:'Что возьму в работу',kk:'Жұмысқа не аламын'},
