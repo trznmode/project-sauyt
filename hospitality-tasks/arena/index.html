@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сауыт Арена</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: арочные «двери» номеров 101–505 как навигация; каждая дверь открывает одну игровую ситуацию смены. */
+:root{
+  --bg:#eef2ff;--card:#ffffff;--ink:#0b1437;--muted:#55608a;--line:#d5dcf5;
+  --blue:#2347ff;--on-blue:#ffffff;--blue-soft:#e3e8ff;--sun:#ffcf3f;--on-sun:#0b1437;
+  --ok:#0b7a53;--ok-bg:#d9f5e8;--bad:#b9202f;--bad-bg:#fde0e3;--shadow:rgba(35,71,255,.14);
+  --r-wall:#dfe5ff;--r-floor:#b9c3f2;--r-bed:#ffffff;--r-bed2:#2347ff;--r-wood:#8a6a4b;--r-curt:#ff8a5c;--r-glass:#bfe6ff;--r-towel:#f3f3f3;--r-bin:#6b7390;
+  --f-display:'Unbounded','Arial Black',system-ui,sans-serif;--f-body:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#080d2b;--card:#121a44;--ink:#eef1ff;--muted:#9aa6d6;--line:#27316b;
+  --blue:#4a65ff;--blue-soft:#1b2760;--sun:#ffd54d;
+  --ok:#4fdca0;--ok-bg:#0f3a2c;--bad:#ff8a97;--bad-bg:#451a26;--shadow:rgba(0,0,0,.45);
+  --r-wall:#1b2563;--r-floor:#111945;--r-bed:#e9edff;--r-wood:#a98159;--r-glass:#3a5a9a;--r-towel:#d8dcf0;--r-bin:#8c95b8;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#080d2b;--card:#121a44;--ink:#eef1ff;--muted:#9aa6d6;--line:#27316b;
+  --blue:#4a65ff;--blue-soft:#1b2760;--sun:#ffd54d;
+  --ok:#4fdca0;--ok-bg:#0f3a2c;--bad:#ff8a97;--bad-bg:#451a26;--shadow:rgba(0,0,0,.45);
+  --r-wall:#1b2563;--r-floor:#111945;--r-bed:#e9edff;--r-wood:#a98159;--r-glass:#3a5a9a;--r-towel:#d8dcf0;--r-bin:#8c95b8;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);line-height:1.1;text-wrap:balance}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+
+/* hero */
+.hero{padding-block:36px 8px}
+.eyebrow{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:clamp(2rem,6.4vw,3.8rem);font-weight:900;margin-block:10px 14px;letter-spacing:-.02em}
+h1 em{font-style:normal;background:var(--sun);color:var(--on-sun);padding:0 .15em;border-radius:.12em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.lead{max-width:56ch;color:var(--muted);font-size:1.05rem}
+
+/* doors */
+.doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:14px;margin-block:30px 10px}
+.door{position:relative;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:80px 80px 14px 14px;padding:26px 16px 16px;cursor:pointer;transition:transform .25s,background .25s,border-color .25s,box-shadow .25s;min-width:0}
+.door:hover{transform:translateY(-4px);box-shadow:0 14px 28px var(--shadow)}
+.door .no{display:block;font-family:var(--f-display);font-weight:900;font-size:1.7rem;letter-spacing:-.02em;text-align:center}
+.door .nm{display:block;text-align:center;font-weight:700;margin-top:2px}
+.door .sb{display:block;text-align:center;font-size:.8rem;color:var(--muted)}
+.door .st{display:block;text-align:center;margin-top:10px;font-size:.78rem;font-weight:700;border-radius:99px;padding:3px 8px;background:var(--blue-soft);color:var(--blue)}
+.door::after{content:"";position:absolute;right:12px;top:58%;width:9px;height:9px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 2px var(--on-sun) inset}
+.door.on{background:var(--blue);border-color:var(--blue);color:var(--on-blue);transform:translateY(-4px);box-shadow:0 18px 34px var(--shadow)}
+.door.on .sb{color:#dfe5ff}.door.on .st{background:var(--sun);color:var(--on-sun)}
+.door.fin .st{background:var(--ok-bg);color:var(--ok)}
+.door.on.fin .st{background:var(--sun);color:var(--on-sun)}
+.hud{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;margin-block:14px 6px}
+.bar{flex:1 1 220px;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--sun));border-radius:99px;transition:width .7s cubic-bezier(.2,.9,.3,1)}
+.hud b{font-family:var(--f-display);font-size:1.05rem}
+.finalbtn{border:2px solid var(--ink);background:transparent;border-radius:99px;padding:8px 16px;font-weight:700;cursor:pointer}
+.finalbtn:hover{background:var(--ink);color:var(--bg)}
+
+/* panels */
+.panel{display:none;background:var(--card);border:2px solid var(--line);border-radius:28px;padding:clamp(18px,4vw,34px);margin-top:18px;box-shadow:0 22px 48px var(--shadow)}
+.panel.on{display:block;animation:open .5s cubic-bezier(.2,.9,.3,1)}
+@keyframes open{from{opacity:0;transform:perspective(900px) rotateY(-14deg) translateX(-18px);transform-origin:left}to{opacity:1;transform:none}}
+.panel h2{font-size:clamp(1.3rem,3.6vw,2rem);margin-block:6px 8px}
+.panel .intro{color:var(--muted);max-width:62ch;margin-bottom:22px}
+.mini{font-family:var(--f-body);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.note{margin-top:16px;padding:12px 16px;border-radius:14px;background:var(--blue-soft);font-weight:500;min-height:48px}
+.note.ok{background:var(--ok-bg);color:var(--ok)}.note.bad{background:var(--bad-bg);color:var(--bad)}
+.btn{background:var(--blue);color:var(--on-blue);border:0;border-radius:14px;padding:12px 22px;font-weight:700;font-size:1rem;cursor:pointer;transition:transform .15s,opacity .15s}
+.btn:hover:not(:disabled){transform:translateY(-2px)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sun{background:var(--sun);color:var(--on-sun)}
+.btn.ghost{background:transparent;color:var(--blue);border:2px solid var(--blue)}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+/* lobby */
+.lobby{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.lobby>div{min-width:0}
+.gcard,.rcard{width:100%;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:18px;padding:12px 14px;margin-bottom:10px;cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:border-color .2s,background .2s,transform .2s}
+.gcard:hover:not(:disabled),.rcard:hover:not(:disabled){border-color:var(--blue)}
+.gcard.sel{border-color:var(--blue);background:var(--blue-soft);transform:translateX(6px)}
+.gcard:disabled,.rcard:disabled{cursor:default}
+.gcard.done{opacity:.55}
+.av{flex:0 0 42px;height:42px;border-radius:50%;background:var(--blue);color:var(--on-blue);display:grid;place-items:center;font-family:var(--f-display);font-weight:700}
+.gcard b,.rcard b{display:block}
+.gcard small,.rcard small{color:var(--muted);display:block;font-size:.88rem;line-height:1.4}
+.rno{flex:0 0 66px;font-family:var(--f-display);font-weight:900;font-size:1.35rem;color:var(--blue)}
+.rcard.ok{border-color:var(--ok);background:var(--ok-bg)}
+.rcard .who{display:block;margin-top:6px;font-weight:700;color:var(--ok)}
+
+/* revenue */
+.days{display:grid;gap:18px}
+.day{border:2px solid var(--line);border-radius:22px;padding:18px;background:var(--bg);min-width:0}
+.day h3{font-size:1.05rem}.day p{color:var(--muted);font-size:.92rem;margin-block:4px 14px}
+.price{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.price b{font-family:var(--f-display);font-size:1.9rem;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--blue);height:28px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-block:12px}
+.kpi{background:var(--card);border-radius:14px;padding:10px 12px;border:1px solid var(--line)}
+.kpi small{display:block;color:var(--muted);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase}
+.kpi b{font-family:var(--f-display);font-size:1.05rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.chart{width:100%;height:auto;display:block;margin-block:6px 12px}
+.chart text{fill:var(--muted);font-size:9px;font-family:var(--f-body)}
+.res{font-weight:600;margin-top:10px}
+
+/* inspect */
+.insp{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:20px;align-items:start}
+.room{width:100%;height:auto;border-radius:20px;border:2px solid var(--line);background:var(--r-wall);display:block}
+.hot{cursor:pointer}.hot:hover{filter:brightness(1.08)}
+.ring{fill:none;stroke:var(--sun);stroke-width:3;display:none}
+.hot.found .ring{display:block;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{stroke-width:6;opacity:.6}}
+.chk{list-style:none;display:grid;gap:8px}
+.chk,.brk{padding:0;margin:0}
+.chk li{padding:10px 12px;border-radius:12px;border:2px dashed var(--line);font-size:.92rem;color:var(--muted)}
+.chk li.on{border:2px solid var(--ok);background:var(--ok-bg);color:var(--ok);border-style:solid}
+.chk li b{display:block}
+
+/* overbooking */
+.meters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.meter small{display:flex;justify-content:space-between;color:var(--muted);font-weight:600;font-size:.82rem}
+.meter .tr{height:12px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:4px}
+.meter .tr i{display:block;height:100%;width:50%;border-radius:99px;background:var(--blue);transition:width .8s cubic-bezier(.2,.9,.3,1),background .4s}
+.scene{background:var(--ink);color:var(--bg);border-radius:20px;padding:18px 20px;margin-bottom:14px;font-size:1.02rem}
+.scene small{display:block;letter-spacing:.14em;text-transform:uppercase;opacity:.65;margin-bottom:6px;font-size:.72rem;font-weight:600}
+.opt{display:block;width:100%;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:10px;font-size:1rem;cursor:pointer;transition:border-color .2s,transform .2s}
+.opt:hover:not(:disabled){border-color:var(--blue);transform:translateX(5px)}
+.opt:disabled{cursor:default}.opt.best{border-color:var(--ok);background:var(--ok-bg)}.opt.pick{border-color:var(--bad);background:var(--bad-bg)}.opt.best.pick{border-color:var(--ok);background:var(--ok-bg)}
+
+/* review */
+.review{background:var(--bg);border:2px solid var(--line);border-radius:20px;padding:16px 18px;margin-bottom:18px}
+.review .stars{color:var(--sun);letter-spacing:.15em;font-size:1.2rem;text-shadow:0 0 1px var(--on-sun)}
+.slot{margin-bottom:16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:9px 13px;font-size:.92rem;cursor:pointer;text-align:left;transition:all .2s;max-width:100%}
+.chip:hover:not(:disabled){border-color:var(--blue)}
+.chip.sel{background:var(--blue);color:var(--on-blue);border-color:var(--blue)}
+.chip:disabled{cursor:default}
+.chip.best{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}.chip.bad{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.bubble{background:var(--blue-soft);border-radius:20px 20px 20px 4px;padding:14px 18px;margin-block:8px 16px;min-height:60px}
+.bubble span.h{color:var(--muted)}
+
+/* badge */
+.final{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:28px;align-items:start}
+.badge{background:var(--blue);color:var(--on-blue);border-radius:26px;padding:46px 22px 24px;text-align:center;position:relative;box-shadow:0 24px 50px var(--shadow);transform:rotate(-2deg)}
+.badge::before{content:"";position:absolute;left:50%;top:14px;width:64px;height:12px;border-radius:99px;background:var(--bg);transform:translateX(-50%)}
+.badge .bh{font-family:var(--f-display);font-size:.74rem;letter-spacing:.2em}
+.badge .big{width:104px;height:104px;border-radius:50%;background:var(--sun);color:var(--on-sun);display:grid;place-items:center;font-family:var(--f-display);font-weight:900;font-size:2.4rem;margin:16px auto}
+.badge .bn{font-family:var(--f-display);font-size:1.3rem;font-weight:700;overflow-wrap:anywhere;min-height:1.5em}
+.badge .br{display:inline-block;margin-top:10px;background:var(--sun);color:var(--on-sun);border-radius:99px;padding:5px 14px;font-weight:700;font-size:.9rem}
+.badge .sc{margin-top:14px;font-size:.9rem;opacity:.9}
+input[type=text]{width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:14px;font:inherit;background:var(--bg);color:var(--ink);margin-block:6px 18px}
+.brk{list-style:none;display:grid;gap:8px}
+.brk li{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding-bottom:6px}
+
+.pf{position:fixed;pointer-events:none;width:9px;height:14px;border-radius:2px;z-index:50}
+
+@media (max-width:720px){
+  .lobby,.insp,.final{grid-template-columns:1fr}
+  .meters{grid-template-columns:1fr}
+  .kpis{grid-template-columns:1fr 1fr 1fr}
+  .badge{transform:none}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+.gate{min-height:92vh;display:grid;place-items:center;padding-block:40px}
+.gate[hidden],#app[hidden]{display:none!important}
+.gatecard{max-width:560px;width:100%}
+.gatecard h1{margin-block:8px 12px}
+.keycard{width:150px;height:92px;border-radius:12px;background:var(--blue);color:var(--on-blue);transform:rotate(-8deg);position:relative;margin-bottom:26px;box-shadow:0 18px 34px var(--shadow);display:flex;align-items:flex-end;padding:10px 12px;font-family:var(--f-display);font-weight:900;letter-spacing:.12em;font-size:.8rem}
+.keycard i{position:absolute;left:0;right:0;top:18px;height:16px;background:var(--on-sun);opacity:.85}
+.nmerr{color:var(--bad);font-weight:600;min-height:1.6em;margin-bottom:6px}
+.gatecard .btn{width:100%;font-size:1.05rem;padding:14px}
+.dots{display:flex;gap:6px;margin-bottom:12px}.dots i{width:28px;height:6px;border-radius:99px;background:var(--line)}.dots i.d{background:var(--ok)}.dots i.c{background:var(--blue)}
+.mt{display:block;color:var(--muted);font-size:.86rem;font-weight:400;margin-top:2px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}.fgrid.rows{grid-template-columns:1fr}
+.fl{text-align:left;border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:10px 14px;cursor:pointer;min-width:0;transition:border-color .2s,background .2s}
+.fl:hover{border-color:var(--blue)}
+.fl small{display:block;color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em}
+.fl b{display:block;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.fl.flag{border-color:var(--blue);background:var(--blue-soft)}
+.fl.hit{border-color:var(--ok);background:var(--ok-bg)}.fl.fp{border-color:var(--bad);background:var(--bad-bg)}.fl.miss{border-color:var(--bad);border-style:dashed}
+ol.order{list-style:none;padding:0;display:grid;gap:8px}
+ol.order li{display:flex;gap:8px;align-items:center;border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:8px 12px}
+ol.order li span{flex:1;min-width:0}
+ol.order li.ok{border-color:var(--ok);background:var(--ok-bg)}ol.order li.bad{border-color:var(--bad);background:var(--bad-bg)}
+ol.order button{width:38px;height:38px;border-radius:10px;border:2px solid var(--line);background:var(--card);cursor:pointer;color:var(--ink)}
+.fgrid+p,.scene+.opt{margin-top:0}
+
+/* ---- v4 additions ---- */
+.topbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding-block:14px 0}
+.topbar .who{font-weight:600;color:var(--muted);font-size:.9rem;min-width:0;overflow-wrap:anywhere}
+.lang{display:inline-flex;border:2px solid var(--ink);border-radius:99px;overflow:hidden}
+.lang button{border:0;background:transparent;padding:6px 14px;font-weight:700;cursor:pointer;color:var(--ink)}
+.lang button.on{background:var(--ink);color:var(--bg)}
+.gatecard .lang{margin-bottom:18px}
+.gatecard label.mini{display:block;margin-top:16px}
+.gatecard input[type=text]{margin-block:6px 0}
+.tg{display:grid;gap:10px;margin-top:22px}
+.banner{background:var(--bad-bg);color:var(--bad);border-radius:12px;padding:10px 14px;font-weight:600;margin-top:14px}
+.banner.info{background:var(--blue-soft);color:var(--ink)}
+.doors{grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px}
+.door{padding:22px 10px 12px}
+.door .no{font-size:1.35rem}
+.door .mn{display:block;text-align:center;font-size:.72rem;color:var(--muted);margin-top:2px}
+.door.on .mn{color:#dfe5ff}
+.pfoot{display:none;margin-top:22px;padding-top:16px;border-top:2px dashed var(--line);justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.pfoot.show{display:flex}
+.tag{display:inline-block;background:var(--blue-soft);color:var(--blue);border-radius:99px;padding:2px 10px;font-size:.78rem;font-weight:700}
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.row2>*{min-width:0}
+.tile{background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:12px 14px;text-align:left;cursor:pointer;font-size:.95rem;transition:border-color .2s,background .2s;min-width:0}
+.tile:hover:not(:disabled){border-color:var(--blue)}
+.tile:disabled{cursor:default}
+.tile.used{opacity:.55}
+.tile.sel{border-color:var(--blue);background:var(--blue-soft)}
+.tile b{display:block}
+.tile small{display:block;color:var(--muted);font-size:.84rem;font-weight:400}
+.tile.bad{border-color:var(--bad);background:var(--bad-bg)}
+.tile.good{border-color:var(--ok);background:var(--ok-bg)}
+.chat{display:grid;gap:8px;margin-block:12px}
+.msg{max-width:88%;padding:10px 14px;border-radius:18px;font-size:.96rem}
+.msg.me{justify-self:end;background:var(--blue);color:var(--on-blue);border-bottom-right-radius:4px}
+.msg.gu{justify-self:start;background:var(--blue-soft);border-bottom-left-radius:4px}
+.msg.gu.cold{background:var(--bad-bg);color:var(--bad)}
+.tok{font-family:var(--f-display);font-weight:700}
+.sticky-stat{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-bottom:12px;font-weight:600}
+.btn.sm{padding:8px 14px;font-size:.9rem;border-radius:10px}
+textarea{width:100%;min-height:170px;padding:12px 14px;border:2px solid var(--line);border-radius:14px;font:inherit;background:var(--bg);color:var(--ink);resize:vertical}
+select{padding:9px 10px;border:2px solid var(--line);border-radius:10px;font:inherit;background:var(--bg);color:var(--ink);max-width:100%}
+input[type=number],input[type=text]{color:var(--ink)}
+.num{padding:10px 12px;border:2px solid var(--line);border-radius:12px;font:inherit;background:var(--bg);width:100%;max-width:220px;font-variant-numeric:tabular-nums}
+.fieldrow{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:10px}
+.fieldrow label{flex:1 1 220px;font-weight:600}
+.tw{overflow-x:auto;border:2px solid var(--line);border-radius:14px}
+table{border-collapse:collapse;width:100%;font-size:.9rem;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:var(--blue-soft);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+tr.clk{cursor:pointer}tr.clk:hover td{background:var(--blue-soft)}
+tr.flag td{background:var(--blue-soft)}
+tr.hit td{background:var(--ok-bg)}tr.fp td{background:var(--bad-bg)}tr.miss td{background:var(--bad-bg);font-weight:700}
+.det{font-size:.9rem;color:var(--muted)}
+details{border:2px dashed var(--line);border-radius:12px;padding:8px 14px;margin-block:12px}
+details summary{cursor:pointer;font-weight:600}
+.gantt{width:100%;height:auto;display:block;margin-block:10px}
+.gantt text{font-size:9px;fill:var(--muted);font-family:var(--f-body)}
+.hkr{display:grid;grid-template-columns:1fr auto auto auto;gap:6px 10px;align-items:center;padding:8px 10px;border:2px solid var(--line);border-radius:12px;margin-bottom:6px;background:var(--bg)}
+.hkr .nm{min-width:0}
+.hkr small{display:block;color:var(--muted)}
+.pill{display:inline-block;border-radius:99px;padding:1px 9px;font-size:.76rem;font-weight:700;background:var(--blue-soft);color:var(--blue)}
+.pill.vip{background:var(--sun);color:var(--on-sun)}
+.pill.dnd{background:var(--bad-bg);color:var(--bad)}
+.log{list-style:none;padding:0;display:grid;gap:6px;margin-block:10px}
+.log li{padding:8px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);font-size:.92rem}
+.log li.ev{background:var(--blue-soft)}
+.ap{font-family:var(--f-display);font-size:1.3rem}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:12px}
+.verdict{font-family:var(--f-display);font-size:1.4rem}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px}
+.kv dt{color:var(--muted)}
+.crit{list-style:none;padding:0;display:grid;gap:6px;margin-block:10px}
+.crit li{padding:8px 12px;border-radius:10px;border:2px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.crit li.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.crit li.no{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.cnt{font-size:.82rem;color:var(--muted);text-align:right}
+
+/* teacher */
+.tcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-block:14px}
+.tc{background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:12px 14px}
+.tc b{display:block;font-family:var(--f-display);font-size:1.6rem}
+.tc span{color:var(--muted);font-size:.84rem}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--line);margin-right:6px}
+.dot.on{background:var(--ok);box-shadow:0 0 0 3px var(--ok-bg)}
+.map{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin-block:12px}
+.mc{border:2px solid var(--line);border-radius:14px;padding:8px 10px;background:var(--bg);min-height:96px}
+.mc.hot{border-color:var(--blue);background:var(--blue-soft)}
+.mc small{display:block;color:var(--muted);font-size:.72rem}
+.mc b{font-size:.84rem;display:block;overflow-wrap:anywhere}
+.mc .pp{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+.mc .pp i{font-style:normal;background:var(--blue);color:var(--on-blue);border-radius:99px;padding:0 7px;font-size:.72rem;font-weight:700}
+.ans{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;white-space:pre-wrap;overflow-wrap:anywhere;margin-block:6px 14px;font-size:.92rem}
+.tbar{display:flex;flex-wrap:wrap;gap:8px;margin-block:10px}
+@media (max-width:720px){.hkr{grid-template-columns:1fr 1fr}.msg{max-width:96%}}
+.hotn{cursor:pointer}.hotn:hover{filter:brightness(1.06)}
+.scenebox{min-width:0}
+.rushwrap{position:relative}
+.desks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.desk{border:2px solid var(--line);border-radius:16px;padding:10px 12px;background:var(--bg);min-height:76px}
+.desk.busy{border-color:var(--blue);background:var(--blue-soft)}
+.desk small{display:block;color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em}
+.pbar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.pbar i{display:block;height:100%;width:0;background:var(--blue);border-radius:99px}
+.queue{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;min-height:140px}
+.gq{position:relative;border:2px solid var(--line);border-radius:16px;padding:10px 12px;background:var(--card);cursor:pointer;text-align:left;animation:slidein .45s cubic-bezier(.2,.9,.3,1);min-width:0}
+.gq:hover{border-color:var(--blue)}
+.gq b{display:block;font-size:.92rem}
+.gq small{display:block;color:var(--muted);font-size:.78rem}
+.gq .pbar i{background:var(--ok)}
+.gq.vip{border-color:var(--sun)}
+.gq.out{animation:fly .5s forwards}
+.gq.lost{animation:lost .6s forwards}
+@keyframes slidein{from{opacity:0;transform:translateX(-30px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes fly{to{opacity:0;transform:translateY(-30px) scale(.8)}}
+@keyframes lost{20%{transform:translateX(-6px)}to{opacity:0;transform:translateX(60px) rotate(8deg)}}
+.timebar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-bottom:12px}.timebar i{display:block;height:100%;width:100%;background:var(--sun);transition:width .25s linear}
+.tsvg{width:100%;height:auto;display:block;border-radius:18px;border:2px solid var(--line);background:var(--r-wall);touch-action:none;user-select:none}
+.tray{display:flex;flex-wrap:wrap;gap:10px;margin-block:12px}
+.titem{width:78px;height:70px;border:2px solid var(--line);border-radius:14px;background:var(--bg);display:grid;place-items:center;cursor:grab;touch-action:none;user-select:none}
+.titem svg{width:64px;height:56px;pointer-events:none}
+.titem.sel{border-color:var(--blue);background:var(--blue-soft)}
+.titem.gone{visibility:hidden}
+.dragging{position:fixed;z-index:60;pointer-events:none;opacity:.9;transform:translate(-50%,-50%);width:78px;height:70px;display:grid;place-items:center}
+.zone{fill:transparent;stroke:var(--muted);stroke-width:1.6;stroke-dasharray:4 4;opacity:.8}
+.zone.over{stroke:var(--blue);stroke-width:2.6;fill:var(--blue-soft)}
+.zone.ok{stroke:var(--ok);fill:var(--ok-bg);stroke-dasharray:none}
+.zone.no{stroke:var(--bad);fill:var(--bad-bg);stroke-dasharray:none}
+/* mobile games */
+.swarea{position:relative;min-height:230px;display:grid;place-items:center;margin-block:8px 14px;touch-action:none;overflow:hidden}
+.swc{width:min(100%,360px);min-height:190px;padding:22px 20px;border-radius:24px;background:var(--card);border:2px solid var(--line);box-shadow:0 14px 34px var(--shadow);font-size:1.12rem;line-height:1.45;display:grid;align-items:center;text-align:center;cursor:grab;touch-action:none;user-select:none;animation:swin .35s cubic-bezier(.2,.9,.3,1)}
+@keyframes swin{from{opacity:0;transform:translateY(30px) scale(.94)}to{opacity:1;transform:none}}
+.swlab{position:absolute;top:8px;font-family:var(--f-display);font-weight:900;font-size:1rem;opacity:0;padding:6px 12px;border-radius:12px;border:3px solid;z-index:2}
+.swlab.l{left:6px;color:var(--bad);border-color:var(--bad);transform:rotate(-8deg)}
+.swlab.r{right:6px;color:var(--ok);border-color:var(--ok);transform:rotate(8deg)}
+.swbtn{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.swbtn .btn{padding:16px;font-size:1.05rem}
+.btn.bad{background:var(--bad-bg);color:var(--bad);border:2px solid var(--bad)}
+.btn.good{background:var(--ok-bg);color:var(--ok);border:2px solid var(--ok)}
+.swfb{min-height:46px;margin-top:12px;border-radius:14px;padding:10px 14px;font-weight:600;opacity:0;transition:opacity .2s}
+.swfb.show{opacity:1}.swfb.ok{background:var(--ok-bg);color:var(--ok)}.swfb.bad{background:var(--bad-bg);color:var(--bad)}
+.bagarea{position:relative;border:2px solid var(--line);border-radius:20px;background:linear-gradient(var(--r-wall),var(--r-floor));overflow:hidden;touch-action:none}
+.bag{position:absolute;top:0;width:64px;text-align:center;border-radius:14px;background:var(--card);border:2px solid var(--line);padding:2px 0;will-change:transform;line-height:1.1}
+.bag span{display:block;font-size:1.4rem}.bag b{display:block;font-size:.8rem;font-variant-numeric:tabular-nums}
+.bag.vip{border-color:var(--sun);background:var(--sun);color:var(--on-sun)}
+.bag.boom{animation:lost .35s forwards}
+.baglanes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.baglanes .btn{padding:16px 4px;font-size:1rem;touch-action:manipulation}
+/* ═════ Сауыт Арена: тёмная неоновая тема ═════ */
+:root.arcade,:root.arcade[data-theme]{
+  --bg:#0a0620;--card:#150d38;--ink:#f1ecff;--muted:#a79bd6;--line:#2f2370;
+  --blue:#7c5cff;--on-blue:#ffffff;--blue-soft:#221656;--sun:#c6ff3d;--on-sun:#12062e;
+  --ok:#3dffb0;--ok-bg:#0b3a2e;--bad:#ff6b8f;--bad-bg:#42122a;--shadow:rgba(124,92,255,.35);
+  --r-wall:#1b1250;--r-floor:#120a38;--r-bed:#e9e4ff;--r-bed2:#7c5cff;--r-wood:#8f6a4a;--r-curt:#ff7ab0;--r-glass:#3b5ca8;--r-towel:#e9e4ff;--r-bin:#8c86c0;
+  color-scheme:dark}
+html.arcade body{background:radial-gradient(1200px 600px at 20% -10%,#2a1572 0%,transparent 60%),radial-gradient(900px 500px at 100% 0%,#0d3a66 0%,transparent 55%),var(--bg);background-attachment:fixed}
+.arcade h1{text-transform:uppercase;letter-spacing:.02em}
+.arcade h1 em{background:linear-gradient(90deg,#c6ff3d,#3dffb0);color:#12062e;box-shadow:0 0 28px #3dffb066}
+.arcade .eyebrow{color:#3dffb0}
+.arcade .lead,.arcade .intro{color:var(--muted)}
+.arcade .doors{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(min-width:700px){.arcade .doors{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.arcade .door{border-radius:22px;padding:16px 12px 12px;background:linear-gradient(160deg,#1c1250,#120a38);border:2px solid #3b2a96;display:grid;gap:2px;justify-items:center}
+.arcade .door::after{display:none}
+.arcade .door:hover{box-shadow:0 0 0 2px #7c5cff,0 12px 30px #7c5cff55}
+.arcade .door.on{background:linear-gradient(160deg,#5a3cff,#2d1a9a);border-color:#c6ff3d;box-shadow:0 0 28px #7c5cff88}
+.arcade .door .ic{font-size:2.3rem;line-height:1;filter:drop-shadow(0 4px 10px #7c5cff88)}
+.arcade .door .no{font-size:.8rem;opacity:.6}
+.arcade .door .nm{font-size:1rem}
+.arcade .door .stars{display:block;color:var(--sun);letter-spacing:.15em;font-size:1.05rem;min-height:1.3em}
+.arcade .door .st{background:#2f2370;color:#d9ceff;width:100%}
+.arcade .door.fin .st{background:var(--ok-bg);color:var(--ok)}
+.arcade .door.on .st{background:var(--sun);color:var(--on-sun)}
+.arcade .panel{background:linear-gradient(180deg,#160e3d,#0f0830);border-color:#3b2a96;box-shadow:0 0 40px #7c5cff33}
+.arcade .btn{box-shadow:0 6px 0 #4a2fd1,0 10px 24px #7c5cff55;transition:transform .12s,box-shadow .12s}
+.arcade .btn:active{transform:translateY(4px);box-shadow:0 2px 0 #4a2fd1}
+.arcade .btn.sun{box-shadow:0 6px 0 #87b319,0 10px 24px #c6ff3d44}
+.arcade .btn.ghost{box-shadow:none;background:transparent}
+.arcade .btn.bad{box-shadow:0 6px 0 #8a2a49}.arcade .btn.good{box-shadow:0 6px 0 #168a62}
+.arcade .finalbtn{border-color:var(--sun);color:var(--sun)}.arcade .finalbtn:hover{background:var(--sun);color:var(--on-sun)}
+.arcade .lang{border-color:var(--sun)}.arcade .lang button{color:var(--sun)}.arcade .lang button.on{background:var(--sun);color:var(--on-sun)}
+.arcade .bar{background:#2a1d6b}.arcade .bar i{background:linear-gradient(90deg,#7c5cff,#c6ff3d)}
+.arcade .note{background:#1c1250}.arcade .tile,.arcade .day,.arcade .opt,.arcade .chip{background:#1a1148;border-color:#3b2a96}
+.arcade .swc{background:linear-gradient(160deg,#1f1459,#150d38);border-color:#5a3cff;box-shadow:0 0 0 2px #7c5cff55,0 20px 50px #000a}
+.arcade .bagarea{background:linear-gradient(#1b1250,#0a0620)}
+.arcade .bag{background:#1f1459;border-color:#5a3cff}.arcade .bag.vip{background:var(--sun);border-color:var(--sun)}
+.arcade .tsvg,.arcade .room{border-color:#3b2a96}
+.arcade .badge{background:linear-gradient(160deg,#6a49ff,#2d1a9a)}
+.arcade .tc,.arcade .mc{background:#1a1148;border-color:#3b2a96}
+.arcade .tw{border-color:#3b2a96}.arcade th{background:#221656}
+.arc{display:flex;gap:14px;align-items:center;margin-block:16px 6px;padding:12px 14px;border:2px solid #3b2a96;border-radius:20px;background:#150d38}
+.arc .lv{display:grid;place-items:center;min-width:64px;border-radius:16px;background:linear-gradient(160deg,#c6ff3d,#3dffb0);color:#12062e;padding:6px 10px}
+.arc .lv small{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700}.arc .lv b{font-family:var(--f-display);font-size:1.7rem;line-height:1}
+.arc .xp{flex:1;min-width:0}.arc .xp .bar{height:12px;margin-bottom:4px}.arc .xp small{color:var(--muted)}
+.arc .coins{font-weight:700;white-space:nowrap}
+</style>
+</head>
+<body>
+<section class="gate" id="gate"><div class="gatecard" id="gatecard"></div></section>
+<div class="wrap" id="app" hidden>
+  <div class="topbar"><div class="who" id="who"></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="finalbtn" id="tBack" hidden></button><button class="finalbtn" id="cpTop" hidden></button><button class="finalbtn" id="logout"></button><div class="lang" id="langApp"></div></div></div>
+  <div class="banner" id="banner" hidden></div>
+  <header class="hero">
+    <div class="eyebrow">Hotel «Sauyt» · arena</div>
+    <h1 id="heroH"></h1>
+    <p class="lead" id="heroLead"></p>
+    <div class="arc" id="arc"></div>
+    <div class="doors" id="doors"></div>
+    <div class="hud"><div class="bar" aria-hidden="true"><i id="prog"></i></div><b id="hudScore">0 / 0</b><button class="finalbtn" id="finBtn"></button></div>
+  </header>
+  <main id="stage"></main>
+</div>
+<div class="wrap" id="tapp" hidden></div>
+<script>
+/* ═════════ CORE ═════════ */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>Math.round(n).toLocaleString('ru-RU').replace(/ /g,' ');
+const hash=s=>{let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+const mulberry=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const shufR=(arr,R)=>{const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const STORE={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let LANG=STORE.get('sauyt_lang')==='kk'?'kk':'ru';
+const MODS=[];
+const TPW=12551026;
+const DEFAULT80=['guest','rev','audit','over','reply','inspect','hall','rush','book','ready','reflect'];
+let ENABLED=new Set();
+const on=m=>ENABLED.has(m.id);
+const ONMODS=()=>MODS.filter(on);
+const MAXPTS=()=>ONMODS().reduce((a,m)=>a+m.max,0);
+const LESSON_MIN=()=>ONMODS().reduce((a,m)=>a+m.min,0);
+
+const UI={
+ ru:{
+  gateEy:'Отель «Сауыт» · приём сотрудников',gateH:'Как вас зовут?',
+  gateLead:'Сегодня вы выходите на смену. Вас ждут ситуации из жизни отеля: от общения с гостем до кризиса. Время смены — около {min} минут. Имя увидит преподаватель и оно будет на бейдже в конце.',
+  nameL:'Имя и фамилия',nameP:'Например, Асель Нурланова',groupL:'Группа (необязательно)',groupP:'Например, ГБ-21',
+  start:'Начать смену',err:'Введите имя, чтобы начать.',
+  tHello:'Вы вошли как преподаватель',tPanel:'Открыть панель преподавателя',tPractice:'Пробное прохождение (результаты не сохраняются)',tLink:'Я преподаватель',tPw:'Пароль преподавателя',tEnter:'Войти',tBad:'Неверный пароль',
+  heroH:'Смена в отеле',heroLead:'Вы — дежурный администратор. Каждая дверь — отдельная ситуация. Правильные ответы заранее не видны: вы задаёте вопросы, считаете, планируете, пишете. Двери можно открывать в любом порядке, но время смены ограничено.',
+  open:'открыть',min:'мин',next:'Следующее задание →',finBtn:'Получить бейдж',backTeacher:'Панель преподавателя',
+  done:'Задание сдано',saveFail:'Результаты не попадают к преподавателю: нет прав на запись или нет связи. Сообщите преподавателю.',
+  practice:'Режим тренировки: результаты не сохраняются.',
+  finH:'Смена окончена',finLead:'Звание зависит от суммы баллов. Непройденные двери дают ноль.',badge:'Ваш бейдж',res:'Результаты',notDone:'не пройдено',improve:'Что подтянуть',allGood:'Все ситуации закрыты на высоком уровне.',
+  ranks:['Стажёр','Администратор','Менеджер смены','Генеральный директор'],pts:'баллов',of:'из',points:'балл.',
+  tH:'Панель преподавателя',tSub:'Данные обновляются сами. «В сети» — страница открыта прямо сейчас.',
+  tOnline:'В сети',tStarted:'Начали',tFinished:'Дошли до бейджа',tAvg:'Средний балл',
+  tMap:'Где сейчас студенты',tTable:'Студенты',tName:'Имя',tGroup:'Группа',tNow:'Сейчас в окне',tProg:'Пройдено',tScore:'Баллы',tTime:'На смене',tLang:'Язык',tSeen:'Был(а)',
+  tNone:'Пока никто не вошёл. Отправьте студентам ссылку и дайте им доступ «Участник» (Contributor).',
+  tLessonH:'Состав урока',tLessonSub:'Отметьте задания для класса: студенты увидят только отмеченные. Изменения применяются сразу, но только у студентов, вошедших в аккаунт. Остальные видят все задания.',tP80:'Пресет: ~80 минут',tAll:'Все задания',tTotal:'Итого',tCfgFail:'Не удалось сохранить состав: нужны права редактора страницы.',tPts:'баллов',
+  connWait:'Проверяю связь с преподавателем…',connOk:'Связь с преподавателем есть: ваши результаты будут видны.',connNo:'Преподаватель вас не увидит: вы не вошли в аккаунт или у вас нет доступа «Участник». Войдите в аккаунт и откройте ссылку снова. Пока можно проходить задания, а в конце скопировать результат и отправить преподавателю.',copyRes:'Скопировать результат',copied:'Скопировано. Отправьте это преподавателю.',
+  tImpH:'Результаты студентов без аккаунта',tImpSub:'Если студент не вошёл в аккаунт, его результаты не попадут сюда сами. Пусть нажмёт «Скопировать результат» и пришлёт вам сообщение целиком. Вставьте присланное сюда.',tImpBtn:'Добавить в список',tImpDone:'Добавлено студентов',tImpBad:'Код результата не найден в тексте',tImpPh:'Вставьте сообщения студентов с кодом SAUYT1:…',sendTop:'Отправить результат преподавателю',
+  logout:'Выйти',lvl:'Уровень',aTitle:'Анализ: где понял, где нет',aClass:'Анализ группы',aSkills:'Навыки',aTopics:'Что повторить',aOk:'понял',aMid:'частично',aBad:'не понял',aNone:'не проходил',aFast:'очень быстро: проверьте самостоятельность',aSlow:'долго и без результата: нужна помощь',aWeak:'Слабые темы группы: повторить на паре',aStrong:'Сильные темы группы',aAvg:'ср.',aN:'прошли',aAll:'Все задания по сложности',aNoData:'Пока нет данных для анализа.',aSum:'Понял / частично / не понял',aSk:{comm:'Общение с гостем',calc:'Расчёты и показатели',sales:'Продажи и переговоры',plan:'Планирование и организация',std:'Стандарты и внимание к деталям',crisis:'Кризисы и приоритеты'},
+  tDb:'База',tRoom:'Присутствие',tRecs:'Записей',tPeersN:'Окон открыто',tRefresh:'Обновить',
+  tDetail:'Подробно',tClose:'Закрыть',tTimeIn:'время',tAns:'Ответы',tCsv:'Скачать CSV',tReset:'Очистить список',tResetSure:'Нажмите ещё раз, чтобы удалить всех',
+  tNoDb:'База данных недоступна в этом окне: показаны только те, кто в сети.',tNow2:'сейчас',tAgo:'назад',tMinShort:'мин',lobby:'вход'
+ },
+ kk:{
+  gateEy:'«Сауыт» қонақ үйі · қызметкерлерді қабылдау',gateH:'Сіздің атыңыз кім?',
+  gateLead:'Бүгін сіз ауысымға шығасыз. Қонақ үй өмірінен жағдайлар күтіп тұр: қонақпен сөйлесуден дағдарысқа дейін. Ауысым уақыты — шамамен {min} минут. Атыңызды мұғалім көреді және ол соңында бейджде тұрады.',
+  nameL:'Аты-жөніңіз',nameP:'Мысалы, Әсел Нұрланова',groupL:'Топ (міндетті емес)',groupP:'Мысалы, ГБ-21',
+  start:'Ауысымды бастау',err:'Бастау үшін атыңызды енгізіңіз.',
+  tHello:'Сіз мұғалім ретінде кірдіңіз',tPanel:'Мұғалім панелін ашу',tPractice:'Сынақ режимі (нәтиже сақталмайды)',tLink:'Мен мұғаліммін',tPw:'Мұғалім құпиясөзі',tEnter:'Кіру',tBad:'Құпиясөз қате',
+  heroH:'Қонақ үйдегі ауысым',heroLead:'Сіз кезекші әкімшісіз. Әр есік — жеке жағдай. Дұрыс жауаптар алдын ала көрінбейді: сіз сұрақ қоясыз, есептейсіз, жоспарлайсыз, жазасыз. Есіктерді кез келген ретпен ашуға болады, бірақ ауысым уақыты шектеулі.',
+  open:'ашу',min:'мин',next:'Келесі тапсырма →',finBtn:'Бейдж алу',backTeacher:'Мұғалім панелі',
+  done:'Тапсырма тапсырылды',saveFail:'Нәтижелер мұғалімге жетпейді: жазуға құқық жоқ немесе байланыс жоқ. Мұғалімге хабарлаңыз.',
+  practice:'Жаттығу режимі: нәтижелер сақталмайды.',
+  finH:'Ауысым аяқталды',finLead:'Атақ жиналған ұпайға байланысты. Өтілмеген есіктер нөл ұпай береді.',badge:'Сіздің бейджіңіз',res:'Нәтижелер',notDone:'өтілмеген',improve:'Нені жетілдіру керек',allGood:'Барлық жағдай жоғары деңгейде шешілді.',
+  ranks:['Тағылымдамашы','Әкімші','Ауысым менеджері','Бас директор'],pts:'ұпай',of:'/',points:'ұп.',
+  tH:'Мұғалім панелі',tSub:'Деректер өздігінен жаңарады. «Желіде» — бет дәл қазір ашық.',
+  tOnline:'Желіде',tStarted:'Бастады',tFinished:'Бейджге жетті',tAvg:'Орташа ұпай',
+  tMap:'Студенттер қазір қайда',tTable:'Студенттер',tName:'Аты',tGroup:'Топ',tNow:'Қазір терезеде',tProg:'Өтілді',tScore:'Ұпай',tTime:'Ауысымда',tLang:'Тіл',tSeen:'Соңғы рет',
+  tNone:'Әзірге ешкім кірген жоқ. Студенттерге сілтемені жіберіп, оларға «Қатысушы» (Contributor) қолжетімділігін беріңіз.',
+  tLessonH:'Сабақ құрамы',tLessonSub:'Сыныпқа тапсырмаларды белгілеңіз: студенттер тек белгіленгенді көреді. Өзгерістер бірден қолданылады, бірақ тек аккаунтқа кірген студенттерде. Қалғандары барлық тапсырманы көреді.',tP80:'Пресет: ~80 минут',tAll:'Барлық тапсырма',tTotal:'Барлығы',tCfgFail:'Құрамды сақтау мүмкін болмады: бет редакторының құқығы керек.',tPts:'ұпай',
+  connWait:'Мұғалімді байланыс тексерілуде…',connOk:'Мұғаліммен байланыс бар: нәтижелеріңіз көрінеді.',connNo:'Мұғалім сізді көрмейді: аккаунтқа кірмегенсіз немесе «Қатысушы» қолжетімділігі жоқ. Аккаунтқа кіріп, сілтемені қайта ашыңыз. Әзірге тапсырмаларды орындай аласыз, ал соңында нәтижені көшіріп мұғалімге жібересіз.',copyRes:'Нәтижені көшіру',copied:'Көшірілді. Мұны мұғалімге жіберіңіз.',
+  tImpH:'Аккаунтсыз студенттер нәтижелері',tImpSub:'Студент аккаунтқа кірмесе, оның нәтижелері мұнда өздігінен түспейді. «Нәтижені көшіру» батырмасын басып, хабарламаны толық жіберсін. Келгенін осында қойыңыз.',tImpBtn:'Тізімге қосу',tImpDone:'Қосылған студенттер',tImpBad:'Мәтінде нәтиже коды табылмады',tImpPh:'SAUYT1:… коды бар студент хабарламаларын қойыңыз',sendTop:'Нәтижені мұғалімге жіберу',
+  logout:'Шығу',lvl:'Деңгей',aTitle:'Талдау: қайда түсінді, қайда жоқ',aClass:'Топ талдауы',aSkills:'Дағдылар',aTopics:'Нені қайталау керек',aOk:'түсінді',aMid:'жартылай',aBad:'түсінбеді',aNone:'өтпеді',aFast:'өте тез: өздігінен орындағанын тексеріңіз',aSlow:'ұзақ әрі нәтижесіз: көмек керек',aWeak:'Топтың әлсіз тақырыптары: сабақта қайталау',aStrong:'Топтың күшті тақырыптары',aAvg:'орт.',aN:'өтті',aAll:'Барлық тапсырма қиындығы бойынша',aNoData:'Талдау үшін әзірге дерек жоқ.',aSum:'Түсінді / жартылай / түсінбеді',aSk:{comm:'Қонақпен қарым-қатынас',calc:'Есептер мен көрсеткіштер',sales:'Сату және келіссөз',plan:'Жоспарлау және ұйымдастыру',std:'Стандарттар және мұқияттылық',crisis:'Дағдарыс және басымдықтар'},
+  tDb:'Дерекқор',tRoom:'Қатысу',tRecs:'Жазба',tPeersN:'Ашық терезе',tRefresh:'Жаңарту',
+  tDetail:'Толығырақ',tClose:'Жабу',tTimeIn:'уақыт',tAns:'Жауаптар',tCsv:'CSV жүктеу',tReset:'Тізімді тазалау',tResetSure:'Барлығын жою үшін тағы бір рет басыңыз',
+  tNoDb:'Бұл терезеде дерекқор қолжетімсіз: тек желідегілер көрсетіледі.',tNow2:'қазір',tAgo:'бұрын',tMinShort:'мин',lobby:'кіреберіс'
+ }
+};
+const U=k=>{const v=UI[LANG][k];return typeof v==='string'?v.replace('{min}',typeof LESSON_MIN==='function'?LESSON_MIN():80):v};
+const L=o=>(o&&typeof o==='object'&&!Array.isArray(o)&&('ru' in o))?(o[LANG]??o.ru):o;
+
+/* ── student state ── */
+const S={id:null,name:'',group:'',startedAt:0,door:0,res:{},time:{},enter:0,fin:false};
+let connState='wait';
+let PRACTICE=false,isTeacher=false,tPwOpen=false,caps={user:null,db:null,room:null,dl:null},dbDoc=null,saveFailed=false;
+const loadLocal=()=>{try{const j=JSON.parse(STORE.get('sauyt_state')||'null');if(j&&j.name){S.name=j.name;S.group=j.group||'';S.res=j.res||{};S.time=j.time||{};S.startedAt=j.startedAt||0;S.fin=!!j.fin;S.doorId=j.doorId||''}}catch(e){}};
+const saveLocal=()=>{const m=MODS[S.door];STORE.set('sauyt_state',JSON.stringify({name:S.name,group:S.group,res:S.res,time:S.time,startedAt:S.startedAt,fin:S.fin,doorId:m?m.id:''}))};
+const total=()=>ONMODS().reduce((a,m)=>a+((S.res[m.id]||{}).s||0),0);
+const doneCount=()=>ONMODS().filter(m=>S.res[m.id]).length;
+const key=()=>'n:'+(S.name+'|'+S.group).trim().toLowerCase();
+const snaps=[];let mounted=false;
+
+function docData(){
+  const m=MODS[S.door];
+  return {name:S.name,group:S.group,lang:LANG,startedAt:S.startedAt,door:S.fin?'final':(m?m.id:''),res:S.res,time:S.time,tot:total(),k:doneCount(),fin:S.fin,lastAt:Date.now()};
+}
+let saveT=0,dbq=Promise.resolve();
+function persist(){
+  saveLocal();presence();
+  if(PRACTICE||!dbDoc)return;
+  clearTimeout(saveT);
+  saveT=setTimeout(()=>{dbq=dbq.then(()=>dbDoc.set(docData())).then(()=>{if(saveFailed){saveFailed=false;banner()}},()=>{if(!saveFailed){saveFailed=true;banner()}})},400);
+}
+function presence(){
+  if(PRACTICE||!caps.room||!S.name)return;
+  const m=MODS[S.door];
+  try{caps.room.presence({n:S.name.slice(0,40),g:S.group.slice(0,20),i:S.id||'',d:S.fin?'final':(m?m.id:''),l:LANG,k:doneCount(),p:total(),s:S.startedAt,e:S.enter}).catch(()=>{})}catch(e){}
+}
+function banner(){
+  const b=$('#banner');if(!b)return;
+  const noConn=connState==='no'&&!PRACTICE;
+  b.hidden=!(saveFailed||PRACTICE||noConn);
+  b.className='banner'+(PRACTICE&&!saveFailed&&!noConn?' info':'');
+  b.textContent=saveFailed?U('saveFail'):noConn?U('connNo'):U('practice');
+}
+
+/* ── capabilities (light up later) ── */
+async function initCaps(){
+  try{
+    if(!window.claude||!window.claude.use)return;
+    const [user,db,room,dl]=await Promise.all(['user','db','room','downloads'].map(n=>window.claude.use(n).catch(()=>null)));
+    caps={user,db,room,dl};
+    if(user){try{S.id=await user.id()}catch(e){}}
+    if(db&&S.id)dbDoc=db.doc('students/'+S.id);
+    if(dbDoc&&!S.name){try{const sn=await dbDoc.get();if(sn&&sn.exists){const d=sn.data()||{};if(d.name){S.name=d.name;S.group=d.group||'';S.res=d.res||{};S.time=d.time||{};S.startedAt=d.startedAt||Date.now();S.doorId=(d.door&&d.door!=='final')?d.door:'';saveLocal();STORE.set('sauyt_active','1');resumeStudent()}}}catch(e){}}
+    let cw=null;if(user&&user.can){try{cw=await user.can('data.write')}catch(e){}}
+    connState=(dbDoc&&cw!==false)?'ok':'no';
+    if(db){try{db.doc('config/lesson').onSnapshot(sn=>{if(sn.exists){const d=sn.data();if(d&&Array.isArray(d.on))ENABLED=new Set(d.on)}else ENABLED=new Set(MODS.map(m=>m.id));cfgChanged()},()=>{})}catch(e){}}
+  }catch(e){}
+  if(connState==='wait')connState='no';
+  gateRender();banner();if(!$('#app').hidden)appChrome();
+  if(!$('#tapp').hidden)tConnect();
+  if(S.name&&!$('#app').hidden){persist()}
+}
+
+function cfgChanged(){
+  gateRender();
+  if(!$('#app').hidden){
+    if(!showFinal&&MODS[S.door]&&!on(MODS[S.door])){const f=MODS.findIndex(on);if(f>=0)show(f)}
+    appChrome();finalDraw();presence();
+  }
+  if(!$('#tapp').hidden)tRender();
+}
+let cfgT=0;
+function saveCfg(){clearTimeout(cfgT);cfgT=setTimeout(async()=>{
+  const msg=$('#cfgMsg');
+  try{await caps.db.doc('config/lesson').set({on:[...ENABLED],t:Date.now()});if(msg)msg.textContent=''}catch(e){if(msg)msg.textContent=U('tCfgFail')}},300)}
+/* ── gate ── */
+function gateRender(){
+  const g=$('#gatecard');if(!g)return;
+  const keep={n:($('#nm0')||{}).value,g:($('#gp0')||{}).value};
+  g.innerHTML=`<div class="lang" role="group" aria-label="Language"><button data-l="ru" class="${LANG==='ru'?'on':''}">Русский</button><button data-l="kk" class="${LANG==='kk'?'on':''}">Қазақша</button></div>
+  <div class="keycard" aria-hidden="true"><span>САУЫТ</span><i></i></div>
+  <div class="eyebrow">${U('gateEy')}</div><h1>${U('gateH')}</h1><p class="lead">${U('gateLead')}</p>
+  <label class="mini" for="nm0">${U('nameL')}</label><input type="text" id="nm0" maxlength="40" placeholder="${U('nameP')}" autocomplete="off">
+  <label class="mini" for="gp0">${U('groupL')}</label><input type="text" id="gp0" maxlength="20" placeholder="${U('groupP')}" autocomplete="off">
+  <div id="nmerr" class="nmerr" role="alert"></div>
+  <button class="btn sun" id="go">${U('start')}</button>
+  <div class="${connState==='no'?'banner':'banner info'}" style="margin-top:12px">${U(connState==='ok'?'connOk':connState==='no'?'connNo':'connWait')}</div>
+  ${isTeacher?`<div class="tg"><div class="eyebrow">${U('tHello')}</div><button class="btn" id="goT">${U('tPanel')}</button><button class="btn ghost" id="goP">${U('tPractice')}</button></div>`
+   :tPwOpen?`<div class="tg"><label class="mini" for="tpw">${U('tPw')}</label><input type="password" id="tpw" inputmode="numeric" autocomplete="off" maxlength="12" class="num"><div id="tperr" class="nmerr" role="alert"></div><button class="btn ghost" id="tpwGo">${U('tEnter')}</button></div>`
+   :`<p style="margin-top:22px"><button class="finalbtn" id="tLink">${U('tLink')}</button></p>`}`;
+  $('#nm0').value=keep.n!=null&&keep.n!==''?keep.n:S.name;$('#gp0').value=keep.g!=null&&keep.g!==''?keep.g:S.group;
+  $$('.lang button',g).forEach(b=>b.onclick=()=>setLang(b.dataset.l));
+  $('#go').onclick=()=>startStudent(false);
+  $('#nm0').addEventListener('keydown',e=>{if(e.key==='Enter')startStudent(false)});
+  if(isTeacher){$('#goT').onclick=openTeacher;$('#goP').onclick=()=>startStudent(true)}
+  else if(tPwOpen){const go=()=>{if(hash('sauyt-'+$('#tpw').value.trim())===TPW){window.__tpw=$('#tpw').value.trim();isTeacher=true;tPwOpen=false;gateRender()}else{$('#tperr').textContent=U('tBad');$('#tpw').select()}};$('#tpwGo').onclick=go;$('#tpw').addEventListener('keydown',e=>{if(e.key==='Enter')go()});$('#tpw').focus()}
+  else{$('#tLink').onclick=()=>{tPwOpen=true;gateRender()}}
+}
+function setLang(l){
+  LANG=l;STORE.set('sauyt_lang',l);
+  gateRender();
+  if(!$('#app').hidden){appChrome();hooks.forEach(f=>{try{f()}catch(e){}});finalDraw();presence();persist()}
+  if(!$('#tapp').hidden)tRender();
+}
+const hooks=[];
+function startStudent(practice){
+  const v=$('#nm0').value.trim();
+  if(!v){$('#nmerr').textContent=U('err');$('#nm0').focus();return}
+  PRACTICE=practice;S.name=v;S.group=$('#gp0').value.trim();
+  if(!S.startedAt)S.startedAt=Date.now();
+  mountAll();if(!practice)STORE.set('sauyt_active','1');
+  $('#gate').hidden=true;$('#app').hidden=false;
+  S.enter=Date.now();
+  appChrome();banner();persist();window.scrollTo(0,0);
+}
+
+/* ── app ── */
+function appChrome(){
+  $('#who').textContent=S.name+(S.group?' · '+S.group:'');
+  $('#langApp').innerHTML=`<button data-l="ru" class="${LANG==='ru'?'on':''}">RU</button><button data-l="kk" class="${LANG==='kk'?'on':''}">ҚАЗ</button>`;
+  $$('#langApp button').forEach(b=>b.onclick=()=>setLang(b.dataset.l));
+  $('#heroH').innerHTML=`${U('heroH')} <em>«Сауыт»</em>`;
+  $('#heroLead').textContent=U('heroLead');
+  $('#finBtn').textContent=U('finBtn');
+  const tb=$('#tBack');tb.hidden=!isTeacher;tb.textContent=U('backTeacher');
+  $('#logout').textContent=U('logout');
+  const ct=$('#cpTop');ct.hidden=!(connState==='no'&&!PRACTICE);ct.textContent=U('sendTop');
+  drawDoors();
+  $$('.pfoot').forEach((f,i)=>footDraw(i));
+}
+const ICONS={swipe:'👆',accept:'✅',bags:'🧳',orders:'🎧',rush:'⚡',table:'🍽️',inspect:'🔍',hall:'🏛️',conflict:'💬',guest:'🧐',rev:'📈',audit:'🧮'};
+function starsOf(r){if(!r||!r.m)return '';const p=r.s/r.m,n=p>=.9?3:p>=.7?2:p>=.4?1:0;return '★'.repeat(n)+'☆'.repeat(3-n)}
+function drawDoors(){
+  $('#doors').innerHTML=MODS.map((m,i)=>{if(!on(m))return '';const r=S.res[m.id];
+    return `<button class="door ${i===S.door&&!showFinal?'on':''} ${r?'fin':''}" data-i="${i}" aria-label="${m.no} ${esc(L(m.title))}"><span class="ic">${ICONS[m.id]||'🎯'}</span><span class="no">${m.no}</span><span class="nm">${esc(L(m.title))}</span><span class="sb">${esc(L(m.sub))}</span><span class="mn">~${m.min} ${U('min')}</span><span class="stars">${starsOf(r)}</span><span class="st">${r?`${r.s} ${U('of')} ${r.m}`:U('open')}</span></button>`}).join('');
+  const t=total(),mx=MAXPTS();
+  $('#hudScore').textContent=`${t} / ${mx}`;
+  const arc=$('#arc');if(arc){const lv=Math.floor(t/15)+1,xp=t%15;arc.innerHTML=`<div class="lv"><small>${U('lvl')}</small><b>${lv}</b></div><div class="xp"><div class="bar"><i style="width:${xp/15*100}%"></i></div><small>XP ${xp} / 15</small></div><div class="coins">🪙 <b>${t*10}</b></div>`}$('#prog').style.width=(mx?t/mx*100:0)+'%';
+  $$('#doors .door').forEach(b=>b.onclick=()=>show(+b.dataset.i));
+}
+let showFinal=false;
+function leaveDoor(){
+  const m=MODS[S.door];if(m&&S.enter&&!showFinal){S.time[m.id]=(S.time[m.id]||0)+Math.round((Date.now()-S.enter)/1000)}
+  S.enter=Date.now();
+}
+function show(i){
+  if(i<MODS.length&&!on(MODS[i]))return;
+  leaveDoor();showFinal=(i>=MODS.length);if(!showFinal)S.door=i;
+  $$('.panel').forEach((p,k)=>p.classList.toggle('on',k===i));
+  if(showFinal&&!S.fin){S.fin=true}
+  drawDoors();if(showFinal)finalDraw();persist();
+  $('#stage').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+}
+function footDraw(i){
+  const f=$$('.pfoot')[i];if(!f)return;const m=MODS[i],r=S.res[m.id];
+  f.classList.toggle('show',!!r);
+  if(r){const nx=MODS.findIndex((z,k)=>k>i&&on(z));const last=nx<0;f.innerHTML=`<span><b>${U('done')}</b> · ${r.s} ${U('of')} ${r.m}</span><button class="btn">${last?U('finBtn'):U('next')}</button>`;$('button',f).onclick=()=>show(last?MODS.length:nx)}
+}
+function burst(from){
+  if(reduce)return;const r=from.getBoundingClientRect(),x0=r.left+r.width/2,y0=Math.min(Math.max(80,r.top+60),innerHeight-80);
+  const cols=['#ffcf3f','#2347ff','#ff6b6b','#2ee59d','#ffffff'];
+  for(let i=0;i<34;i++){const p=document.createElement('i');p.className='pf';p.style.background=cols[i%cols.length];p.style.left=x0+'px';p.style.top=y0+'px';document.body.appendChild(p);
+    const a=Math.random()*Math.PI*2,d=90+Math.random()*190;
+    p.animate([{transform:'translate(0,0) rotate(0)',opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d+140}px) rotate(${Math.random()*720}deg)`,opacity:0}],{duration:1100+Math.random()*700,easing:'cubic-bezier(.1,.7,.3,1)'}).onfinish=()=>p.remove();}
+}
+function makeApi(m,i,root){
+  return {
+    lang:()=>LANG,L,esc,fmt,
+    rng:(sfx)=>mulberry(hash(key()+'|'+m.id+(sfx||''))),
+    finish(score,ans){
+      score=Math.max(0,Math.min(m.max,Math.round(score)));
+      leaveDoor();const old=S.res[m.id];
+      const a={};if(ans)for(const k in ans)a[k]=String(ans[k]).slice(0,1500);
+      if(!old||score>=old.s)S.res[m.id]={s:score,m:m.max,t:S.time[m.id]||0,a};
+      drawDoors();footDraw(i);persist();burst(root);
+    },
+    onLang(fn){hooks.push(fn)},
+    persist(get,set){const k='sauyt_m_'+m.id+'_'+hash(key());try{const raw=STORE.get(k);if(raw)set(JSON.parse(raw))}catch(e){}snaps.push(()=>{try{STORE.set(k,JSON.stringify(get()))}catch(e){}})},
+    done:()=>!!S.res[m.id]
+  };
+}
+function initApp(){
+  const stage=$('#stage');
+  MODS.forEach((m,i)=>{
+    const p=document.createElement('section');p.className='panel'+(i===0?' on':'');
+    p.innerHTML='<div class="mod"></div><div class="pfoot"></div>';stage.appendChild(p);
+  });
+  const fp=document.createElement('section');fp.className='panel';fp.id='finalPanel';fp.innerHTML='<div class="mod"></div>';stage.appendChild(fp);
+  $('#finBtn').onclick=()=>show(MODS.length);
+  $('#tBack').onclick=()=>{$('#app').hidden=true;openTeacher()};
+  $('#logout').onclick=()=>{STORE.set('sauyt_active','0');location.reload()};
+  const flush=()=>snaps.forEach(f=>f());
+  setInterval(flush,4000);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){flush();saveLocal()}});
+  window.addEventListener('pagehide',()=>{flush();saveLocal()});
+}
+function mountAll(){
+  if(mounted)return;mounted=true;
+  const panels=$$('#stage .panel');
+  MODS.forEach((m,i)=>m.mount($('.mod',panels[i]),makeApi(m,i,panels[i])));
+}
+function resumeStudent(){
+  if(!S.name)return;
+  PRACTICE=false;mountAll();
+  $('#gate').hidden=true;$('#app').hidden=false;
+  let di=MODS.findIndex(m=>m.id===S.doorId);if(di<0||!on(MODS[di]))di=Math.max(0,MODS.findIndex(on));
+  S.door=di;S.enter=Date.now();showFinal=false;
+  $$('.panel').forEach((p,k)=>p.classList.toggle('on',k===di));
+  appChrome();banner();persist();
+}
+/* ── final badge ── */
+function rankOf(r){return r>=.85?3:r>=.65?2:r>=.4?1:0}
+function finalDraw(){
+  const root=$('#finalPanel .mod');if(!root)return;
+  const t=total(),mx=MAXPTS(),r=mx?t/mx:0;
+  const weak=ONMODS().filter(m=>m.max>0).map(m=>[m,S.res[m.id]]).filter(([m,x])=>!x||x.s/x.m<.7).map(([m])=>L(m.title));
+  root.innerHTML=`<div class="eyebrow">${U('finH')}</div><h2>${U('badge')}</h2><p class="intro">${U('finLead')}</p>
+  <div class="final"><div class="badge"><div class="bh">${LANG==='kk'?'«САУЫТ» ҚОНАҚ ҮЙІ':'ОТЕЛЬ «САУЫТ»'}</div><div class="big">${esc((S.name||'?')[0].toUpperCase())}</div><div class="bn">${esc(S.name)}</div><div class="br">${U('ranks')[rankOf(r)]}</div><div class="sc">${t} ${U('of')} ${mx} ${U('pts')}</div></div>
+  <div><div class="mini">${U('res')}</div><ul class="brk">${ONMODS().map(m=>{const x=S.res[m.id];return `<li><span>${m.no} · ${esc(L(m.title))}</span><b>${x?x.s+' / '+x.m:U('notDone')}</b></li>`}).join('')}</ul>
+  <p style="margin-top:12px"><button class="btn sm ghost" id="cpRes">${U('copyRes')}</button> <span class="det" id="cpMsg"></span></p>
+  <p class="lead" style="margin-top:16px;font-size:.95rem">${weak.length?U('improve')+': '+esc(weak.join(', '))+'.':U('allGood')}</p></div></div>`;
+}
+
+function codeOf(){
+  const o={n:S.name,g:S.group,l:LANG,s:S.startedAt,r:{}};
+  ONMODS().forEach(m=>{const x=S.res[m.id];if(!x)return;const a={};let c=0;for(const k in (x.a||{})){if(c++>=3)break;a[k.slice(0,40)]=String(x.a[k]).slice(0,220)}o.r[m.id]=[x.s,x.m,x.t,a]});
+  return 'SAUYT1:'+btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+}
+function decodeCodes(text){
+  const out=[];(String(text).match(/SAUYT1:[A-Za-z0-9+\/=]+/g)||[]).forEach(c=>{
+    try{const o=JSON.parse(decodeURIComponent(escape(atob(c.slice(7)))));if(!o||!o.n)return;
+      const res={};let tot=0,k=0;for(const id in o.r){const v=o.r[id];res[id]={s:v[0],m:v[1],t:v[2],a:v[3]||{}};tot+=v[0];k++}
+      out.push({id:'imp_'+hash((o.n+'|'+(o.g||'')).toLowerCase()),name:o.n,group:o.g||'',lang:o.l,startedAt:o.s||0,res,tot,k,imp:true,lastAt:0})}catch(e){}});
+  return out;
+}
+function resultText(){
+  const lines=[`${S.name}${S.group?' ('+S.group+')':''} — ${total()} / ${MAXPTS()}`].concat(ONMODS().map(m=>{const x=S.res[m.id];return `${m.no} ${L(m.title)}: ${x?x.s+'/'+x.m+', '+Math.round((x.t||0)/60)+' мин':'—'}`}));
+  return lines.join('\n')+'\n\n'+codeOf();
+}
+document.addEventListener('click',e=>{
+  if(e.target&&(e.target.id==='cpRes'||e.target.id==='cpTop')){
+    const txt=resultText(),msg=$('#cpMsg'),btn=e.target;
+    const ok=()=>{if(msg)msg.textContent=U('copied');if(btn.id==='cpTop'){const o=btn.textContent;btn.textContent=U('copied');setTimeout(()=>{btn.textContent=o},2500)}};
+    try{navigator.clipboard.writeText(txt).then(ok,()=>{window.prompt&&0;const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='width:100%;min-height:140px';e.target.parentNode.appendChild(ta);ta.select()})}catch(err){const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='width:100%;min-height:140px';e.target.parentNode.appendChild(ta);ta.select()}
+  }
+});
+/* ── teacher ── */
+let tImp={};try{tImp=JSON.parse(STORE.get('sauyt_imp')||'{}')}catch(e){}
+let tUnsub=[],tDocs={},tPeers=[],tSel=null,tReady=false,tResetArm=false,tRaf=0;
+let tSubDb=false,tSubRoom=false,tErr='';
+function tConnect(){
+  if(caps.db&&!tSubDb){tSubDb=true;
+    try{tUnsub.push(caps.db.collection('students').onSnapshot(s=>{tErr='';tDocs={};s.docs.forEach(d=>{tDocs[d.id]=d.data()});tSched()},e=>{tErr=(e&&e.code)||'error';tSubDb=false;tSched()}))}catch(e){tSubDb=false;tErr='error'}}
+  if(caps.room&&!tSubRoom){tSubRoom=true;
+    try{tPeers=[...caps.room.peers()];tUnsub.push(caps.room.onPeers(c=>{tPeers=[...c.peers];tSched()},e=>{tSubRoom=false}))}catch(e){tSubRoom=false}}
+}
+function openTeacher(){
+  $('#gate').hidden=true;$('#tapp').hidden=false;
+  tConnect();
+  if(!tReady){tReady=true;setInterval(()=>{if(!$('#tapp').hidden){tConnect();tSched()}},5000)}
+  tRender();window.scrollTo(0,0);
+}
+async function tRefresh(){
+  if(!caps.db)return;
+  try{const sn=await caps.db.collection('students').get();tDocs={};sn.docs.forEach(d=>{tDocs[d.id]=d.data()});tErr=''}catch(e){tErr=(e&&e.code)||'error'}
+  tSched();
+}
+function tSched(){if(tRaf)return;const ae=document.activeElement;if(ae&&$('#tapp').contains(ae)&&/TEXTAREA|INPUT/.test(ae.tagName))return;tRaf=requestAnimationFrame(()=>{tRaf=0;if(!$('#tapp').hidden)tRender()})}
+function tStudents(){
+  const rows={};
+  Object.entries(tDocs).forEach(([id,d])=>{rows[id]={id,live:false,...d}});
+  Object.entries(tImp).forEach(([id,d])=>{if(!rows[id])rows[id]={id,live:false,...d}});
+  tPeers.forEach(p=>{
+    if(p.kind!=='viewer'||!p.presence||!p.presence.n)return;
+    const id=p.presence.i||p.by||('p:'+p.peer);const o=rows[id]||{id};
+    rows[id]={...o,id,name:p.presence.n,group:p.presence.g,lang:p.presence.l,door:p.presence.d,startedAt:p.presence.s||o.startedAt,live:true,lk:p.presence.k,lp:p.presence.p,enter:p.presence.e,res:o.res||{}};
+  });
+  return Object.values(rows).map(r=>{r.k=r.live&&r.lk!=null?r.lk:(r.k||0);r.tot=r.live&&r.lp!=null?r.lp:(r.tot||0);return r}).sort((a,b)=>(b.live-a.live)||String(a.name).localeCompare(String(b.name)));
+}
+const modTitle=id=>{if(id==='final')return '🏁';const m=MODS.find(x=>x.id===id);return m?m.no+' '+L(m.title):(U('lobby'))};
+const ago=ts=>{if(!ts)return '—';const m=Math.round((Date.now()-ts)/60000);return m<1?U('tNow2'):m+' '+U('tMinShort')+' '+U('tAgo')};
+function tRender(){
+  const t=$('#tapp');const rows=tStudents();const mx=MAXPTS();
+  const online=rows.filter(r=>r.live).length,fin=rows.filter(r=>r.fin||r.door==='final').length;
+  const avg=rows.length?Math.round(rows.reduce((a,r)=>a+r.tot,0)/rows.length*10)/10:0;
+  const cnt={};rows.filter(r=>r.live).forEach(r=>{(cnt[r.door]=cnt[r.door]||[]).push(r.name)});
+  const sel=tSel&&rows.find(r=>r.id===tSel);
+  t.innerHTML=`<div class="topbar"><div class="who">${U('tSub')}</div><div class="lang" id="tl"><button data-l="ru" class="${LANG==='ru'?'on':''}">RU</button><button data-l="kk" class="${LANG==='kk'?'on':''}">ҚАЗ</button></div></div>
+  <header class="hero"><div class="eyebrow">${U('gateEy')}</div><h1 style="font-size:clamp(1.8rem,5vw,3rem)">${U('tH')}</h1></header>
+  <div class="tbar"><span class="tag">${U('tDb')}: ${caps.db?(tErr?'✗ '+esc(tErr):'✓'):'✗'}</span><span class="tag">${U('tRoom')}: ${caps.room?'✓':'✗'}</span><span class="tag">${U('tRecs')}: ${Object.keys(tDocs).length}</span><span class="tag">${U('tPeersN')}: ${tPeers.filter(p=>p.kind==='viewer').length}</span><button class="btn sm ghost" id="tRef">${U('tRefresh')}</button></div>
+  ${caps.db?'':`<div class="banner info">${U('tNoDb')}</div>`}
+  <div class="tcards"><div class="tc"><b>${online}</b><span>${U('tOnline')}</span></div><div class="tc"><b>${rows.length}</b><span>${U('tStarted')}</span></div><div class="tc"><b>${fin}</b><span>${U('tFinished')}</span></div><div class="tc"><b>${avg}</b><span>${U('tAvg')} (${mx})</span></div></div>
+  <div class="panel on" style="margin-top:6px"><div class="mini">${U('aClass')}</div>${classAnalysis(rows)}</div>
+  <div class="panel on" style="margin-top:14px"><div class="mini">${U('tLessonH')}</div><p class="det">${U('tLessonSub')}</p>
+   <div class="tbar"><button class="btn sm ghost" id="cP80">${U('tP80')}</button><button class="btn sm ghost" id="cAll">${U('tAll')}</button><span class="tag">${U('tTotal')}: ${LESSON_MIN()} ${U('tMinShort')} · ${MAXPTS()} ${U('tPts')}</span></div>
+   <div class="row2">${MODS.map(m=>`<button class="tile ${on(m)?'sel':''}" data-lm="${m.id}"><b>${m.no} · ${esc(L(m.title))}</b><small>~${m.min} ${U('tMinShort')} · ${m.max} ${U('tPts')}</small></button>`).join('')}</div>
+   <div class="nmerr" id="cfgMsg"></div></div>
+  <div class="panel on" style="margin-top:14px"><div class="mini">${U('tMap')}</div>
+   <div class="map">${ONMODS().map(m=>`<div class="mc ${cnt[m.id]?'hot':''}"><small>${m.no}</small><b>${esc(L(m.title))}</b><div class="pp">${(cnt[m.id]||[]).map(n=>`<i title="${esc(n)}">${esc(n.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase())}</i>`).join('')}</div></div>`).join('')}<div class="mc ${cnt.final?'hot':''}"><small>🏁</small><b>${U('badge')}</b><div class="pp">${(cnt.final||[]).map(n=>`<i title="${esc(n)}">${esc(n[0].toUpperCase())}</i>`).join('')}</div></div></div>
+   <div class="mini" style="margin-top:20px">${U('tTable')}</div>
+   ${rows.length?`<div class="tw"><table><thead><tr><th></th><th>${U('tName')}</th><th>${U('tGroup')}</th><th>${U('tNow')}</th><th>${U('tProg')}</th><th>${U('tScore')}</th><th>${U('tTime')}</th><th>${U('tLang')}</th><th>${U('tSeen')}</th></tr></thead><tbody>${rows.map(r=>`<tr class="clk" data-id="${esc(r.id)}"><td><span class="dot ${r.live?'on':''}"></span></td><td><b>${esc(r.name)}</b></td><td>${esc(r.group||'')}</td><td>${esc(r.door?modTitle(r.door):U('lobby'))}</td><td>${r.k||0} / ${ONMODS().length}</td><td>${r.tot||0} / ${mx}</td><td>${r.startedAt?Math.round((Date.now()-r.startedAt)/60000)+' '+U('tMinShort'):'—'}</td><td>${r.lang==='kk'?'ҚАЗ':'RU'}</td><td>${r.live?U('tNow2'):ago(r.lastAt)}</td></tr>`).join('')}</tbody></table></div>`:`<p class="lead">${U('tNone')}</p>`}
+   <div class="mini" style="margin-top:20px">${U('tImpH')}</div><p class="det">${U('tImpSub')}</p><textarea id="impTx" style="min-height:80px" placeholder="${U('tImpPh')}"></textarea><p style="margin-top:8px"><button class="btn sm" id="impGo">${U('tImpBtn')}</button> <span class="det" id="impMsg"></span></p>
+   <div class="tbar">${caps.dl?`<button class="btn sm" id="tCsv">${U('tCsv')}</button>`:''}<button class="btn sm ghost" id="tRst">${tResetArm?U('tResetSure'):U('tReset')}</button><button class="btn sm ghost" id="tToApp">${LANG==='kk'?'Студент ретінде өту':'Пройти как студент'}</button></div>
+  </div>
+  ${sel?tDetail(sel):''}`;
+  $$('#tl button').forEach(b=>b.onclick=()=>setLang(b.dataset.l));
+  $$('[data-lm]',t).forEach(b=>b.onclick=()=>{const id=b.dataset.lm;ENABLED.has(id)?ENABLED.delete(id):ENABLED.add(id);cfgChanged();saveCfg()});
+  $('#cP80',t).onclick=()=>{ENABLED=new Set(DEFAULT80);cfgChanged();saveCfg()};
+  $('#cAll',t).onclick=()=>{ENABLED=new Set(MODS.map(m=>m.id));cfgChanged();saveCfg()};
+  $$('tr.clk',t).forEach(tr=>tr.onclick=()=>{tSel=tSel===tr.dataset.id?null:tr.dataset.id;tRender();if(tSel)$('#tdet')&&$('#tdet').scrollIntoView({behavior:'smooth'})});
+  const c=$('#tCsv');if(c)c.onclick=()=>tCsv(rows);
+  $('#tRef').onclick=tRefresh;
+  $('#impGo').onclick=async()=>{const arr=decodeCodes($('#impTx').value),msg=$('#impMsg');
+    if(!arr.length){msg.textContent=U('tImpBad');return}
+    arr.forEach(d=>{tImp[d.id]=d});STORE.set('sauyt_imp',JSON.stringify(tImp));
+    if(caps.db){for(const d of arr){try{await caps.db.doc('students/'+d.id).set(d)}catch(e){}}}
+    $('#impTx').value='';tRender();const m2=$('#impMsg');if(m2)m2.textContent=U('tImpDone')+': '+arr.length};
+  $('#tRst').onclick=async()=>{if(!tResetArm){tResetArm=true;tRender();setTimeout(()=>{tResetArm=false},5000);return}tResetArm=false;
+    try{await Promise.all(Object.keys(tDocs).map(id=>caps.db.doc('students/'+id).delete()))}catch(e){}tRender()};
+  $('#tToApp').onclick=()=>{$('#tapp').hidden=true;$('#gate').hidden=false;gateRender()};
+  const cd=$('#tdetClose');if(cd)cd.onclick=()=>{tSel=null;tRender()};
+}
+
+const SKMAP={guest:'comm',conflict:'comm',reply:'comm',rev:'sales',sales:'sales',tour:'sales',rating:'sales',audit:'calc',menu:'calc',book:'calc',hk:'plan',sched:'plan',conf:'plan',ready:'plan',swipe:'std',accept:'calc',bags:'crisis',orders:'std',over:'crisis',crisis:'crisis',rush:'crisis',inspect:'std',hall:'std',table:'std'};
+const TOPIC={
+ guest:{ru:'Выявление потребностей: какие вопросы задать гостю, чтобы подобрать номер и услуги',kk:'Қажеттіліктерді анықтау: нөмір мен қызметті таңдау үшін қонаққа қандай сұрақ қою керек'},
+ rev:{ru:'Ценообразование: как цена влияет на загрузку, учёт конкурентов и событий (RevPAR)',kk:'Баға белгілеу: бағаның толымдылыққа әсері, бәсекелестер мен іс-шараларды ескеру (RevPAR)'},
+ audit:{ru:'Показатели отеля: загрузка, ADR, RevPAR и сверка списаний',kk:'Қонақ үй көрсеткіштері: толымдылық, ADR, RevPAR және есептен шығаруды салыстыру'},
+ over:{ru:'Овербукинг: кого переселять, политика отеля и бюджет компенсаций',kk:'Овербукинг: кімді көшіру, қонақ үй саясаты және өтемақы бюджеті'},
+ reply:{ru:'Ответ на отзыв: имя, благодарность, извинение без оправданий, конкретные меры',kk:'Пікірге жауап: аты, алғыс, ақталусыз кешірім, нақты шаралар'},
+ hk:{ru:'График уборки: сроки заезда, «не беспокоить», нагрузка на горничных',kk:'Жинау кестесі: келу мерзімі, «мазаламаңыз», қызметкерлер жүктемесі'},
+ crisis:{ru:'Кризис: порядок действий — безопасность, срок, информирование, компенсация',kk:'Дағдарыс: әрекет реті — қауіпсіздік, мерзім, хабарлау, өтемақы'},
+ menu:{ru:'Меню-инжиниринг: маржа, популярность и фудкост блюда',kk:'Мәзір-инжиниринг: маржа, танымалдық және тағам фудкосты'},
+ inspect:{ru:'Стандарты чистоты номера: что проверяют перед заездом',kk:'Нөмір тазалығы стандарттары: келер алдында нені тексереді'},
+ hall:{ru:'Стандарты зала и безопасность: выходы, посуда, пол, освещение',kk:'Зал стандарттары және қауіпсіздік: шығу жолдары, ыдыс, еден, жарық'},
+ rush:{ru:'Приоритизация очереди: срочность и ценность запроса',kk:'Кезекті басымдастыру: сұраудың шұғылдығы мен құндылығы'},
+ table:{ru:'Сервировка: расположение приборов, бокалов и салфетки',kk:'Дастарқан жаю: құрал-саймандар, бокалдар мен майлықтың орналасуы'},
+ sched:{ru:'График смен: правила, навыки сотрудников и нагрузка по загрузке отеля',kk:'Ауысым кестесі: ережелер, қызметкер дағдылары және қонақ үй толымдылығына сай жүктеме'},
+ book:{ru:'Подтверждение брони: вместимость, наличие на все ночи, тариф и расчёт суммы',kk:'Брондауды растау: сыйымдылық, барлық түнге бос болуы, тариф және соманы есептеу'},
+ sales:{ru:'Продажи: выявить приоритет клиента, давать уступки только по делу',kk:'Сату: клиент басымдығын анықтау, жеңілдікті тек орнымен беру'},
+ ready:{ru:'Номер под состав гостей: нормы комплектации и вместимость',kk:'Қонақтар құрамына нөмір: жабдықтау нормалары және сыйымдылық'},
+ rating:{ru:'Рейтинг на Booking: найти причину низкой оценки и вложиться точно в неё',kk:'Booking рейтингі: төмен бағаның себебін табу және дәл соған қаржы салу'},
+ conflict:{ru:'Конфликт гостей: эмпатия, выяснение фактов, решение для обеих сторон',kk:'Қонақтар жанжалы: жанашырлық, фактілерді анықтау, екі жаққа шешім'},
+ tour:{ru:'Переговоры с туроператором: комиссия, квота, release и политика отеля',kk:'Туроператормен келіссөз: комиссия, квота, release және қонақ үй саясаты'},
+ swipe:{ru:'Стандарты сервиса: что можно и нельзя в работе с гостем',kk:'Қызмет көрсету стандарттары: қонақпен жұмыста не болады, не болмайды'},
+ accept:{ru:'Брондау: наличие на все ночи и правила вместимости',kk:'Брондау: барлық түнге бос болуы және сыйымдылық ережелері'},
+ bags:{ru:'Скорость и внимание: быстро направлять багаж по этажам',kk:'Жылдамдық және зейін: жүкті қабаттарға тез бағыттау'},
+ orders:{ru:'Приём заказа: запомнить блюдо, особенность и количество',kk:'Тапсырыс қабылдау: тағамды, ерекшелікті және санын есте сақтау'},
+ conf:{ru:'Конференц-зал: рассадка, заказ по нормам и план размещения оборудования',kk:'Конференц-зал: отырғызу, нормалар бойынша тапсырыс және жабдықты орналастыру жоспары'}
+};
+function verdictOf(p){return p>=.8?'ok':p>=.5?'mid':'bad'}
+function studentAnalysis(r){
+  const res=r.res||{};
+  const items=ONMODS().filter(m=>m.max>0).map(m=>{const x=res[m.id];if(!x)return{m,v:'none'};const p=x.s/x.m,t=x.t||0;let flag='';
+    if(p>=.7&&t<m.min*60*.2)flag='aFast';else if(p<.5&&t>m.min*60*2)flag='aSlow';return{m,p,v:verdictOf(p),t,flag}});
+  const done=items.filter(i=>i.v!=='none');
+  if(!done.length)return `<p class="det">${U('aNoData')}</p>`;
+  const sk={};done.forEach(i=>{const k=SKMAP[i.m.id];if(!k)return;(sk[k]=sk[k]||[]).push(i.p)});
+  const lab={ok:U('aOk'),mid:U('aMid'),bad:U('aBad')};
+  const bad=done.filter(i=>i.v!=='ok').sort((a,b)=>a.p-b.p);
+  return `<div class="mini" style="margin-top:14px">${U('aSkills')}</div>
+  <div class="mgrid">${Object.keys(U('aSk')).filter(k=>sk[k]).map(k=>{const v=sk[k].reduce((a,b)=>a+b,0)/sk[k].length;const col=v>=.8?'var(--ok)':v>=.5?'var(--sun)':'var(--bad)';return `<div class="meter"><small>${esc(U('aSk')[k])}<span>${Math.round(v*100)}%</span></small><div class="tr"><i style="width:${Math.round(v*100)}%;background:${col}"></i></div></div>`}).join('')}</div>
+  <p class="det">${U('aSum')}: <b>${done.filter(i=>i.v==='ok').length}</b> / <b>${done.filter(i=>i.v==='mid').length}</b> / <b>${done.filter(i=>i.v==='bad').length}</b></p>
+  <ul class="crit">${items.map(i=>i.v==='none'?`<li><span>${i.m.no} · ${esc(L(i.m.title))}</span><b>${U('aNone')}</b></li>`:`<li class="${i.v==='ok'?'ok':i.v==='bad'?'no':''}"><span>${i.m.no} · ${esc(L(i.m.title))}${i.v!=='ok'&&TOPIC[i.m.id]?`<br><span class="det">${U('aTopics')}: ${esc(L(TOPIC[i.m.id]))}</span>`:''}${i.flag?`<br><span class="det" style="color:var(--bad)">⚠ ${U(i.flag)}</span>`:''}</span><b>${lab[i.v]} · ${Math.round(i.p*100)}%</b></li>`).join('')}</ul>`;
+}
+function classAnalysis(rows){
+  const st=ONMODS().filter(m=>m.max>0).map(m=>{const xs=rows.map(r=>r.res&&r.res[m.id]).filter(Boolean);const n=xs.length;const avg=n?xs.reduce((a,x)=>a+x.s/x.m,0)/n:null;const okN=xs.filter(x=>x.s/x.m>=.8).length;return{m,n,avg,okN}}).filter(x=>x.n>0);
+  if(!st.length)return `<p class="det">${U('aNoData')}</p>`;
+  st.sort((a,b)=>a.avg-b.avg);
+  const weak=st.filter(x=>x.avg<.7).slice(0,5),strong=[...st].reverse().filter(x=>x.avg>=.8).slice(0,3);
+  const bar=x=>{const v=Math.round(x.avg*100);const col=x.avg>=.8?'var(--ok)':x.avg>=.5?'var(--sun)':'var(--bad)';return `<div class="meter" style="margin-bottom:8px"><small>${x.m.no} · ${esc(L(x.m.title))}<span>${U('aAvg')} ${v}% · ${U('aN')} ${x.n} · ${U('aOk')} ${x.okN}</span></small><div class="tr"><i style="width:${v}%;background:${col}"></i></div></div>`};
+  return `${weak.length?`<div class="mini">${U('aWeak')}</div><ul class="crit">${weak.map(x=>`<li class="no"><span><b>${x.m.no} · ${esc(L(x.m.title))}</b><br><span class="det">${esc(L(TOPIC[x.m.id]||''))}</span></span><b>${Math.round(x.avg*100)}%</b></li>`).join('')}</ul>`:''}
+  ${strong.length?`<div class="mini" style="margin-top:12px">${U('aStrong')}</div><ul class="crit">${strong.map(x=>`<li class="ok"><span>${x.m.no} · ${esc(L(x.m.title))}</span><b>${Math.round(x.avg*100)}%</b></li>`).join('')}</ul>`:''}
+  <details style="margin-top:12px"><summary>${U('aAll')}</summary><div style="margin-top:10px">${st.map(bar).join('')}</div></details>`;
+}
+
+function tDetail(r){
+  const res=r.res||{};
+  return `<div class="panel on" id="tdet"><div class="eyebrow">${U('tDetail')}</div><h2>${esc(r.name)} <span class="tag">${r.tot||0} / ${MAXPTS()}</span></h2>
+  <div class="mini">${U('aTitle')}</div>${studentAnalysis(r)}
+  <ul class="brk">${MODS.filter(m=>on(m)||res[m.id]).map(m=>{const x=res[m.id];return `<li><span>${m.no} · ${esc(L(m.title))}</span><b>${x?`${x.s} / ${x.m} · ${Math.round((x.t||0)/60*10)/10} ${U('tMinShort')}`:'—'}</b></li>`}).join('')}</ul>
+  ${MODS.map(m=>{const x=res[m.id];if(!x||!x.a||!Object.keys(x.a).length)return '';return `<div class="mini" style="margin-top:16px">${m.no} · ${esc(L(m.title))} · ${U('tAns')}</div>`+Object.entries(x.a).map(([k,v])=>`<div class="det">${esc(k)}</div><div class="ans">${esc(v)}</div>`).join('')}).join('')}
+  <button class="btn sm ghost" id="tdetClose">${U('tClose')}</button></div>`;
+}
+async function tCsv(rows){
+  const head=['name','group','lang','done','total',...MODS.map(m=>m.id+'_score'),...MODS.map(m=>m.id+'_sec')];
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const lines=[head.join(',')].concat(rows.map(r=>[q(r.name),q(r.group),r.lang||'',r.k||0,r.tot||0,...MODS.map(m=>(r.res&&r.res[m.id]?r.res[m.id].s:'')),...MODS.map(m=>(r.res&&r.res[m.id]?r.res[m.id].t:''))].join(',')));
+  try{await caps.dl.save({filename:'sauyt-results.csv',data:'﻿'+lines.join('\n')})}catch(e){}
+}
+
+/* ── boot ── */
+loadLocal();
+function boot(){
+  ENABLED=new Set(MODS.map(m=>m.id));
+  initApp();gateRender();
+  if(S.name&&STORE.get('sauyt_active')==='1')resumeStudent();
+  initCaps();
+}
+
+
+document.documentElement.classList.add('arcade');
+UI.ru.gateEy='Сауыт Арена · игры для отельеров';UI.ru.gateH='Как тебя зовут?';
+UI.ru.gateLead='Быстрые игры на внимание, скорость и знание сервиса. Набирай звёзды и уровни, а результаты видит преподаватель.';
+UI.ru.start='В игру';UI.ru.heroH='Арена';UI.ru.heroLead='Выбирай игру, проходи уровни и собирай звёзды: три звезды за результат от 90%. Играй с телефона, прогресс сохраняется.';
+UI.ru.finBtn='Мой бейдж';UI.ru.next='Дальше →';UI.ru.done='Игра пройдена';
+UI.kk.gateEy='Сауыт Арена · қонақ үй мамандарына ойындар';UI.kk.gateH='Сенің атың кім?';
+UI.kk.gateLead='Зейін, жылдамдық және қызмет білімі бойынша жылдам ойындар. Жұлдыз бен деңгей жина, ал нәтижені оқытушы көреді.';
+UI.kk.start='Ойынға';UI.kk.heroH='Арена';UI.kk.heroLead='Ойынды таңда, деңгейлерден өт және жұлдыз жина: 90%-дан жоғары нәтижеге үш жұлдыз. Телефоннан ойна, прогресс сақталады.';
+UI.kk.finBtn='Менің бейджім';UI.kk.next='Әрі қарай →';UI.kk.done='Ойын өтілді';
+/* ═════════ МОБИЛЬНЫЕ ИГРЫ: свайп, багаж, заказ на слух ═════════ */
+function swipeDeck(root,api,cfg){
+  const R=api.rng();
+  const cards=cfg.build(R);
+  const N=cards.length,PER=cfg.per||10;
+  let i=0,correct=0,streak=0,best=0,log=[],done=false,res=null,started=false,tmr=null,t0=0,locked=false;
+  const t=k=>cfg.T[api.lang()][k];
+  function draw(){
+    clearInterval(tmr);
+    const lg=api.lang(),x=cfg.T[lg];
+    if(done){
+      root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b><p>${x.right}: ${correct} / ${N} · ${x.streak}: ${best}</p></div>
+      ${log.filter(l=>!l.ok).length?`<div class="mini" style="margin-top:14px">${x.mist}</div><ul class="crit">${log.filter(l=>!l.ok).map(l=>`<li class="no"><span>${esc(cards[l.i].tx[lg])}<br><span class="det">${l.to?x.timeout+'. ':''}${esc(cards[l.i].why[lg])}</span></span><b>${cards[l.i].ans?x.yes:x.no}</b></li>`).join('')}</ul>`:''}`;
+      return;
+    }
+    if(!started){
+      root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p><p style="margin-top:14px"><button class="btn sun" id="go">${x.start}</button></p>`;
+      $('#go',root).onclick=()=>{started=true;draw()};return;
+    }
+    const c=cards[i];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2>
+    <div class="dots">${cards.map((_,k)=>`<i class="${k<i?'d':k===i?'c':''}" style="width:${Math.max(6,Math.floor(260/N))}px"></i>`).join('')}</div>
+    <div class="sticky-stat"><span>${x.right}: <span class="tok">${correct}</span></span><span>${x.streak}: <span class="tok">${streak}</span>${streak>=3?' 🔥':''}</span></div>
+    <div class="timebar"><i id="tb" style="width:100%"></i></div>
+    ${c.rule?`<p class="det" style="margin-bottom:8px">${esc(c.rule[lg])}</p>`:''}
+    <div class="swarea"><div class="swlab l" id="ll">← ${x.no}</div><div class="swlab r" id="rl">${x.yes} →</div><div class="swc" id="swc">${esc(c.tx[lg])}</div></div>
+    <div class="swbtn"><button class="btn bad" id="bn">✕ ${x.no}</button><button class="btn good" id="by">✓ ${x.yes}</button></div><div class="swfb" id="fb"></div>`;
+    t0=performance.now();locked=false;
+    tmr=setInterval(()=>{const r=1-(performance.now()-t0)/(PER*1000);const tb=$('#tb',root);if(tb)tb.style.width=Math.max(0,r*100)+'%';if(r<=0)decide(null,true)},100);
+    const el=$('#swc',root);let sx=0,dx=0,drag=false;
+    el.onpointerdown=e=>{drag=true;sx=e.clientX;el.setPointerCapture(e.pointerId);el.style.transition='none'};
+    el.onpointermove=e=>{if(!drag)return;dx=e.clientX-sx;el.style.transform=`translateX(${dx}px) rotate(${dx/18}deg)`;$('#ll',root).style.opacity=Math.min(1,Math.max(0,-dx/90));$('#rl',root).style.opacity=Math.min(1,Math.max(0,dx/90))};
+    el.onpointerup=e=>{if(!drag)return;drag=false;el.style.transition='transform .25s';if(dx>90)decide(true);else if(dx<-90)decide(false);else{el.style.transform='';$('#ll',root).style.opacity=0;$('#rl',root).style.opacity=0}dx=0};
+    $('#bn',root).onclick=()=>decide(false);$('#by',root).onclick=()=>decide(true);
+  }
+  function decide(v,to){
+    if(locked)return;locked=true;clearInterval(tmr);
+    const lg=api.lang(),x=cfg.T[lg],c=cards[i],ok=!to&&v===c.ans;
+    const el=$('#swc',root),fb=$('#fb',root);
+    if(el){el.style.transition='transform .35s,opacity .35s';el.style.transform=`translateX(${v===false?-420:v===true?420:0}px) rotate(${v===false?-25:25}deg)`;el.style.opacity='0'}
+    if(ok){correct++;streak++;best=Math.max(best,streak)}else streak=0;
+    log.push({i,ok,to:!!to});
+    fb.className='swfb show '+(ok?'ok':'bad');fb.textContent=(ok?'✓ ':'✗ ')+(ok?'':(to?x.timeout+'. ':'')+c.why[lg]);
+    setTimeout(()=>{i++;if(i>=N){done=true;const sc=Math.max(0,Math.round(10*correct/N));res={sc};draw();api.finish(sc,{'Верных':correct+' / '+N,'Серия':best,'Ошибки':log.filter(l=>!l.ok).map(l=>cards[l.i].tx.ru.slice(0,60)).join(' | ')})}else draw()},ok?650:1700);
+  }
+  api.persist(()=>({i,correct,streak,best,log,done,res,started:started&&!done?false:started}),s=>{i=s.i||0;correct=s.correct||0;streak=s.streak||0;best=s.best||0;log=s.log||[];done=!!s.done;res=s.res||null;started=!!s.started});
+  api.onLang(draw);draw();
+}
+
+/* ── 161 · СВАЙП: стандарты сервиса ── */
+(function(){
+const P=[
+ [true,'Гость жалуется на шум. Вы выслушали, извинились и предложили решение.','Гость шу туралы шағымданады. Сіз тыңдап, кешірім сұрап, шешім ұсындыңыз.','Это стандарт: эмпатия плюс решение.','Бұл стандарт: жанашырлық және шешім.'],
+ [false,'Администратор ответил на звонок с набитым ртом и не представился.','Әкімші қоңырауға аузы толы күйде жауап беріп, өзін таныстырмады.','Нужно назвать отель и своё имя, говорить чётко.','Қонақ үйдің атын және өз атыңызды айтып, анық сөйлеу керек.'],
+ [true,'Горничная постучала, подождала ответа и громко сказала «Housekeeping».','Бөлме қызметкері қағып, жауап күтіп, дауыстап «Housekeeping» деді.','Стандарт входа в занятый номер.','Бос емес нөмірге кіру стандарты.'],
+ [false,'Официант принёс блюдо гостю с аллергией, не уточнив состав.','Даяшы аллергиясы бар қонаққа құрамын нақтыламай тағам әкелді.','Аллергены всегда уточняют: это здоровье гостя.','Аллергендерді әрдайым нақтылайды: бұл қонақтың денсаулығы.'],
+ [true,'Вы обратились к гостю по фамилии и поблагодарили за ожидание.','Сіз қонаққа тегі бойынша жүгініп, күткені үшін алғыс айттыңыз.','Личное обращение и благодарность — стандарт.','Жеке жүгіну және алғыс — стандарт.'],
+ [false,'Вы сказали гостю: «Это не наша проблема».','Сіз қонаққа «Бұл біздің мәселе емес» дедіңіз.','Гость остаётся без помощи. Нужно предложить решение.','Қонақ көмексіз қалады. Шешім ұсыну керек.'],
+ [false,'Номер сдан с чужим волосом в ванной: «гость не заметит».','Нөмір ваннада бөтен шашпен тапсырылды: «қонақ байқамайды».','Чистота — базовый стандарт. Заметят.','Тазалық — негізгі стандарт. Байқайды.'],
+ [true,'Вы предупредили, что номер задерживается, и предложили кофе в лаунже.','Сіз нөмірдің кешігетінін ескертіп, лаунжда кофе ұсындыңыз.','Честно предупредили и компенсировали ожидание.','Адал ескертіп, күтуді өтедіңіз.'],
+ [false,'Вы громко назвали номер комнаты гостя на весь холл.','Сіз қонақтың бөлме нөмірін бүкіл холлға естіртіп айттыңыз.','Номер комнаты — приватные данные. Показывают на карточке.','Бөлме нөмірі — жеке деректер. Карточкада көрсетіледі.'],
+ [true,'Вы тихо назвали номер комнаты и показали его на карточке.','Сіз бөлме нөмірін ақырын айтып, карточкада көрсеттіңіз.','Безопасность гостя на первом месте.','Қонақ қауіпсіздігі бірінші орында.'],
+ [false,'Вы обсуждаете гостя с коллегой в его присутствии.','Сіз қонақты оның көзінше әріптесіңізбен талқылайсыз.','Это неуважение. Обсуждения — вне поля зрения гостя.','Бұл құрметсіздік. Талқылау қонақтың көзінен тыс жүргізіледі.'],
+ [true,'Вы записали пожелание гостя о подушке в его карточку.','Сіз қонақтың жастық туралы тілегін оның карточкасына жаздыңыз.','Запоминаем предпочтения гостей: так растёт лояльность.','Қонақ қалауларын есте сақтаймыз: адалдық осылай артады.'],
+ [false,'Вы пообещали гостю скидку за счёт отеля без согласования и взяли чаевые.','Сіз келісусіз қонаққа қонақ үй есебінен жеңілдік уәде етіп, шайлық алдыңыз.','Скидки согласуются с менеджером. Это нарушение полномочий.','Жеңілдіктер менеджермен келісіледі. Бұл өкілеттікті бұзу.'],
+ [true,'Вы проверили документы гостя и вернули их без лишних вопросов.','Сіз қонақтың құжаттарын тексеріп, артық сұрақсыз қайтардыңыз.','Проверка по регламенту без давления на гостя.','Қонаққа қысымсыз, регламент бойынша тексеру.'],
+ [true,'Вы улыбнулись и поприветствовали гостя в течение 10 секунд.','Сіз күлімсіреп, қонақпен 10 секунд ішінде сәлемдестіңіз.','Быстрое приветствие — часть стандарта.','Жылдам сәлемдесу — стандарттың бөлігі.'],
+ [false,'Вы приняли оплату наличными и не выдали чек.','Сіз төлемді қолма-қол қабылдап, чек бермедіңіз.','Чек обязателен: учёт и права гостя.','Чек міндетті: есеп және қонақ құқығы.'],
+ [false,'Горничная оставила тележку в коридоре, перекрыв проход.','Бөлме қызметкері арбасын дәлізде қалдырып, жолды жапты.','Проход и эвакуационные пути должны быть свободны.','Өтетін жол мен эвакуациялық жолдар бос болуы керек.'],
+ [true,'Повар проверил сроки годности и убрал просроченные продукты.','Аспаз жарамдылық мерзімін тексеріп, мерзімі өткен өнімдерді алып тастады.','Безопасность питания.','Тамақ қауіпсіздігі.'],
+ [false,'Вы назвали номер гостя незнакомцу, который представился другом.','Сіз өзін дос деп таныстырған бейтаныс адамға қонақтың нөмірін айттыңыз.','Данные гостей никому не раскрываем. Предложите оставить сообщение.','Қонақ деректерін ешкімге айтпаймыз. Хабарлама қалдыруды ұсыныңыз.'],
+ [true,'Гостю стало плохо: вы вызвали врача и сообщили менеджеру.','Қонаққа жағдайы нашарлады: сіз дәрігер шақырып, менеджерге хабарладыңыз.','Здоровье важнее всего, затем эскалация.','Денсаулық бәрінен маңызды, содан кейін эскалация.']
+];
+const T={ru:{eb:'Номер 161 · стандарты сервиса',h:'Свайп: можно или нельзя',intro:'Появляется ситуация из работы отеля. Смахните карточку вправо, если так делать МОЖНО (соответствует стандарту), и влево, если НЕЛЬЗЯ. На каждую карточку 10 секунд. Ошибки разберём в конце.',start:'Начать',yes:'Можно',no:'Нельзя',right:'Верно',streak:'Серия',res:'Итог',mist:'Разбор ошибок',timeout:'Время вышло'},
+ kk:{eb:'161 нөмір · қызмет көрсету стандарттары',h:'Свайп: болады немесе болмайды',intro:'Қонақ үй жұмысынан жағдай шығады. Олай істеуге БОЛАДЫ (стандартқа сай) болса, карточканы оңға, БОЛМАЙДЫ болса, солға сырғытыңыз. Әр карточкаға 10 секунд. Қателер соңында талданады.',start:'Бастау',yes:'Болады',no:'Болмайды',right:'Дұрыс',streak:'Қатар',res:'Қорытынды',mist:'Қателер талдауы',timeout:'Уақыт бітті'}};
+MODS.push({id:'swipe',no:'161',min:4,max:10,title:{ru:'Свайп-стандарты',kk:'Свайп-стандарттар'},sub:{ru:'Можно или нельзя',kk:'Болады немесе жоқ'},
+ mount(root,api){swipeDeck(root,api,{T,per:10,build:R=>shufR(P,R).slice(0,12).map(p=>({ans:p[0],tx:{ru:p[1],kk:p[2]},why:{ru:p[3],kk:p[4]}}))})}});
+})();
+
+/* ── 171 · СВАЙП: принять или отказать ── */
+(function(){
+const T={ru:{eb:'Номер 171 · служба бронирования',h:'Принять или отказать',intro:'Заявки приходят одна за другой. Правила под каждой карточкой. Смахните вправо, если заявку можно принять, и влево, если нет. На карточку 10 секунд.',start:'Начать',yes:'Принять',no:'Отказать',right:'Верно',streak:'Серия',res:'Итог',mist:'Разбор ошибок',timeout:'Время вышло'},
+ kk:{eb:'171 нөмір · брондау қызметі',h:'Қабылдау немесе бас тарту',intro:'Өтінімдер бірінен соң бірі келеді. Ережелер әр карточканың астында. Өтінімді қабылдауға болса, оңға, болмаса, солға сырғытыңыз. Әр карточкаға 10 секунд.',start:'Бастау',yes:'Қабылдау',no:'Бас тарту',right:'Дұрыс',streak:'Қатар',res:'Қорытынды',mist:'Қателер талдауы',timeout:'Уақыт бітті'}};
+const RULE={ru:'Правила: хватит ли свободных номеров на КАЖДУЮ ночь; в Стандарт — не больше 2 гостей (дети до 6 лет не считаются).',kk:'Ережелер: ӘР түнге бос нөмір жете ме; Стандартқа — 2 қонақтан көп емес (6 жасқа дейінгі балалар есептелмейді).'};
+MODS.push({id:'accept',no:'171',min:4,max:10,title:{ru:'Принять или отказать',kk:'Қабылдау немесе бас тарту'},sub:{ru:'Быстрые решения по брони',kk:'Брондау бойынша жылдам шешімдер'},
+ mount(root,api){swipeDeck(root,api,{T,per:10,build:R=>{
+  const out=[];
+  for(let k=0;k<12;k++){
+    if(R()<.55){
+      const n=1+Math.floor(R()*3),nights=2+Math.floor(R()*2);const free=Array.from({length:nights},()=>Math.floor(R()*4));
+      const ans=free.every(v=>v>=n),f=free.join(' / ');
+      out.push({ans,rule:RULE,tx:{ru:`Запрос: ${n} номер(а) на ${nights} ночи. Свободно по ночам: ${f}.`,kk:`Өтінім: ${nights} түнге ${n} нөмір. Түндер бойынша бос: ${f}.`},why:{ru:ans?'Свободных номеров хватает на каждую ночь.':`Есть ночь, где свободно меньше ${n}: заявку принять нельзя.`,kk:ans?'Әр түнге бос нөмір жеткілікті.':`Бос нөмір ${n}-ден аз түн бар: өтінімді қабылдауға болмайды.`}});
+    }else{
+      const a=1+Math.floor(R()*2),kid=[2,4,5,7,9][Math.floor(R()*5)],counted=a+(kid>=6?1:0),ans=counted<=2;
+      out.push({ans,rule:RULE,tx:{ru:`Стандарт: ${a} взр. и ребёнок ${kid} лет.`,kk:`Стандарт: ${a} ер. және ${kid} жастағы бала.`},why:{ru:ans?`Считаем ${counted}: помещаются.`:`Считаем ${counted} гостя(ей): больше 2, нужен другой номер.`,kk:ans?`${counted} қонақ есептеледі: сыяды.`:`${counted} қонақ есептеледі: 2-ден көп, басқа нөмір керек.`}});
+    }
+  }
+  return out}})}});
+})();
+
+/* ── 181 · БАГАЖ В ЛИФТ ── */
+MODS.push({id:'bags',no:'181',min:4,max:10,title:{ru:'Багаж в лифт',kk:'Жүкті лифтке'},sub:{ru:'Играй на скорость',kk:'Жылдамдыққа ойна'},
+mount(root,api){
+  const T={ru:{eb:'Номер 181 · служба приёма и размещения',h:'Багаж в лифт',intro:'Чемоданы падают сверху. На бирке номер комнаты. Нажмите нужный этаж, пока чемодан не упал. Первая цифра — этаж. Метка VIP везёт чемодан в отдельный лифт. У вас 3 жизни и 45 секунд.',start:'Играть',floor:'эт.',vip:'VIP',res:'Итог',hit:'Доставлено',miss:'Ошибки',again:'Ещё раз',lives:'Жизни'},
+   kk:{eb:'181 нөмір · қабылдау және орналастыру қызметі',h:'Жүкті лифтке',intro:'Чемодандар жоғарыдан түседі. Биркада бөлме нөмірі тұр. Чемодан құламай тұрып, қажет қабатты басыңыз. Бірінші сан — қабат. VIP белгісі чемоданды бөлек лифтке жібереді. Сізде 3 өмір және 45 секунд бар.',start:'Ойнау',floor:'қаб.',vip:'VIP',res:'Қорытынды',hit:'Жеткізілді',miss:'Қателер',again:'Тағы',lives:'Өмір'}};
+  const DUR=45,H=300;
+  let st='idle',items=[],hit=0,miss=0,lives=3,t0=0,last=0,spawnT=0,raf=0,seq=0,res=null;
+  const R=api.rng();
+  const t=k=>T[api.lang()][k];
+  function lane(it){return it.vip?3:it.room<200?0:it.room<300?1:2}
+  function start(){st='run';items=[];hit=0;miss=0;lives=3;seq=0;t0=performance.now();last=t0;spawnT=0;buildRun();raf=requestAnimationFrame(loop)}
+  function buildRun(){
+    const x=T[api.lang()];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2>
+    <div class="sticky-stat"><span>${x.hit}: <span class="tok" id="bh">0</span></span><span>${x.lives}: <span class="tok" id="bl">❤❤❤</span></span></div>
+    <div class="timebar"><i id="tb" style="width:100%"></i></div>
+    <div class="bagarea" id="ba" style="height:${H}px"></div>
+    <div class="baglanes">${[1,2,3].map(n=>`<button class="btn" data-l="${n-1}">${n} ${x.floor}</button>`).join('')}<button class="btn sun" data-l="3">${x.vip}</button></div>`;
+    $$('[data-l]',root).forEach(b=>b.onpointerdown=e=>{e.preventDefault();tap(+b.dataset.l)});
+  }
+  function spawn(){
+    const vip=R()<.18,floor=1+Math.floor(R()*3),room=floor*100+Math.floor(R()*30)+1;
+    const it={id:++seq,room,vip,y:-40,x:10+Math.floor(R()*70),el:null};
+    const el=document.createElement('div');el.className='bag'+(vip?' vip':'');el.innerHTML=`<span>🧳</span><b>${vip?'VIP ':''}${room}</b>`;el.style.left=it.x+'%';$('#ba',root).appendChild(el);it.el=el;items.push(it);
+  }
+  function loop(now){
+    if(st!=='run')return;
+    const dt=(now-last)/1000;last=now;const el0=(now-t0)/1000;
+    const speed=70+el0*2.6;
+    spawnT-=dt;if(spawnT<=0){spawn();spawnT=Math.max(.7,1.8-el0*.02)}
+    items.forEach(it=>{it.y+=speed*dt;it.el.style.transform=`translateY(${it.y}px)`});
+    const tb=$('#tb',root);if(tb)tb.style.width=Math.max(0,(1-el0/DUR)*100)+'%';
+    const low=items.filter(it=>it.y>=H-44);
+    low.forEach(it=>{lose(it,true)});
+    if(el0>=DUR||lives<=0)return end();
+    raf=requestAnimationFrame(loop);
+  }
+  function lose(it,fell){
+    items=items.filter(z=>z!==it);miss++;lives--;it.el.classList.add('boom');setTimeout(()=>it.el.remove(),350);
+    const bl=$('#bl',root);if(bl)bl.textContent='❤'.repeat(Math.max(0,lives))+'🖤'.repeat(3-Math.max(0,lives));
+  }
+  function tap(l){
+    if(st!=='run')return;
+    const it=[...items].sort((a,b)=>b.y-a.y)[0];if(!it)return;
+    if(lane(it)===l){items=items.filter(z=>z!==it);hit++;it.el.classList.add('ok');it.el.style.transition='transform .3s,opacity .3s';it.el.style.transform+=' translateX(60px) scale(.4)';it.el.style.opacity='0';setTimeout(()=>it.el.remove(),320);const bh=$('#bh',root);if(bh)bh.textContent=hit}
+    else{lose(it,false)}
+  }
+  function end(){
+    st='end';cancelAnimationFrame(raf);
+    const sc=Math.max(0,Math.min(10,Math.round(10*hit/(hit+miss+2)*Math.min(1,(hit/16)+.35))));
+    const s2=Math.min(10,Math.round(hit/2.4)-Math.floor(miss/2));res={sc:Math.max(0,s2)};drawEnd();
+    api.finish(res.sc,{'Доставлено':hit,'Ошибки':miss});
+  }
+  function drawEnd(){const x=T[api.lang()];root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b><p>${x.hit}: ${hit} · ${x.miss}: ${miss}</p></div><p style="margin-top:12px"><button class="btn" id="go">${x.again}</button></p>`;$('#go',root).onclick=start}
+  function drawIdle(){const x=T[api.lang()];root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p><p><button class="btn sun" id="go">${x.start}</button></p>`;$('#go',root).onclick=start}
+  api.onLang(()=>{if(st==='idle')drawIdle();else if(st==='end')drawEnd()});drawIdle();
+}});
+
+/* ── 191 · ЗАКАЗ НА СЛУХ ── */
+MODS.push({id:'orders',no:'191',min:5,max:10,title:{ru:'Заказ на слух',kk:'Тапсырыс құлақпен'},sub:{ru:'Запомни и собери',kk:'Есте сақта да жина'},
+mount(root,api){
+  const T={ru:{eb:'Номер 191 · ресторан',h:'Заказ на слух',intro:'Гость диктует заказ, текст появляется и исчезает. Запомните и соберите заказ из карточек: блюдо, особенность и количество в каждой строке. Три раунда, каждый длиннее и быстрее предыдущего. Повторный показ стоит балла.',start:'Начать',round:'Раунд',of:'из',again:'Показать ещё раз (−1 балл)',check:'Сдать заказ',next:'Дальше',res:'Итог',guest:'Гость говорит',pick:'—',dish:'Блюдо',mod:'Особенность',qty:'Кол-во',ok:'верно',total:'Верно полей',
+   dishes:['Стейк','Салат','Суп','Паста','Рыба','Плов'],mods:['без изменений','средней прожарки','без лука','без орехов, аллергия','без глютена','острое'],
+   say:(l)=>l.map(o=>`${o.q} ${['стейк','салат','суп','пасту','рыбу','плов'][o.d]}${[' ',' средней прожарки',' без лука',' без орехов, у меня аллергия',' без глютена',' поострее'][o.m]}`).join('; ')+'.'},
+   kk:{eb:'191 нөмір · мейрамхана',h:'Тапсырыс құлақпен',intro:'Қонақ тапсырысты айтады, мәтін пайда болып, жоғалады. Есте сақтап, тапсырысты карточкалардан жинаңыз: әр жолда тағам, ерекшелік және саны. Үш раунд, әрқайсысы алдыңғысынан ұзағырақ және жылдамырақ. Қайта көрсету бір ұпайға тұрады.',start:'Бастау',round:'Раунд',of:'/',again:'Тағы көрсету (−1 ұпай)',check:'Тапсырысты тапсыру',next:'Әрі қарай',res:'Қорытынды',guest:'Қонақ айтады',pick:'—',dish:'Тағам',mod:'Ерекшелік',qty:'Саны',ok:'дұрыс',total:'Дұрыс өріс',
+   dishes:['Стейк','Салат','Көже','Паста','Балық','Палау'],mods:['өзгеріссіз','орташа қуырылған','пиязсыз','жаңғақсыз, аллергия','глютенсіз','ащылау'],
+   say:(l)=>l.map(o=>`${o.q} ${['стейк','салат','көже','паста','балық','палау'][o.d]}${[' ',' орташа қуырылған',' пиязсыз',' жаңғақсыз, менде аллергия бар',' глютенсіз',' ащылау'][o.m]}`).join('; ')+'.'}};
+  const R=api.rng();
+  const rounds=[2,3,4].map(n=>{const ds=shufR([0,1,2,3,4,5],R).slice(0,n);return ds.map(d=>({d,m:Math.floor(R()*6),q:1+Math.floor(R()*3)}))});
+  const SHOW=[9000,8000,7000];
+  let r=0,phase='intro',ans=[],replays=0,tot=0,fields=0,done=false,res=null,tm=null;
+  const t=k=>T[api.lang()][k];
+  function blank(n){return Array.from({length:n},()=>({d:'',m:'',q:''}))}
+  function startRound(){phase='show';ans=blank(rounds[r].length);draw();clearTimeout(tm);tm=setTimeout(()=>{phase='form';draw()},SHOW[r])}
+  function draw(){
+    const lg=api.lang(),x=T[lg];
+    if(phase==='intro'){root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p><p><button class="btn sun" id="go">${x.start}</button></p>`;$('#go',root).onclick=startRound;return}
+    if(done){root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b><p>${x.total}: ${tot} / ${fields}</p></div>`;return}
+    const head=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><div class="dots">${rounds.map((_,k)=>`<i class="${k<r?'d':k===r?'c':''}" style="width:60px"></i>`).join('')}</div><div class="mini">${x.round} ${r+1} ${x.of} 3</div>`;
+    if(phase==='show'){
+      const txt=x.say(rounds[r]);
+      root.innerHTML=head+`<div class="timebar"><i id="tb" style="width:100%;transition:width ${SHOW[r]}ms linear"></i></div><div class="msg gu" style="max-width:100%"><b>${x.guest}:</b> <span id="ty"></span></div>`;
+      requestAnimationFrame(()=>{const tb=$('#tb',root);if(tb)tb.style.width='0%'});
+      const ty=$('#ty',root);let k=0;const ti=setInterval(()=>{if(!ty||!ty.isConnected){clearInterval(ti);return}k+=2;ty.textContent=txt.slice(0,k);if(k>=txt.length)clearInterval(ti)},30);
+      return;
+    }
+    root.innerHTML=head+rounds[r].map((o,i)=>`<div class="day" style="margin-top:10px"><div class="row2"><div><div class="mini">${x.dish}</div><select data-f="${i}|d"><option value="">${x.pick}</option>${x.dishes.map((s,k)=>`<option value="${k}" ${String(ans[i].d)===String(k)?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div><div class="mini">${x.mod}</div><select data-f="${i}|m"><option value="">${x.pick}</option>${x.mods.map((s,k)=>`<option value="${k}" ${String(ans[i].m)===String(k)?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div><div class="mini">${x.qty}</div><select data-f="${i}|q"><option value="">${x.pick}</option>${[1,2,3].map(k=>`<option value="${k}" ${String(ans[i].q)===String(k)?'selected':''}>${k}</option>`).join('')}</select></div></div></div>`).join('')+
+      `<p style="margin-top:14px"><button class="btn" id="ck">${r<2?x.next:x.check}</button> <button class="btn ghost sm" id="rp">${x.again}</button></p>`;
+    $$('[data-f]',root).forEach(s=>s.onchange=()=>{const[i,f]=s.dataset.f.split('|');ans[+i][f]=s.value});
+    $('#rp',root).onclick=()=>{replays++;phase='show';draw();clearTimeout(tm);tm=setTimeout(()=>{phase='form';draw()},SHOW[r])};
+    $('#ck',root).onclick=()=>{
+      rounds[r].forEach((o,i)=>{fields+=3;if(String(ans[i].d)===String(o.d))tot++;if(String(ans[i].m)===String(o.m))tot++;if(String(ans[i].q)===String(o.q))tot++});
+      if(r<2){r++;startRound()}else{done=true;const sc=Math.max(0,Math.round(10*tot/fields)-replays);res={sc};draw();api.finish(sc,{'Верных полей':tot+' / '+fields,'Повторов':replays})}
+    };
+  }
+  api.persist(()=>({r,phase:phase==='show'?'form':phase,ans,replays,tot,fields,done,res}),s=>{r=s.r||0;phase=s.phase||'intro';ans=s.ans||[];replays=s.replays||0;tot=s.tot||0;fields=s.fields||0;done=!!s.done;res=s.res||null;if(phase==='form'&&!ans.length)ans=blank(rounds[r].length)});
+  api.onLang(draw);draw();
+}});
+
+/* ═════════ 333 · ЧАС ПИК ═════════ */
+MODS.push({id:'rush',no:'333',min:4,max:10,
+title:{ru:'Час пик',kk:'Қарбалас сәт'},sub:{ru:'Очередь у стойки',kk:'Ресепшндегі кезек'},
+mount(root,api){
+  const DUR=60;
+  const T={ru:{
+   eb:'Номер 333 · стойка ресепшн',h:'Час пик: 60 секунд у стойки',
+   intro:'Утренний наплыв гостей. У вас две стойки. Нажмите на гостя, чтобы начать обслуживание: у каждого свой запрос, своё терпение и своя ценность. Гость, который ждал слишком долго, уйдёт. Успеть всех нельзя: решайте, кого брать первым.',
+   desk:'Стойка',free:'свободна',serving:'обслуживание',start:'Начать час пик',again:'Сыграть ещё раз',
+   t:{q:'Вопрос',out:'Выезд',inn:'Заселение',cmp:'Жалоба',vip:'VIP-заселение'},
+   res:'Итог',served:'Обслужено',lost:'Ушли недовольными',value:'Набрано очков ценности',
+   tip:'Совет: сначала берите тех, у кого терпение скоро кончится и кто обслуживается быстро.',
+   gname:['Айбек','Лена','Тимур','Дана','Олег','Марат','Сауле','Игорь','Зарина','Антон','Алия','Рустам','Нина','Бауыржан','Камила','Эдуард']
+  },kk:{
+   eb:'333 нөмір · ресепшн үстелі',h:'Қарбалас сәт: үстел басындағы 60 секунд',
+   intro:'Таңертеңгі қонақтар легі. Сізде екі үстел бар. Қызмет көрсетуді бастау үшін қонақты басыңыз: әрқайсысының өз сұрауы, шыдамы және құндылығы бар. Тым ұзақ күткен қонақ кетіп қалады. Бәріне үлгеру мүмкін емес: кімнен бастау керегін өзіңіз шешіңіз.',
+   desk:'Үстел',free:'бос',serving:'қызмет көрсету',start:'Қарбаласты бастау',again:'Тағы ойнау',
+   t:{q:'Сұрақ',out:'Шығу',inn:'Орналасу',cmp:'Шағым',vip:'VIP орналасу'},
+   res:'Қорытынды',served:'Қызмет көрсетілді',lost:'Наразы болып кетті',value:'Жиналған құндылық ұпайы',
+   tip:'Кеңес: шыдамы тез таусылатын және тез қызмет көрсетілетін қонақтардан бастаңыз.',
+   gname:['Айбек','Лена','Тимур','Дана','Олег','Марат','Сауле','Игорь','Зарина','Антон','Алия','Рустам','Нина','Бауыржан','Камила','Эдуард']
+  }};
+  const TY={q:{svc:3,pat:9,val:1,col:'#2e9bd6'},out:{svc:4,pat:11,val:2,col:'#6b5bd6'},inn:{svc:7,pat:15,val:3,col:'#2347ff'},cmp:{svc:9,pat:14,val:4,col:'#d6402e'},vip:{svc:6,pat:9,val:5,col:'#d6a42e'}};
+  const R=api.rng();
+  const plan=[];let tt=1;const types=['q','out','inn','inn','cmp','q','out','vip','inn','q','cmp','out','inn','q','vip','inn'];
+  const names=shufR(T.ru.gname,R);
+  for(let i=0;i<26;i++){plan.push({id:i,at:tt,type:types[Math.floor(R()*types.length)],name:names[i%names.length]});tt+=1.2+R()*1.4}
+  let st='idle',timer=null,t0=0,G=[],desks=[null,null],score=0,lostVal=0,served=0,lost=0,total=0,res=null;
+  const t=k=>T[api.lang()][k];
+  function start(){
+    st='run';G=plan.map(p=>({...p,pat:TY[p.type].pat,max:TY[p.type].pat,state:'wait',spawned:false}));desks=[null,null];score=0;lostVal=0;served=0;lost=0;total=plan.reduce((a,p)=>a+TY[p.type].val,0);t0=performance.now();last=t0;
+    buildRun();timer=setInterval(step,100);
+  }
+  let last=0;
+  function el(id){return $('#g'+id,root)}
+  function gHtml(g){const x=T[api.lang()],y=TY[g.type];return `<b>${esc(g.name)}</b><small style="color:${y.col};font-weight:700">${x.t[g.type]} · ★${y.val}</small><small>⏱ ${y.svc} c</small><div class="pbar"><i></i></div>`}
+  function buildRun(){
+    const x=T[api.lang()];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2>
+    <div class="timebar"><i id="tb"></i></div>
+    <div class="desks">${[0,1].map(i=>`<div class="desk" id="dk${i}"><small>${x.desk} ${i+1}</small><b>${x.free}</b><div class="pbar"><i></i></div></div>`).join('')}</div>
+    <div class="queue" id="q"></div>`;
+  }
+  function step(){
+    const now=performance.now(),dt=(now-last)/1000;last=now;const el0=(now-t0)/1000;
+    const q=$('#q',root);if(!q)return;
+    $('#tb',root).style.width=Math.max(0,(1-el0/DUR)*100)+'%';
+    G.forEach(g=>{
+      if(!g.spawned&&el0>=g.at&&g.state==='wait'){g.spawned=true;const b=document.createElement('button');b.className='gq'+(g.type==='vip'?' vip':'');b.id='g'+g.id;b.innerHTML=gHtml(g);b.onclick=()=>take(g);q.appendChild(b)}
+      if(g.spawned&&g.state==='wait'){g.pat-=dt;const e=el(g.id);if(e){const r=Math.max(0,g.pat/g.max);const bar=$('.pbar i',e);bar.style.width=r*100+'%';bar.style.background=r>.5?'var(--ok)':r>.25?'var(--sun)':'var(--bad)'}
+        if(g.pat<=0){g.state='lost';lost++;lostVal+=TY[g.type].val;const e2=el(g.id);if(e2){e2.classList.add('lost');setTimeout(()=>e2.remove(),600)}}}
+    });
+    desks.forEach((d,i)=>{if(!d)return;d.left-=dt;const dk=$('#dk'+i,root);$('.pbar i',dk).style.width=(1-d.left/d.svc)*100+'%';
+      if(d.left<=0){const g=d.g;g.state='done';served++;score+=TY[g.type].val;const e=el(g.id);if(e)e.remove();desks[i]=null;dk.classList.remove('busy');$('b',dk).textContent=t('free');$('.pbar i',dk).style.width='0'}});
+    if(el0>=DUR||(G.every(g=>g.spawned&&g.state!=='wait'&&g.state!=='serving')&&!desks.some(Boolean)))end();
+  }
+  function take(g){
+    if(g.state!=='wait')return;const i=desks.findIndex(d=>!d);if(i<0)return;
+    g.state='serving';desks[i]={g,left:TY[g.type].svc,svc:TY[g.type].svc};
+    const e=el(g.id);if(e)e.classList.add('out');setTimeout(()=>e&&e.remove(),500);
+    const dk=$('#dk'+i,root);dk.classList.add('busy');$('b',dk).textContent=g.name+' · '+t('t')[g.type];
+  }
+  function end(){
+    clearInterval(timer);st='end';
+    const missed=G.filter(g=>g.state==='wait'||g.state==='serving'||!g.spawned).length;
+    const spawnedVal=G.filter(g=>g.spawned).reduce((a,g)=>a+TY[g.type].val,0);
+    const raw=(score-0.5*lostVal)/Math.max(1,spawnedVal*0.85);
+    const sc=Math.max(0,Math.min(10,Math.round(10*raw)));
+    res={sc,served,lost,score,lostVal};
+    drawEnd();
+    api.finish(sc,{'Обслужено':served,'Ушли':lost,'Очки':score+' (потеряно '+lostVal+')'});
+  }
+  function drawEnd(){
+    const x=T[api.lang()];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2>
+    <div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b>
+    <p>${x.served}: ${res.served} · ${x.lost}: ${res.lost} · ${x.value}: ${res.score}</p><p class="det">${x.tip}</p></div>
+    <p style="margin-top:14px"><button class="btn" id="go">${x.again}</button></p>`;
+    $('#go',root).onclick=start;
+  }
+  function drawIdle(){
+    const x=T[api.lang()];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <div class="row2">${Object.keys(TY).map(k=>`<div class="tile"><b style="color:${TY[k].col}">${x.t[k]}</b><small>⏱ ${TY[k].svc} c · ★${TY[k].val}</small></div>`).join('')}</div>
+    <p style="margin-top:16px"><button class="btn sun" id="go">${x.start}</button></p>`;
+    $('#go',root).onclick=start;
+  }
+  api.onLang(()=>{if(st==='idle')drawIdle();else if(st==='end')drawEnd()});
+  drawIdle();
+}});
+
+/* ═════════ 444 · СЕРВИРОВКА ═════════ */
+MODS.push({id:'table',no:'444',min:4,max:10,
+title:{ru:'Сервировка',kk:'Дастарқан жаюу'},sub:{ru:'Накрой стол',kk:'Үстелді жаю'},
+mount(root,api){
+  const T={ru:{
+   eb:'Номер 444 · ресторан',h:'Накройте стол для ужина из трёх блюд',
+   intro:'В центре стоит тарелка. Перетащите предметы из лотка на правильные места вокруг неё (или нажмите на предмет, затем на место). Подписи не показаны. Подсказка со схемой снимает 2 балла.',
+   items:{fork:'Вилка',knife:'Нож',spoon:'Суповая ложка',dess:'Десертная ложка',bread:'Хлебная тарелка',water:'Бокал для воды',wine:'Бокал для вина',napkin:'Салфетка'},
+   hint:'Показать подписи (−2 балла)',check:'Проверить стол',res:'Итог',right:'верно',wrong:'не на месте',
+   expl:{fork:'Вилка слева от тарелки.',knife:'Нож справа от тарелки, лезвием к тарелке.',spoon:'Суповая ложка справа, рядом с ножом.',dess:'Десертная ложка лежит выше тарелки, ручкой вправо.',bread:'Хлебная тарелка слева, выше вилки.',water:'Бокал для воды стоит над ножом.',wine:'Бокал для вина правее бокала для воды.',napkin:'Салфетка слева от вилки.'},
+   hintUsed:'Использована подсказка: −2.',reset:'Начать заново'
+  },kk:{
+   eb:'444 нөмір · мейрамхана',h:'Үш тағамды кешкі асқа үстелді жайыңыз',
+   intro:'Ортада табақ тұр. Заттарды науадан оның айналасындағы дұрыс орындарға сүйреңіз (немесе затты, содан кейін орынды басыңыз). Жазулар көрсетілмейді. Схемасы бар кеңес 2 ұпайды алады.',
+   items:{fork:'Шанышқы',knife:'Пышақ',spoon:'Көже қасығы',dess:'Десерт қасығы',bread:'Нан табағы',water:'Су бокалы',wine:'Шарап бокалы',napkin:'Майлық'},
+   hint:'Жазуларды көрсету (−2 ұпай)',check:'Үстелді тексеру',res:'Қорытынды',right:'дұрыс',wrong:'орнында емес',
+   expl:{fork:'Шанышқы табақтың сол жағында.',knife:'Пышақ табақтың оң жағында, жүзі табаққа қарайды.',spoon:'Көже қасығы оң жақта, пышақтың қасында.',dess:'Десерт қасығы табақтың жоғарғы жағында, сабы оңға қарай жатады.',bread:'Нан табағы сол жақта, шанышқыдан жоғары.',water:'Су бокалы пышақтың үстінде тұрады.',wine:'Шарап бокалы су бокалының оң жағында.',napkin:'Майлық шанышқының сол жағында.'},
+   hintUsed:'Кеңес қолданылды: −2.',reset:'Қайтадан бастау'
+  }};
+  // zone geometry in viewBox 360x260
+  const Z={fork:{x:112,y:122,w:18,h:56},napkin:{x:84,y:120,w:22,h:60},bread:{x:92,y:54,w:34,h:34,c:1},dess:{x:150,y:76,w:60,h:12},knife:{x:236,y:122,w:12,h:56},spoon:{x:254,y:122,w:14,h:56},water:{x:222,y:60,w:30,h:36,c:1},wine:{x:262,y:60,w:30,h:36,c:1}};
+  const ICON={
+   fork:`<svg viewBox="0 0 40 70"><path d="M12 4v18M20 4v18M28 4v18M12 22q0 10 8 12q8 -2 8 -12M20 34v32" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`,
+   knife:`<svg viewBox="0 0 40 70"><path d="M24 4q10 14 2 34h-6V4z" fill="currentColor"/><path d="M20 38v28" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`,
+   spoon:`<svg viewBox="0 0 40 70"><ellipse cx="20" cy="16" rx="9" ry="13" fill="currentColor"/><path d="M20 28v38" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>`,
+   dess:`<svg viewBox="0 0 70 40"><ellipse cx="54" cy="20" rx="13" ry="8" fill="currentColor"/><path d="M42 20H8" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>`,
+   bread:`<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="30" cy="30" r="14" fill="none" stroke="currentColor" stroke-width="2" opacity=".6"/></svg>`,
+   water:`<svg viewBox="0 0 50 70"><path d="M10 6h30l-4 38q-4 6-11 6t-11-6z" fill="none" stroke="currentColor" stroke-width="3"/><path d="M25 50v14M15 66h20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M13 22h24" stroke="currentColor" stroke-width="2" opacity=".5"/></svg>`,
+   wine:`<svg viewBox="0 0 50 70"><path d="M12 4h26q2 24 -12 30q-14 -6 -14 -30z" fill="none" stroke="currentColor" stroke-width="3"/><path d="M25 34v28M15 66h20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M14 16h22" stroke="#b03a5c" stroke-width="5" opacity=".7"/></svg>`,
+   napkin:`<svg viewBox="0 0 40 70"><path d="M6 6h28v58H6z" fill="none" stroke="currentColor" stroke-width="3"/><path d="M6 22h28" stroke="currentColor" stroke-width="2" opacity=".6"/></svg>`
+  };
+  const keys=Object.keys(Z);
+  const R=api.rng();
+  let placed={},sel=null,hintOn=false,hintUsed=false,done=false,res=null;
+  const order=shufR(keys,R);
+  const t=k=>T[api.lang()][k];
+  function itemSvg(k,x,y,w,h,color){return `<g transform="translate(${x} ${y})" style="color:${color||'var(--ink)'}"><svg x="0" y="0" width="${w}" height="${h}" viewBox="${ICON[k].match(/viewBox="([^"]+)"/)[1]}" preserveAspectRatio="xMidYMid meet" overflow="visible">${ICON[k].replace(/<svg[^>]*>|<\/svg>/g,'')}</svg></g>`}
+  function draw(){
+    const x=T[api.lang()];
+    const zones=keys.map(k=>{const z=Z[k],cl=done?(placed[k]===k?'ok':'no'):'';
+      return `<g data-z="${k}"><${z.c?`ellipse cx="${z.x+z.w/2}" cy="${z.y+z.h/2}" rx="${z.w/2+3}" ry="${z.h/2+3}"`:`rect x="${z.x-3}" y="${z.y-3}" width="${z.w+6}" height="${z.h+6}" rx="6"`} class="zone ${cl}" data-zz="${k}"/>
+      ${placed[k]?itemSvg(placed[k],z.x,z.y,z.w,z.h):''}${hintOn&&!placed[k]?`<text x="${z.x+z.w/2}" y="${z.y+z.h+14}" font-size="8" text-anchor="middle" fill="var(--muted)">${esc(x.items[k])}</text>`:''}</g>`}).join('');
+    const free=order.filter(k=>!Object.values(placed).includes(k));
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <svg class="tsvg" id="tv" viewBox="0 0 360 260" role="img" aria-label="Table">
+      <rect width="360" height="260" style="fill:var(--r-wood)" opacity=".3"/><rect x="40" y="26" width="280" height="210" rx="10" style="fill:var(--r-bed)"/>
+      <circle cx="180" cy="150" r="40" style="fill:var(--r-bed);stroke:var(--line);stroke-width:3"/><circle cx="180" cy="150" r="27" fill="none" stroke="var(--line)" stroke-width="2"/>${zones}</svg>
+    <div class="tray" id="tr">${keys.map(k=>`<div class="titem ${sel===k?'sel':''} ${Object.values(placed).includes(k)?'gone':''}" data-k="${k}" title="${esc(x.items[k])}" style="color:var(--ink)">${ICON[k]}</div>`).join('')}</div>
+    <div class="note">${x.items[sel]||''}${sel?'':'&nbsp;'}</div>
+    <p style="margin-top:12px">${done?`<button class="btn ghost" id="rs">${x.reset}</button>`:`<button class="btn" id="ck" ${Object.keys(placed).length<keys.length?'disabled':''}>${x.check}</button> <button class="btn ghost sm" id="hn">${x.hint}</button>`}</p>
+    ${done?resHtml():''}`;
+    bind();
+  }
+  function resHtml(){
+    const x=T[api.lang()];
+    return `<div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}" style="margin-top:12px"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b><p>${res.c} / ${keys.length} ${x.right}</p>
+    <ul class="log">${keys.map(k=>`<li style="${placed[k]===k?'':'background:var(--bad-bg)'}"><b>${esc(x.items[k])}</b>: ${esc(x.expl[k])}</li>`).join('')}</ul>${hintUsed?`<p class="det">${x.hintUsed}</p>`:''}</div>`;
+  }
+  function place(k,z){
+    if(done||!z)return;
+    if(placed[z])delete placed[z];
+    // remove k from previous zone
+    for(const zz in placed)if(placed[zz]===k)delete placed[zz];
+    placed[z]=k;sel=null;draw();
+  }
+  function zoneAt(cx,cy){
+    const els=document.elementsFromPoint(cx,cy);const e=els.find(n=>n.dataset&&n.dataset.zz);return e?e.dataset.zz:null;
+  }
+  function bind(){
+    if(done){const rs=$('#rs',root);if(rs)rs.onclick=()=>{placed={};sel=null;done=false;res=null;hintOn=false;draw()};return}
+    $('#hn',root).onclick=()=>{hintOn=true;hintUsed=true;draw()};
+    const ck=$('#ck',root);ck.onclick=()=>{
+      const c=keys.filter(k=>placed[k]===k).length;let sc=Math.round(10*c/keys.length);if(hintUsed)sc=Math.max(0,sc-2);
+      res={sc,c};done=true;draw();api.finish(sc,{'Верных':c+' / '+keys.length,'Расстановка':keys.map(z=>z+'='+(placed[z]||'-')).join(', ')});};
+    $$('.titem',root).forEach(it=>{
+      const k=it.dataset.k;
+      it.addEventListener('pointerdown',e=>{
+        if(it.classList.contains('gone'))return;
+        e.preventDefault();const sx=e.clientX,sy=e.clientY;let ghost=null,moved=false;
+        const mv=ev=>{if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)<6)return;moved=true;
+          if(!ghost){ghost=document.createElement('div');ghost.className='titem dragging';ghost.style.color='var(--ink)';ghost.innerHTML=ICON[k];document.body.appendChild(ghost)}
+          ghost.style.left=ev.clientX+'px';ghost.style.top=ev.clientY+'px';
+          $$('.zone',root).forEach(z=>z.classList.remove('over'));const zz=zoneAt(ev.clientX,ev.clientY);if(zz){const zn=root.querySelector(`[data-zz="${zz}"]`);if(zn)zn.classList.add('over')}};
+        const up=ev=>{window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up);if(ghost)ghost.remove();
+          if(moved){const zz=zoneAt(ev.clientX,ev.clientY);if(zz)place(k,zz);else draw()}else{sel=sel===k?null:k;draw()}};
+        window.addEventListener('pointermove',mv);window.addEventListener('pointerup',up);
+      });
+    });
+    $$('[data-zz]',root).forEach(z=>z.addEventListener('click',()=>{const k=z.dataset.zz;if(sel)place(sel,k);else if(placed[k]){delete placed[k];draw()}}));
+  }
+  api.persist(()=>({placed,sel,hintOn,hintUsed,done,res}),s=>{placed=s.placed||{};sel=s.sel||null;hintOn=!!s.hintOn;hintUsed=!!s.hintUsed;done=!!s.done;res=s.res||null});api.onLang(draw);draw();
+}});
+
+/* ═════════ СЦЕНЫ «НАЙДИ ДЕФЕКТЫ»: номер и зал ресторана ═════════ */
+function sceneMount(cfg,root,api){
+  const R=api.rng();
+  const keys=cfg.defs.map(d=>d.k);
+  const chosen=new Set(shufR(keys,R).slice(0,cfg.show));
+  let found=new Set(),miss=0,done=false,note={k:'start',txt:''},t0=0,res=null,tick=null;
+  const t=k=>cfg.T[api.lang()][k];
+  const nm=d=>d[api.lang()][0],why=d=>d[api.lang()][1];
+  function svg(){
+    const lg=api.lang();
+    return cfg.svg(chosen,found,(msg)=>msg[lg],lg);
+  }
+  function draw(){
+    const lg=api.lang(),x=cfg.T[lg];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <div class="insp"><div><div class="scenebox">${svg()}</div><div class="sticky-stat" style="margin-top:10px"><span>${x.timer}: <span class="tok" id="tm">0:00</span></span><span>${x.miss}: <span class="tok" id="ms">${miss}</span></span></div></div>
+    <div><div class="mini">${x.check} · <span id="cnt">${found.size}/${chosen.size}</span></div><ul class="chk" id="ck">${[...chosen].map((k,i)=>{const d=cfg.defs.find(z=>z.k===k);const on=found.has(k);return `<li class="${on?'on':''}" data-k="${k}">${on?`<b>${esc(nm(d))}</b>${esc(why(d))}`:`${x.defect} ${i+1}: ???`}</li>`}).join('')}</ul></div></div>
+    <div class="note ${note.c||''}" id="nt">${esc(note.txt||x.start)}</div>
+    ${done?resHtml():`<p style="margin-top:12px"><button class="btn ghost" id="fin">${x.finish}</button></p>`}`;
+    bind();
+  }
+  function bind(){
+    const sv=$('.scenebox svg',root);if(!sv||done)return;
+    sv.onclick=e=>{
+      const g=e.target.closest('g[data-d],g[data-n]');if(!g||done)return;
+      if(!t0){t0=Date.now();tick=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000),el=$('#tm',root);if(el)el.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0')},500)}
+      if(g.dataset.d){
+        const k=g.dataset.d;if(found.has(k))return;found.add(k);
+        const d=cfg.defs.find(z=>z.k===k);note={c:'ok',txt:nm(d)};
+        if(found.size===chosen.size)return finish();
+        draw();
+      }else{miss++;note={c:'bad',txt:g.dataset.n};draw();
+        const s2=$('.scenebox svg',root);}
+    };
+    const f=$('#fin',root);if(f)f.onclick=finish;
+  }
+  function finish(){
+    if(done)return;done=true;clearInterval(tick);
+    const secs=t0?Math.round((Date.now()-t0)/1000):0;
+    const base=Math.round(10*found.size/chosen.size);
+    const pen=Math.floor(miss/2);
+    const sc=Math.max(0,base-pen);
+    res={sc,base,pen,secs};
+    draw();
+    api.finish(sc,{'Найдено / было':found.size+' / '+chosen.size,'Ложных нажатий':miss,'Время, с':secs,'Пропущено':[...chosen].filter(k=>!found.has(k)).map(k=>cfg.defs.find(z=>z.k===k).ru[0]).join(', ')});
+  }
+  function resHtml(){
+    const lg=api.lang(),x=cfg.T[lg];
+    const missed=[...chosen].filter(k=>!found.has(k)).map(k=>cfg.defs.find(z=>z.k===k));
+    return `<div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b>
+    <p>${x.found}: ${found.size} / ${chosen.size} · ${x.miss}: ${miss} (−${res.pen}) · ${Math.floor(res.secs/60)}:${String(res.secs%60).padStart(2,'0')}</p>
+    ${missed.length?`<p style="margin-top:8px"><b>${x.missed}:</b></p><ul class="log">${missed.map(d=>`<li><b>${esc(nm(d))}</b>. ${esc(why(d))}</li>`).join('')}</ul>`:''}</div>`;
+  }
+  api.persist(()=>({found:[...found],miss,done,note,res}),s=>{found=new Set(s.found||[]);miss=s.miss||0;done=!!s.done;note=s.note||note;res=s.res||null});
+  api.onLang(draw);draw();
+}
+
+/* ── сцена 1: номер ── */
+(function(){
+const F=(s)=>s;
+const defs=[
+ {k:'pillow',ru:['Пятно на наволочке','Бельё с пятном меняют до заселения, даже если оно чистое на вид.'],kk:['Жастық тысындағы дақ','Дақты төсек жапқыш қонақ келгенге дейін ауыстырылады.']},
+ {k:'lamp',ru:['Треснувший абажур','Повреждённый светильник — риск и плохое впечатление. Заменить до заселения.'],kk:['Жарықшақ кеткен шам плафоны','Зақымдалған шам қауіпті және жағымсыз әсер қалдырады. Қонақ келгенше ауыстырылады.']},
+ {k:'curtain',ru:['Порванная занавеска','Шторы должны быть целыми и полностью закрываться: от этого зависит приватность гостя.'],kk:['Жыртылған перде','Перде бүтін болып, толық жабылуы керек: қонақтың жеке өмірі соған байланысты.']},
+ {k:'towel',ru:['Полотенце на полу','Использованный текстиль выносят при уборке. Это значит, номер убран не полностью.'],kk:['Едендегі сүлгі','Қолданылған тоқыма бұйымдар жинау кезінде шығарылады. Бұл нөмір толық жиналмағанын білдіреді.']},
+ {k:'bin',ru:['Переполненная корзина','Корзина должна быть пустой и чистой — это проверяют в первую очередь.'],kk:['Толып кеткен қоқыс себеті','Себет бос әрі таза болуы керек — алдымен осыны тексереді.']},
+ {k:'frame',ru:['Криво висящая картина','Мелочи создают общее впечатление о чистоте и порядке.'],kk:['Қисық ілінген сурет','Ұсақ-түйек тазалық пен тәртіп туралы жалпы әсер қалыптастырады.']},
+ {k:'minibar',ru:['Открытый мини-бар','Дверца ослаблена, бутылка вскрыта: нужно проверить и пополнить мини-бар.'],kk:['Ашық мини-бар','Есігі ашық, бөтелке ашылған: мини-барды тексеріп, толтыру керек.']},
+ {k:'window',ru:['Грязное окно','Следы на стекле заметны на свету. Окна протирают при каждой уборке.'],kk:['Лас терезе','Әйнектегі іздер жарықта көрінеді. Терезені әр жинауда сүртеді.']}
+];
+const T={ru:{eb:'Номер 111 · осмотр номера',h:'Проверка номера перед заселением',
+ intro:'Горничная сдала номер, но кое-что пропустила. Нажимайте на то, что считаете нарушением стандарта. Неверное нажатие тоже считается: каждые два лишних клика снимают балл. Когда решите, что нашли всё, нажмите «Закончить осмотр».',
+ timer:'Время',miss:'Лишних кликов',check:'Чек-лист',defect:'Дефект',start:'Осмотрите номер. Не всё здесь в порядке.',finish:'Закончить осмотр',res:'Итог осмотра',found:'Найдено',missed:'Что вы пропустили'},
+ kk:{eb:'111 нөмір · нөмірді тексеру',h:'Қонақ келер алдында нөмірді тексеру',
+ intro:'Бөлме қызметкері нөмірді тапсырды, бірақ бірдеңені қалдырып кеткен. Стандартты бұзады деп санайтын нәрсені басыңыз. Қате басу да есепке алынады: әр екі артық басу бір ұпайды алып тастайды. Бәрін таптым деп ойласаңыз, «Тексеруді аяқтау» батырмасын басыңыз.',
+ timer:'Уақыт',miss:'Артық басулар',check:'Чек-парақ',defect:'Ақау',start:'Нөмірді мұқият қараңыз. Мұндағы бәрі ретті емес.',finish:'Тексеруді аяқтау',res:'Тексеру қорытындысы',found:'Табылды',missed:'Нені өткізіп алдыңыз'}};
+const OKM={bed:{ru:'Кровать заправлена безупречно. Здесь всё в порядке.',kk:'Керует мінсіз жиналған. Мұнда бәрі дұрыс.'},stand:{ru:'Тумбочка чистая, всё на месте.',kk:'Тумба таза, бәрі орнында.'},rug:{ru:'Коврик чистый.',kk:'Кілемше таза.'},
+ pillow:{ru:'Подушка чистая. Здесь всё в порядке.',kk:'Жастық таза. Мұнда бәрі дұрыс.'},lamp:{ru:'Светильник целый и исправный.',kk:'Шам бүтін әрі жұмыс істейді.'},curtain:{ru:'Штора целая.',kk:'Перде бүтін.'},towel:{ru:'Полотенце аккуратно сложено на кровати.',kk:'Сүлгі керуетке ұқыпты жиналған.'},bin:{ru:'Корзина пустая и чистая.',kk:'Себет бос әрі таза.'},frame:{ru:'Картина висит ровно.',kk:'Сурет тік ілулі.'},minibar:{ru:'Мини-бар закрыт, пломбы целы.',kk:'Мини-бар жабық, пломбалар бүтін.'},window:{ru:'Стекло чистое.',kk:'Әйнек таза.'}};
+function svgRoom(on,found,pick,lg){
+  const D=k=>on.has(k),F=k=>found.has(k)?' found':'';
+  const hot=(k,ring,inner)=>D(k)?`<g class="hot${F(k)}" data-d="${k}">${inner(true)}${ring}</g>`:`<g class="hotn" data-n="${esc(OKM[k][lg])}">${inner(false)}</g>`;
+  const ok=(k,inner)=>`<g class="hotn" data-n="${esc(OKM[k][lg])}">${inner}</g>`;
+  return `<svg class="room" viewBox="0 0 400 260" role="img" aria-label="Room">
+  <rect width="400" height="260" style="fill:var(--r-wall)"/><polygon points="0,190 400,190 400,260 0,260" style="fill:var(--r-floor)"/>
+  ${ok('rug',`<ellipse cx="200" cy="232" rx="110" ry="14" style="fill:var(--r-bed2)" opacity=".18"/>`)}
+  ${hot('frame',`<circle class="ring" cx="128" cy="53" r="44"/>`,d=>`<g ${d?'transform="rotate(-13 128 53)"':''}><rect x="90" y="28" width="76" height="50" rx="3" style="fill:var(--r-bed)"/><rect x="96" y="34" width="64" height="38" style="fill:var(--r-glass)"/><path d="M96 66 L112 50 L124 60 L138 44 L160 66Z" style="fill:var(--blue)"/></g>`)}
+  ${hot('window',`<circle class="ring" cx="314" cy="70" r="52"/>`,d=>`<rect x="262" y="28" width="104" height="84" rx="4" style="fill:var(--r-glass)"/><path d="M314 28V112M262 70H366" stroke="var(--r-bed)" stroke-width="4"/>${d?`<path d="M274 44 q10 6 8 16 M290 84 q12 -4 18 8 M330 40 q-8 10 2 20 M344 86 q-10 6 -2 16" stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none" opacity=".55"/>`:''}<rect x="252" y="22" width="122" height="6" rx="3" style="fill:var(--r-wood)"/><path d="M254 28 H284 L278 128 Q268 136 258 128Z" style="fill:var(--r-curt)"/>`)}
+  ${hot('curtain',`<circle class="ring" cx="352" cy="80" r="46"/>`,d=>d?`<path d="M372 28 H346 L330 96 L350 112 L336 140 L372 100Z" style="fill:var(--r-curt)"/><path d="M346 28 L334 70" stroke="var(--ink)" stroke-width="2" stroke-dasharray="3 3" opacity=".5"/>`:`<path d="M346 28 H374 L378 128 H346Z" style="fill:var(--r-curt)"/>`)}
+  ${ok('bed',`<rect x="34" y="96" width="180" height="26" rx="6" style="fill:var(--r-wood)"/><rect x="26" y="132" width="196" height="58" rx="10" style="fill:var(--r-bed)"/><rect x="26" y="156" width="196" height="34" rx="8" style="fill:var(--r-bed2)"/><rect x="34" y="188" width="8" height="14" style="fill:var(--r-wood)"/><rect x="206" y="188" width="8" height="14" style="fill:var(--r-wood)"/>`)}
+  ${hot('pillow',`<circle class="ring" cx="88" cy="125" r="30"/>`,d=>`<rect x="52" y="112" width="70" height="26" rx="12" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/>${d?`<ellipse cx="88" cy="125" rx="14" ry="8" fill="#9b6a3e" opacity=".75"/><circle cx="82" cy="123" r="4" fill="#6f4522" opacity=".7"/>`:''}`)}
+  <rect x="130" y="112" width="70" height="26" rx="12" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/>
+  ${ok('stand',`<rect x="236" y="150" width="54" height="46" rx="4" style="fill:var(--r-wood)"/><rect x="242" y="160" width="42" height="12" rx="2" fill="#00000026"/>`)}
+  ${hot('lamp',`<circle class="ring" cx="261" cy="116" r="28"/>`,d=>d?`<rect x="258" y="130" width="6" height="22" style="fill:var(--r-bin)"/><path d="M240 130 L282 130 L272 100 L250 100Z" style="fill:var(--r-bin)"/><path d="M262 100 L258 112 L266 116 L260 130" fill="none" stroke="var(--ink)" stroke-width="2"/>`:`<circle cx="261" cy="116" r="30" fill="var(--sun)" opacity=".28"><animate attributeName="opacity" values=".22;.34;.22" dur="3s" repeatCount="indefinite"/></circle><rect x="258" y="130" width="6" height="22" style="fill:var(--r-bin)"/><path d="M240 130 L282 130 L272 100 L250 100Z" style="fill:var(--sun)"/>`)}
+  ${hot('minibar',`<circle class="ring" cx="336" cy="170" r="38"/>`,d=>`<rect x="306" y="150" width="62" height="46" rx="4" style="fill:var(--r-bin)"/>${d?`<path d="M368 152 L388 160 L388 204 L368 196Z" style="fill:var(--r-bin)" opacity=".75"/><rect x="326" y="136" width="8" height="16" rx="2" fill="#2e7d32"/><rect x="326" y="132" width="8" height="5" fill="#ccc"/><path d="M330 154 q-2 12 -8 18" stroke="#7bd" stroke-width="3" fill="none" opacity=".7"/>`:`<rect x="312" y="156" width="50" height="3" fill="#ffffff55"/><circle cx="360" cy="176" r="2.5" fill="#fff"/>`}`)}
+  ${hot('towel',`<circle class="ring" cx="${on.has('towel')?127:182}" cy="${on.has('towel')?224:156}" r="46"/>`,d=>d?`<g transform="rotate(-6 127 224)"><rect x="86" y="212" width="82" height="24" rx="9" style="fill:var(--r-towel);stroke:var(--line);stroke-width:2"/><rect x="100" y="212" width="6" height="24" fill="var(--blue)"/></g>`:`<rect x="160" y="146" width="44" height="14" rx="4" style="fill:var(--r-towel);stroke:var(--line);stroke-width:2"/><rect x="172" y="146" width="4" height="14" fill="var(--blue)"/>`)}
+  ${hot('bin',`<circle class="ring" cx="344" cy="228" r="34"/>`,d=>`<path d="M326 206 H362 L358 252 H330Z" style="fill:var(--r-bin)"/>${d?`<circle cx="336" cy="203" r="8" fill="#fff"/><circle cx="350" cy="200" r="7" fill="#ffd1d1"/><path d="M342 207 l8 -10 l5 8z" fill="#f3f3f3"/><circle cx="344" cy="196" r="6" fill="#fff"/>`:''}`)}
+  </svg>`;
+}
+MODS.push({id:'inspect',no:'111',min:5,max:10,title:{ru:'Осмотр номера',kk:'Нөмірді тексеру'},sub:{ru:'Найди дефекты',kk:'Ақауларды табу'},
+ mount(root,api){sceneMount({T,defs,show:6,svg:svgRoom},root,api)}});
+})();
+
+/* ── сцена 2: зал ресторана ── */
+(function(){
+const defs=[
+ {k:'puddle',ru:['Лужа без знака','Мокрый пол без предупреждающего знака — травмоопасно. Нужно вытереть и выставить табличку.'],kk:['Белгісіз су','Ескерту белгісіз ылғал еден жарақат алуға әкеледі. Сүртіп, тақтайша қою керек.']},
+ {k:'glass',ru:['Бокал со сколом','Посуду с трещинами и сколами убирают сразу: риск пореза.'],kk:['Жиегі сынған бокал','Жарықшақ пен сынығы бар ыдыстарды дереу алып тастайды: кесіп алу қаупі бар.']},
+ {k:'cloth',ru:['Пятно на скатерти','Скатерть с пятном заменяют до посадки гостей.'],kk:['Дастарқандағы дақ','Дақ түскен дастарқанды қонақтарды отырғызғанға дейін ауыстырады.']},
+ {k:'plate',ru:['Грязная посуда на столе','Использованную посуду забирают сразу после ухода гостей.'],kk:['Үстелдегі лас ыдыс','Қолданылған ыдысты қонақ кеткен бойда жинап алады.']},
+ {k:'chair',ru:['Упавший стул','Стулья всегда стоят ровно: упавший стул мешает проходу и выглядит небрежно.'],kk:['Құлаған орындық','Орындықтар әрдайым тік тұрады: құлаған орындық жолға кедергі және ұқыпсыз көрінеді.']},
+ {k:'napkin',ru:['Салфетка на полу','Мусор и упавшие предметы убирают сразу, до подхода гостей.'],kk:['Едендегі майлық','Қоқыс пен құлаған заттарды қонақ келмей тұрып жинайды.']},
+ {k:'exit',ru:['Заблокированный выход','Эвакуационный выход должен быть свободен всегда. Это требование безопасности.'],kk:['Бөгелген шығу есігі','Эвакуациялық шығу әрдайым бос болуы тиіс. Бұл қауіпсіздік талабы.']},
+ {k:'lamp',ru:['Перегоревший светильник','Одна тёмная лампа в зале заметна гостям. Заменяют до открытия.'],kk:['Жанбайтын шам','Залдағы бір сөнген шам қонақтарға көрінеді. Ашылар алдында ауыстырады.']}
+];
+const T={ru:{eb:'Номер 222 · зал ресторана',h:'Проверка зала перед открытием',
+ intro:'До открытия ресторана 15 минут. Обойдите зал глазами менеджера смены и найдите нарушения стандартов сервиса и безопасности. Лишние клики по нормальным местам снимают баллы.',
+ timer:'Время',miss:'Лишних кликов',check:'Чек-лист',defect:'Нарушение',start:'Осмотрите зал. Что здесь не так?',finish:'Зал готов',res:'Итог',found:'Найдено',missed:'Что вы пропустили'},
+ kk:{eb:'222 нөмір · мейрамхана залы',h:'Ашылар алдында залды тексеру',
+ intro:'Мейрамхана ашылуына 15 минут қалды. Залды ауысым менеджерінің көзімен аралап, қызмет көрсету мен қауіпсіздік стандарттарының бұзылуын табыңыз. Қалыпты жерлерге артық басу ұпайды азайтады.',
+ timer:'Уақыт',miss:'Артық басулар',check:'Чек-парақ',defect:'Бұзушылық',start:'Залды қараңыз. Мұнда не дұрыс емес?',finish:'Зал дайын',res:'Қорытынды',found:'Табылды',missed:'Нені өткізіп алдыңыз'}};
+const OKM={bar:{ru:'Барная стойка в порядке.',kk:'Бар үстелі қалыпты.'},plant:{ru:'Растение ухожено.',kk:'Өсімдік күтімді.'},win:{ru:'Окно чистое.',kk:'Терезе таза.'},menu:{ru:'Меню на стойке актуально.',kk:'Үстелдегі мәзір өзекті.'},
+ puddle:{ru:'Пол чистый и сухой, коврик на месте.',kk:'Еден таза әрі құрғақ, кілемше орнында.'},glass:{ru:'Бокал целый, без сколов.',kk:'Бокал бүтін, сынығы жоқ.'},cloth:{ru:'Скатерть чистая и выглажена.',kk:'Дастарқан таза әрі үтіктелген.'},plate:{ru:'Стол сервирован чисто.',kk:'Үстел таза сервировкаланған.'},chair:{ru:'Стул стоит ровно.',kk:'Орындық тік тұр.'},napkin:{ru:'Салфетка аккуратно сложена.',kk:'Майлық ұқыпты бүктелген.'},exit:{ru:'Выход свободен, указатель горит.',kk:'Шығу есігі бос, көрсеткіш жанып тұр.'},lamp:{ru:'Светильник горит ровно.',kk:'Шам бірқалыпты жанып тұр.'}};
+function svgHall(on,found,pick,lg){
+  const D=k=>on.has(k),F=k=>found.has(k)?' found':'';
+  const hot=(k,ring,inner)=>D(k)?`<g class="hot${F(k)}" data-d="${k}">${inner(true)}${ring}</g>`:`<g class="hotn" data-n="${esc(OKM[k][lg])}">${inner(false)}</g>`;
+  const ok=(k,inner)=>`<g class="hotn" data-n="${esc(OKM[k][lg])}">${inner}</g>`;
+  const chairUp=(x,y)=>`<rect x="${x}" y="${y}" width="22" height="6" rx="3" style="fill:var(--r-wood)"/><rect x="${x+2}" y="${y-22}" width="3" height="24" style="fill:var(--r-wood)"/><rect x="${x+17}" y="${y-22}" width="3" height="24" style="fill:var(--r-wood)"/><rect x="${x}" y="${y-24}" width="22" height="5" rx="2" style="fill:var(--r-wood)"/>`;
+  return `<svg class="room" viewBox="0 0 400 260" role="img" aria-label="Hall">
+  <rect width="400" height="260" style="fill:var(--r-wall)"/><polygon points="0,170 400,170 400,260 0,260" style="fill:var(--r-floor)"/>
+  ${hot('exit',`<circle class="ring" cx="40" cy="132" r="48"/>`,d=>`<rect x="14" y="86" width="52" height="86" rx="3" style="fill:var(--r-wood)"/><rect x="22" y="72" width="36" height="12" rx="2" fill="#1c9c5a"/><text x="40" y="81" font-size="8" text-anchor="middle" fill="#fff" font-weight="700">EXIT</text>${d?`<rect x="18" y="138" width="22" height="30" rx="2" fill="#b98a58"/><rect x="38" y="148" width="24" height="20" rx="2" fill="#a67845"/><rect x="24" y="118" width="20" height="20" rx="2" fill="#c89a66"/>`:''}`)}
+  ${hot('lamp',`<circle class="ring" cx="200" cy="40" r="32"/>`,d=>`<line x1="200" y1="0" x2="200" y2="24" stroke="var(--r-bin)" stroke-width="2"/>${d?`<path d="M184 24 H216 L208 44 H192Z" style="fill:var(--r-bin)"/><path d="M190 44 l-4 14 M200 44 v16 M210 44 l4 12" stroke="var(--muted)" stroke-width="1.2"/>`:`<circle cx="200" cy="38" r="34" fill="var(--sun)" opacity=".25"><animate attributeName="opacity" values=".2;.32;.2" dur="3.2s" repeatCount="indefinite"/></circle><path d="M184 24 H216 L208 44 H192Z" style="fill:var(--sun)"/>`}`)}
+  ${ok('win',`<rect x="90" y="40" width="70" height="60" rx="3" style="fill:var(--r-glass)"/><path d="M125 40V100M90 70H160" stroke="var(--r-bed)" stroke-width="3"/>`)}
+  ${ok('menu',`<rect x="300" y="50" width="56" height="40" rx="3" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/><path d="M308 62H348M308 72H340M308 82H344" stroke="var(--muted)" stroke-width="2"/>`)}
+  ${ok('bar',`<rect x="296" y="110" width="94" height="56" rx="4" style="fill:var(--r-wood)"/><rect x="292" y="104" width="102" height="8" rx="3" fill="#00000030"/>`)}
+  ${ok('plant',`<path d="M74 168 L96 168 L92 186 L78 186Z" style="fill:var(--r-curt)"/><path d="M85 168 q-14 -24 -4 -40 q10 12 4 40 M85 168 q16 -22 10 -42 q-10 14 -10 42" fill="#2e8b57"/>`)}
+  <!-- tables -->
+  <rect x="118" y="188" width="6" height="40" style="fill:var(--r-wood)"/><ellipse cx="121" cy="188" rx="50" ry="13" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/>
+  ${hot('glass',`<circle class="ring" cx="128" cy="174" r="22"/>`,d=>`<path d="M118 160 H138 L134 184 H122Z" style="fill:var(--r-glass)" opacity=".9" stroke="var(--muted)" stroke-width="1.2"/><rect x="127" y="184" width="3" height="8" style="fill:var(--muted)"/>${d?`<path d="M134 160 l-4 6 l4 3 l-3 6" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M134 160 l4 0 l-2 5z" style="fill:var(--r-wall)"/>`:''}`)}
+  ${hot('chair',`<circle class="ring" cx="${on.has('chair')?58:56}" cy="${on.has('chair')?212:200}" r="32"/>`,d=>d?`<g transform="translate(30 224) rotate(-84)">${chairUp(0,0)}</g>`:chairUp(44,214))}
+  <rect x="248" y="188" width="6" height="40" style="fill:var(--r-wood)"/>
+  ${hot('cloth',`<circle class="ring" cx="251" cy="190" r="48"/>`,d=>`<ellipse cx="251" cy="188" rx="50" ry="13" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/>${d?`<ellipse cx="236" cy="188" rx="13" ry="5" fill="#a0522d" opacity=".65"/><path d="M262 183 q10 3 20 -1" stroke="var(--line)" stroke-width="2" fill="none"/>`:''}`)}
+  ${hot('napkin',`<circle class="ring" cx="${on.has('napkin')?205:262}" cy="${on.has('napkin')?238:180}" r="26"/>`,d=>d?`<path d="M190 236 l12 -8 l16 4 l4 10 l-14 6z" fill="#fff" stroke="var(--line)" stroke-width="1.5"/>`:`<path d="M258 178 l10 -8 l8 6 l-6 10z" fill="#fff" stroke="var(--line)" stroke-width="1.5"/>`)}
+  ${hot('plate',`<circle class="ring" cx="337" cy="196" r="36"/>`,d=>`<rect x="332" y="206" width="6" height="30" style="fill:var(--r-wood)"/><ellipse cx="335" cy="206" rx="40" ry="11" style="fill:var(--r-bed);stroke:var(--line);stroke-width:2"/><ellipse cx="335" cy="203" rx="17" ry="5" fill="#fff" stroke="var(--muted)" stroke-width="1.5"/>${d?`<circle cx="330" cy="202" r="3" fill="#c0792e"/><circle cx="338" cy="204" r="2.5" fill="#6d8b3a"/><path d="M350 198 l14 4 M354 196 l12 2" stroke="var(--muted)" stroke-width="2"/>`:''}`)}
+  ${hot('puddle',`<circle class="ring" cx="112" cy="236" r="40"/>`,d=>d?`<ellipse cx="112" cy="238" rx="38" ry="9" fill="#6bb8ee" opacity=".55"><animate attributeName="rx" values="36;39;36" dur="4s" repeatCount="indefinite"/></ellipse>`:`<rect x="90" y="232" width="44" height="10" rx="3" style="fill:var(--r-bin)" opacity=".4"/>`)}
+  </svg>`;
+}
+MODS.push({id:'hall',no:'222',min:4,max:10,title:{ru:'Зал ресторана',kk:'Мейрамхана залы'},sub:{ru:'Найди нарушения',kk:'Бұзушылықты табу'},
+ mount(root,api){sceneMount({T,defs,show:6,svg:svgHall},root,api)}});
+})();
+
+/* ═════════ 909 · РЕФЛЕКСИЯ ═════════ */
+MODS.push({id:'reflect',no:'909',min:3,max:0,
+title:{ru:'Рефлексия',kk:'Рефлексия'},sub:{ru:'Что возьму в работу',kk:'Жұмысқа не аламын'},
+mount(root,api){
+  const T={ru:{eb:'Номер 909 · разбор смены',h:'Три минуты на выводы',
+    intro:'Баллы не начисляются. Преподаватель прочитает ваши ответы и использует их на разборе.',
+    q1:'Какая ситуация была самой трудной и почему?',q2:'Что вы сделали бы иначе, если бы снова оказались на этой смене?',q3:'Какой навык из девяти вам нужно подтянуть в первую очередь?',
+    send:'Отправить',thanks:'Спасибо! Ответы отправлены преподавателю.'},
+   kk:{eb:'909 нөмір · ауысымды талдау',h:'Қорытынды жасауға үш минут',
+    intro:'Ұпай есептелмейді. Мұғалім жауаптарыңызды оқып, талдауда пайдаланады.',
+    q1:'Қай жағдай ең қиын болды және неге?',q2:'Осы ауысымға қайта түссеңіз, нені басқаша жасар едіңіз?',q3:'Тоғыз дағдының ішінен ең алдымен қайсысын жетілдіру керек?',
+    send:'Жіберу',thanks:'Рақмет! Жауаптар мұғалімге жіберілді.'}};
+  const v={a:'',b:'',c:''};let sent=false;
+  function draw(){
+    const x=T[api.lang()];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    ${['a','b','c'].map((k,i)=>`<div class="fieldrow" style="display:block"><label for="r_${k}" style="display:block;margin-bottom:6px">${x['q'+(i+1)]}</label><textarea id="r_${k}" style="min-height:90px" maxlength="600" ${sent?'disabled':''}>${esc(v[k])}</textarea></div>`).join('')}
+    ${sent?`<div class="note ok">${x.thanks}</div>`:`<button class="btn" id="snd">${x.send}</button>`}`;
+    $$('textarea',root).forEach(t=>t.oninput=()=>{v[t.id.slice(2)]=t.value});
+    const b=$('#snd',root);if(b)b.onclick=()=>{sent=true;draw();api.finish(0,{'Самая трудная ситуация':v.a,'Что бы сделал иначе':v.b,'Что подтянуть':v.c})};
+  }
+  api.persist(()=>({v,sent}),s=>{if(s.v)Object.assign(v,s.v);sent=!!s.sent});api.onLang(draw);draw();
+}});
+
+
+boot();
+</script>
+</body>
+</html>
