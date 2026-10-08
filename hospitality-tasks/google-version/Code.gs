@@ -52,6 +52,16 @@ function api_save(id, doc) {
   return true;
 }
 
+/** Студент возвращается на страницу: подтягиваем его прогресс. */
+function api_get(id) {
+  id = String(id || '').replace(/[^A-Za-z0-9_:\-]/g, '').slice(0, 80);
+  if (!id) return null;
+  const sh = sheet_();
+  const r = findRow_(sh, id);
+  if (!r) return null;
+  try { return JSON.parse(sh.getRange(r, 9).getValue()); } catch (e) { return null; }
+}
+
 /** Студент сообщает, что он в сети и в каком окне (хранится в кэше, быстро). */
 function api_ping(id, presence) {
   id = String(id || '').replace(/[^A-Za-z0-9_:\-]/g, '').slice(0, 80);

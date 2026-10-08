@@ -323,7 +323,7 @@ details summary{cursor:pointer;font-weight:600}
 <body>
 <section class="gate" id="gate"><div class="gatecard" id="gatecard"></div></section>
 <div class="wrap" id="app" hidden>
-  <div class="topbar"><div class="who" id="who"></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="finalbtn" id="tBack" hidden></button><button class="finalbtn" id="cpTop" hidden></button><div class="lang" id="langApp"></div></div></div>
+  <div class="topbar"><div class="who" id="who"></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="finalbtn" id="tBack" hidden></button><button class="finalbtn" id="cpTop" hidden></button><button class="finalbtn" id="logout"></button><div class="lang" id="langApp"></div></div></div>
   <div class="banner" id="banner" hidden></div>
   <header class="hero">
     <div class="eyebrow">Hotel «Sauyt» · hospitality practicum</div>
@@ -377,6 +377,7 @@ const UI={
   tLessonH:'Состав урока',tLessonSub:'Отметьте задания для класса: студенты увидят только отмеченные. Изменения применяются сразу, но только у студентов, вошедших в аккаунт. Остальные видят все задания.',tP80:'Пресет: ~80 минут',tAll:'Все задания',tTotal:'Итого',tCfgFail:'Не удалось сохранить состав: нужны права редактора страницы.',tPts:'баллов',
   connWait:'Проверяю связь с преподавателем…',connOk:'Связь с преподавателем есть: ваши результаты будут видны.',connNo:'Преподаватель вас не увидит: вы не вошли в аккаунт или у вас нет доступа «Участник». Войдите в аккаунт и откройте ссылку снова. Пока можно проходить задания, а в конце скопировать результат и отправить преподавателю.',copyRes:'Скопировать результат',copied:'Скопировано. Отправьте это преподавателю.',
   tImpH:'Результаты студентов без аккаунта',tImpSub:'Если студент не вошёл в аккаунт, его результаты не попадут сюда сами. Пусть нажмёт «Скопировать результат» и пришлёт вам сообщение целиком. Вставьте присланное сюда.',tImpBtn:'Добавить в список',tImpDone:'Добавлено студентов',tImpBad:'Код результата не найден в тексте',tImpPh:'Вставьте сообщения студентов с кодом SAUYT1:…',sendTop:'Отправить результат преподавателю',
+  logout:'Выйти',
   tDb:'База',tRoom:'Присутствие',tRecs:'Записей',tPeersN:'Окон открыто',tRefresh:'Обновить',
   tDetail:'Подробно',tClose:'Закрыть',tTimeIn:'время',tAns:'Ответы',tCsv:'Скачать CSV',tReset:'Очистить список',tResetSure:'Нажмите ещё раз, чтобы удалить всех',
   tNoDb:'База данных недоступна в этом окне: показаны только те, кто в сети.',tNow2:'сейчас',tAgo:'назад',tMinShort:'мин',lobby:'вход'
@@ -400,6 +401,7 @@ const UI={
   tLessonH:'Сабақ құрамы',tLessonSub:'Сыныпқа тапсырмаларды белгілеңіз: студенттер тек белгіленгенді көреді. Өзгерістер бірден қолданылады, бірақ тек аккаунтқа кірген студенттерде. Қалғандары барлық тапсырманы көреді.',tP80:'Пресет: ~80 минут',tAll:'Барлық тапсырма',tTotal:'Барлығы',tCfgFail:'Құрамды сақтау мүмкін болмады: бет редакторының құқығы керек.',tPts:'ұпай',
   connWait:'Мұғалімді байланыс тексерілуде…',connOk:'Мұғаліммен байланыс бар: нәтижелеріңіз көрінеді.',connNo:'Мұғалім сізді көрмейді: аккаунтқа кірмегенсіз немесе «Қатысушы» қолжетімділігі жоқ. Аккаунтқа кіріп, сілтемені қайта ашыңыз. Әзірге тапсырмаларды орындай аласыз, ал соңында нәтижені көшіріп мұғалімге жібересіз.',copyRes:'Нәтижені көшіру',copied:'Көшірілді. Мұны мұғалімге жіберіңіз.',
   tImpH:'Аккаунтсыз студенттер нәтижелері',tImpSub:'Студент аккаунтқа кірмесе, оның нәтижелері мұнда өздігінен түспейді. «Нәтижені көшіру» батырмасын басып, хабарламаны толық жіберсін. Келгенін осында қойыңыз.',tImpBtn:'Тізімге қосу',tImpDone:'Қосылған студенттер',tImpBad:'Мәтінде нәтиже коды табылмады',tImpPh:'SAUYT1:… коды бар студент хабарламаларын қойыңыз',sendTop:'Нәтижені мұғалімге жіберу',
+  logout:'Шығу',
   tDb:'Дерекқор',tRoom:'Қатысу',tRecs:'Жазба',tPeersN:'Ашық терезе',tRefresh:'Жаңарту',
   tDetail:'Толығырақ',tClose:'Жабу',tTimeIn:'уақыт',tAns:'Жауаптар',tCsv:'CSV жүктеу',tReset:'Тізімді тазалау',tResetSure:'Барлығын жою үшін тағы бір рет басыңыз',
   tNoDb:'Бұл терезеде дерекқор қолжетімсіз: тек желідегілер көрсетіледі.',tNow2:'қазір',tAgo:'бұрын',tMinShort:'мин',lobby:'кіреберіс'
@@ -412,11 +414,12 @@ const L=o=>(o&&typeof o==='object'&&!Array.isArray(o)&&('ru' in o))?(o[LANG]??o.
 const S={id:null,name:'',group:'',startedAt:0,door:0,res:{},time:{},enter:0,fin:false};
 let connState='wait';
 let PRACTICE=false,isTeacher=false,tPwOpen=false,caps={user:null,db:null,room:null,dl:null},dbDoc=null,saveFailed=false;
-const loadLocal=()=>{try{const j=JSON.parse(STORE.get('sauyt_state')||'null');if(j&&j.name){S.name=j.name;S.group=j.group||'';S.res=j.res||{};S.time=j.time||{};S.startedAt=j.startedAt||0;S.fin=!!j.fin}}catch(e){}};
-const saveLocal=()=>STORE.set('sauyt_state',JSON.stringify({name:S.name,group:S.group,res:S.res,time:S.time,startedAt:S.startedAt,fin:S.fin}));
+const loadLocal=()=>{try{const j=JSON.parse(STORE.get('sauyt_state')||'null');if(j&&j.name){S.name=j.name;S.group=j.group||'';S.res=j.res||{};S.time=j.time||{};S.startedAt=j.startedAt||0;S.fin=!!j.fin;S.doorId=j.doorId||''}}catch(e){}};
+const saveLocal=()=>{const m=MODS[S.door];STORE.set('sauyt_state',JSON.stringify({name:S.name,group:S.group,res:S.res,time:S.time,startedAt:S.startedAt,fin:S.fin,doorId:m?m.id:''}))};
 const total=()=>ONMODS().reduce((a,m)=>a+((S.res[m.id]||{}).s||0),0);
 const doneCount=()=>ONMODS().filter(m=>S.res[m.id]).length;
-const key=()=>S.id||('n:'+S.name.trim().toLowerCase());
+const key=()=>'n:'+(S.name+'|'+S.group).trim().toLowerCase();
+const snaps=[];let mounted=false;
 
 function docData(){
   const m=MODS[S.door];
@@ -450,6 +453,7 @@ async function initCaps(){
     caps={user,db,room,dl};
     if(user){try{S.id=await user.id()}catch(e){}}
     if(db&&S.id)dbDoc=db.doc('students/'+S.id);
+    if(dbDoc&&!S.name){try{const sn=await dbDoc.get();if(sn&&sn.exists){const d=sn.data()||{};if(d.name){S.name=d.name;S.group=d.group||'';S.res=d.res||{};S.time=d.time||{};S.startedAt=d.startedAt||Date.now();S.doorId=(d.door&&d.door!=='final')?d.door:'';saveLocal();STORE.set('sauyt_active','1');resumeStudent()}}}catch(e){}}
     let cw=null;if(user&&user.can){try{cw=await user.can('data.write')}catch(e){}}
     connState=(dbDoc&&cw!==false)?'ok':'no';
     if(db){try{db.doc('config/lesson').onSnapshot(sn=>{if(sn.exists){const d=sn.data();if(d&&Array.isArray(d.on))ENABLED=new Set(d.on)}else ENABLED=new Set(MODS.map(m=>m.id));cfgChanged()},()=>{})}catch(e){}}
@@ -492,7 +496,7 @@ function gateRender(){
   $('#go').onclick=()=>startStudent(false);
   $('#nm0').addEventListener('keydown',e=>{if(e.key==='Enter')startStudent(false)});
   if(isTeacher){$('#goT').onclick=openTeacher;$('#goP').onclick=()=>startStudent(true)}
-  else if(tPwOpen){const go=()=>{if(hash('sauyt-'+$('#tpw').value.trim())===TPW){isTeacher=true;tPwOpen=false;gateRender()}else{$('#tperr').textContent=U('tBad');$('#tpw').select()}};$('#tpwGo').onclick=go;$('#tpw').addEventListener('keydown',e=>{if(e.key==='Enter')go()});$('#tpw').focus()}
+  else if(tPwOpen){const go=()=>{if(hash('sauyt-'+$('#tpw').value.trim())===TPW){window.__tpw=$('#tpw').value.trim();isTeacher=true;tPwOpen=false;gateRender()}else{$('#tperr').textContent=U('tBad');$('#tpw').select()}};$('#tpwGo').onclick=go;$('#tpw').addEventListener('keydown',e=>{if(e.key==='Enter')go()});$('#tpw').focus()}
   else{$('#tLink').onclick=()=>{tPwOpen=true;gateRender()}}
 }
 function setLang(l){
@@ -507,6 +511,7 @@ function startStudent(practice){
   if(!v){$('#nmerr').textContent=U('err');$('#nm0').focus();return}
   PRACTICE=practice;S.name=v;S.group=$('#gp0').value.trim();
   if(!S.startedAt)S.startedAt=Date.now();
+  mountAll();if(!practice)STORE.set('sauyt_active','1');
   $('#gate').hidden=true;$('#app').hidden=false;
   S.enter=Date.now();
   appChrome();banner();persist();window.scrollTo(0,0);
@@ -521,6 +526,7 @@ function appChrome(){
   $('#heroLead').textContent=U('heroLead');
   $('#finBtn').textContent=U('finBtn');
   const tb=$('#tBack');tb.hidden=!isTeacher;tb.textContent=U('backTeacher');
+  $('#logout').textContent=U('logout');
   const ct=$('#cpTop');ct.hidden=!(connState==='no'&&!PRACTICE);ct.textContent=U('sendTop');
   drawDoors();
   $$('.pfoot').forEach((f,i)=>footDraw(i));
@@ -569,6 +575,7 @@ function makeApi(m,i,root){
       drawDoors();footDraw(i);persist();burst(root);
     },
     onLang(fn){hooks.push(fn)},
+    persist(get,set){const k='sauyt_m_'+m.id+'_'+hash(key());try{const raw=STORE.get(k);if(raw)set(JSON.parse(raw))}catch(e){}snaps.push(()=>{try{STORE.set(k,JSON.stringify(get()))}catch(e){}})},
     done:()=>!!S.res[m.id]
   };
 }
@@ -577,13 +584,30 @@ function initApp(){
   MODS.forEach((m,i)=>{
     const p=document.createElement('section');p.className='panel'+(i===0?' on':'');
     p.innerHTML='<div class="mod"></div><div class="pfoot"></div>';stage.appendChild(p);
-    m.mount($('.mod',p),makeApi(m,i,p));
   });
   const fp=document.createElement('section');fp.className='panel';fp.id='finalPanel';fp.innerHTML='<div class="mod"></div>';stage.appendChild(fp);
   $('#finBtn').onclick=()=>show(MODS.length);
   $('#tBack').onclick=()=>{$('#app').hidden=true;openTeacher()};
+  $('#logout').onclick=()=>{STORE.set('sauyt_active','0');location.reload()};
+  const flush=()=>snaps.forEach(f=>f());
+  setInterval(flush,4000);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){flush();saveLocal()}});
+  window.addEventListener('pagehide',()=>{flush();saveLocal()});
 }
-
+function mountAll(){
+  if(mounted)return;mounted=true;
+  const panels=$$('#stage .panel');
+  MODS.forEach((m,i)=>m.mount($('.mod',panels[i]),makeApi(m,i,panels[i])));
+}
+function resumeStudent(){
+  if(!S.name)return;
+  PRACTICE=false;mountAll();
+  $('#gate').hidden=true;$('#app').hidden=false;
+  let di=MODS.findIndex(m=>m.id===S.doorId);if(di<0||!on(MODS[di]))di=Math.max(0,MODS.findIndex(on));
+  S.door=di;S.enter=Date.now();showFinal=false;
+  $$('.panel').forEach((p,k)=>p.classList.toggle('on',k===di));
+  appChrome();banner();persist();
+}
 /* ── final badge ── */
 function rankOf(r){return r>=.85?3:r>=.65?2:r>=.4?1:0}
 function finalDraw(){
@@ -714,6 +738,7 @@ loadLocal();
 function boot(){
   ENABLED=new Set(MODS.map(m=>m.id));
   initApp();gateRender();
+  if(S.name&&STORE.get('sauyt_active')==='1')resumeStudent();
   initCaps();
 }
 
@@ -853,7 +878,7 @@ mount(root,api){
     done=true;draw();
     api.finish(score,{'Гость / Қонақ':pr.name.ru,'Вопросы':asked.map(q=>Q.find(x=>x.id===q).ru).join(' | '),'Номер':room.ru,'Услуги':[...selAdd].join(', '),'Итого за ночь':tot+' ₸ (бюджет '+pr.budget+')'});
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({asked,selRoom,selAdd:[...selAdd],done,res}),s=>{asked=s.asked||[];selRoom=s.selRoom||null;selAdd=new Set(s.selAdd||[]);done=!!s.done;res=s.res||null});api.onLang(draw);draw();
 }});
 
 /* ═════════ 202 · REVENUE-НЕДЕЛЯ ═════════ */
@@ -935,7 +960,7 @@ mount(root,api){
     const score=ratio>=.97?10:ratio>=.94?9:ratio>=.9?8:ratio>=.86?6:ratio>=.8?4:ratio>=.7?2:0;
     api.finish(score,{'Цены по дням':prices.map(p=>fmt(p)).join(' / '),'Выручка / максимум':fmt(rev)+' / '+fmt(mx)+' ('+Math.round(ratio*100)+'%)'});
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({cur,prices,finished,draft}),s=>{cur=s.cur||0;prices=s.prices||[];finished=!!s.finished;draft=s.draft==null?null:s.draft});api.onLang(draw);draw();
 }});
 
 /* ═════════ 303 · НОЧНОЙ АУДИТ ═════════ */
@@ -1021,7 +1046,7 @@ mount(root,api){
     draw();
     api.finish(sc,{'Ваши ответы':['sold','rev','adr','occ','revpar'].map(k=>k+'='+(vals[k]??'')).join(', '),'Правильные':JSON.stringify(C),'Отмеченные строки':[...flags].map(i=>rows[i].no).join(', '),'Ошибочные строки':bad.map(i=>rows[i].no).join(', ')});
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({flags:[...flags],done,hintUsed,vals,resHtml}),s=>{flags=new Set(s.flags||[]);done=!!s.done;hintUsed=!!s.hintUsed;vals=s.vals||{};resHtml=s.resHtml||''});api.onLang(draw);draw();
 }});
 
 /* ═════════ 404 · ОВЕРБУКИНГ ═════════ */
@@ -1141,7 +1166,7 @@ mount(root,api){
     done=true;draw();
     api.finish(res.score,{'Переселены':sel.map(i=>G[i].name+' → '+HOT[asg[i].h].n+' / '+T.ru.comps[asg[i].c]).join(' | '),'Ущерб / минимум':d.toFixed(1)+' / '+OPT.d.toFixed(1)});
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({sel,asg,done,res}),s=>{sel=s.sel||[];asg=s.asg||{};done=!!s.done;res=s.res||null});api.onLang(draw);draw();
 }});
 
 /* ═════════ 505 · ОТВЕТ НА ОТЗЫВ ═════════ */
@@ -1242,7 +1267,7 @@ mount(root,api){
     const a={'Отзыв (гость)':rv.name+': '+rv.ru,'Ответ, попытка 1':hist[0]};if(hist[1])a['Ответ, попытка 2']=hist[1];
     api.finish(out.score,a);
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({text,tries,out,hist}),s=>{text=s.text||'';tries=s.tries||0;out=s.out||null;hist=s.hist||[]});api.onLang(draw);draw();
 }});
 
 /* ═════════ 606 · ГРАФИК УБОРКИ ═════════ */
@@ -1336,7 +1361,7 @@ mount(root,api){
     return `<div class="note ${s.score>=8?'ok':s.score>=5?'':'bad'}" style="margin-top:14px"><div class="mini">${x.res}</div><b class="verdict">${s.score} / 10</b>${gantt(s)}
     <ul class="crit"><li class="${s.onT===ND?'ok':'no'}"><span>${x.ontime}</span><b>${s.onT} / ${ND}</b></li><li class="${s.vipOk?'ok':'no'}"><span>${x.vipok}</span><b>${s.vipOk?1:0} / 1</b></li><li class="${s.inShift?'ok':'no'}"><span>${x.inshift}</span><b>${s.inShift?1:0} / 1</b></li><li class="${s.bal?'ok':'no'}"><span>${x.bal} <span class="det">(${x.balDet})</span></span><b>${s.bal?1:0} / 1</b></li></ul></div>`;
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({plan,pool,sim,done}),s=>{if(s.plan){plan=s.plan;pool=s.pool;sim=s.sim||null;done=!!s.done}});api.onLang(draw);draw();
 }});
 
 /* ═════════ 707 · БЛЭКАУТ ═════════ */
@@ -1443,7 +1468,7 @@ mount(root,api){
     <p><b>${x.expert}:</b></p><ul class="log">${x.exp.map(s=>`<li>${s}</li>`).join('')}</ul></div>`;
   }
   function restart(){ap=8;log=[];picked=[];known=false;done=false;res=null;Object.assign(M,{safe:30,info:20,comf:50,rep:60,cost:10});draw()}
-  api.onLang(draw);draw();
+  api.persist(()=>({ap,log,picked,known,done,res,M}),s=>{ap=s.ap==null?8:s.ap;log=s.log||[];picked=s.picked||[];known=!!s.known;done=!!s.done;res=s.res||null;if(s.M)Object.assign(M,s.M)});api.onLang(draw);draw();
 }});
 
 /* ═════════ 808 · МЕНЮ ═════════ */
@@ -1539,7 +1564,7 @@ mount(root,api){
     draw();
     api.finish(sc,{'Классы':D.map((d,i)=>d.ru+'='+(sel[i]||'-')+'('+d.k+')').join('; '),'Фудкост / цена':(vals.fc||'-')+' / '+(vals.pr||'-')+' (верно '+trueFc+' / '+truePrice+')'});
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({sel,vals,done,hintUsed,resH}),s=>{sel=s.sel||{};vals=s.vals||{fc:'',pr:''};done=!!s.done;hintUsed=!!s.hintUsed;resH=s.resH||''});api.onLang(draw);draw();
 }});
 
 /* ═════════ СЦЕНЫ «НАЙДИ ДЕФЕКТЫ»: номер и зал ресторана ═════════ */
@@ -1595,6 +1620,7 @@ function sceneMount(cfg,root,api){
     <p>${x.found}: ${found.size} / ${chosen.size} · ${x.miss}: ${miss} (−${res.pen}) · ${Math.floor(res.secs/60)}:${String(res.secs%60).padStart(2,'0')}</p>
     ${missed.length?`<p style="margin-top:8px"><b>${x.missed}:</b></p><ul class="log">${missed.map(d=>`<li><b>${esc(nm(d))}</b>. ${esc(why(d))}</li>`).join('')}</ul>`:''}</div>`;
   }
+  api.persist(()=>({found:[...found],miss,done,note,res}),s=>{found=new Set(s.found||[]);miss=s.miss||0;done=!!s.done;note=s.note||note;res=s.res||null});
   api.onLang(draw);draw();
 }
 
@@ -1872,7 +1898,7 @@ mount(root,api){
     });
     $$('[data-zz]',root).forEach(z=>z.addEventListener('click',()=>{const k=z.dataset.zz;if(sel)place(sel,k);else if(placed[k]){delete placed[k];draw()}}));
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({placed,sel,hintOn,hintUsed,done,res}),s=>{placed=s.placed||{};sel=s.sel||null;hintOn=!!s.hintOn;hintUsed=!!s.hintUsed;done=!!s.done;res=s.res||null});api.onLang(draw);draw();
 }});
 
 /* ═════════ 555 · ГРАФИК АДМИНИСТРАТОРОВ ═════════ */
@@ -1988,7 +2014,7 @@ mount(root,api){
     <li class="${c.rul===3?'ok':'no'}"><span>${x.rul}${c.v.length?'<br><span class="det">'+c.v.slice(0,6).map(esc).join('<br>')+(c.v.length>6?'<br>'+x.more+' '+(c.v.length-6):'')+'</span>':'<br><span class="det">'+x.okAll+'</span>'}</span><b>${c.rul} / 3</b></li>
     <li class="${c.eff?'ok':'no'}"><span>${x.eff}: +${c.excess}</span><b>${c.eff} / 1</b></li></ul></div>`;
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({as,checked,done}),s=>{if(s.as)as=s.as;checked=s.checked||null;done=!!s.done});api.onLang(draw);draw();
 }});
 
 /* ═════════ 666 · ПОДТВЕРЖДЕНИЕ БРОНИ ═════════ */
@@ -2098,7 +2124,7 @@ mount(root,api){
     return `<div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}" style="margin-top:14px"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b>
     <ul class="crit">${REQ.map((q,i)=>`<li class="${res.rows[i].p>=3.5?'ok':'no'}"><span>${x.rq} ${i+1}<br><span class="det">${x.cr}: ${x.types[q.room]} · ${q.plan} · ${q.bf?x.bfY:x.bfN} · ${fmt(q.total)} ₸ · ${q.info.map(k=>x.inf[k]).join(', ')}</span></span><b>${res.rows[i].p} / 4</b></li>`).join('')}</ul></div>`;
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({ans,done,res}),s=>{if(s.ans)s.ans.forEach((a,i)=>Object.assign(ans[i],a));done=!!s.done;res=s.res||null});api.onLang(draw);draw();
 }});
 
 /* ═════════ 777 · ОТДЕЛ ПРОДАЖ ═════════ */
@@ -2194,7 +2220,7 @@ mount(root,api){
     <li class="${r.dsc===2?'ok':'no'}"><span>${x.dOk}</span><b>${r.dsc} / 2</b></li></ul>
     <p class="det">${x.real}: ${x.rn[pk]}.</p></div>`;
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({asked,disc,cons:[...cons],done,res}),s=>{asked=s.asked||[];if(s.disc)Object.assign(disc,s.disc);cons=new Set(s.cons||[]);done=!!s.done;res=s.res||null});api.onLang(draw);draw();
 }});
 
 /* ═════════ 888 · НОМЕР ПОД ГОСТЕЙ ═════════ */
@@ -2283,7 +2309,7 @@ mount(root,api){
     return `<div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}" style="margin-top:14px"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b>
     <ul class="crit">${St.map((s,i)=>{const r=res.rows[i],p=s.p;return `<li class="${r.dec?'ok':'no'}"><span>${x.rm} ${i+1}: ${x.fit1}${r.f?'':'<br><span class="det">'+x.notfit(places(p),ROOMS[p.room].places+1)+'</span>'}</span><b>${r.dec} / 1</b></li>`}).join('')}</ul></div>`;
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({St:St.map(x=>({fit:x.fit,vals:x.vals})),done,res}),s=>{if(s.St)s.St.forEach((x,i)=>{if(St[i]){St[i].fit=x.fit;St[i].vals=x.vals}});done=!!s.done;res=s.res||null});api.onLang(draw);draw();
 }});
 
 /* ═════════ 121 · РЕЙТИНГ НА BOOKING ═════════ */
@@ -2356,7 +2382,7 @@ mount(root,api){
     res={sc,after,gain};done=true;draw();
     api.finish(sc,{'Выбрано':[...sel].map(f=>T.ru.fx[f]).join('; '),'Рост / максимум':gain.toFixed(2)+' / '+bestGain.toFixed(2),'Причины':JSON.stringify(cause)});
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({sel:[...sel],done,res}),s=>{sel=new Set(s.sel||[]);done=!!s.done;res=s.res||null});api.onLang(draw);draw();
 }});
 
 /* ═════════ 131 · КОНФЛИКТ ДВУХ ГОСТЕЙ ═════════ */
@@ -2456,7 +2482,7 @@ mount(root,api){
       draw();window.scrollTo&&0;
     });
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({step,log,res}),s=>{step=s.step||0;log=s.log||[];res=s.res||null});api.onLang(draw);draw();
 }});
 
 /* ═════════ 141 · ПЕРЕГОВОРЫ С ТУРОПЕРАТОРОМ ═════════ */
@@ -2556,7 +2582,7 @@ mount(root,api){
     <ul class="crit"><li class="${r.dealPts?'ok':'no'}"><span>${x.deal}: ${r.ok?x.dealY:x.dealN}</span><b>${r.dealPts} / 4</b></li><li class="${r.qual>=3?'ok':'no'}"><span>${x.quality}: ${(r.delta*100).toFixed(1)}%</span><b>${r.qual} / 4</b></li><li class="${r.speed===2?'ok':'no'}"><span>${x.speed}: ${r.rounds}</span><b>${r.speed} / 2</b></li></ul>
     <p class="det">${x.persona[P]}</p></div>`;
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({cfg,hist,done,res,deal}),s=>{if(s.cfg)cfg=s.cfg;hist=s.hist||[];done=!!s.done;res=s.res||null;deal=!!s.deal});api.onLang(draw);draw();
 }});
 
 /* ═════════ 151 · ПОДГОТОВКА КОНФЕРЕНЦ-ЗАЛА ═════════ */
@@ -2684,7 +2710,7 @@ mount(root,api){
     <li class="${r.plOk.length===r.req.length?'ok':'no'}"><span>${x.plS}: ${r.plOk.length} / ${r.req.length}</span><b>${r.plPts.toFixed(1)} / 4</b></li></ul>
     <ul class="log">${r.req.map(k=>`<li style="${r.plOk.includes(k)?'':'background:var(--bad-bg)'}"><b>${x.tray[k]}</b>${placed[k]?'':' ('+x.notPl+')'}: ${x.pr[k]}</li>`).join('')}</ul></div>`;
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({lay,vals,placed,sel,done,res}),s=>{lay=s.lay||'';if(s.vals)Object.assign(vals,s.vals);placed=s.placed||{};sel=s.sel||null;done=!!s.done;res=s.res||null});api.onLang(draw);draw();
 }});
 
 /* ═════════ 909 · РЕФЛЕКСИЯ ═════════ */
@@ -2708,7 +2734,7 @@ mount(root,api){
     $$('textarea',root).forEach(t=>t.oninput=()=>{v[t.id.slice(2)]=t.value});
     const b=$('#snd',root);if(b)b.onclick=()=>{sent=true;draw();api.finish(0,{'Самая трудная ситуация':v.a,'Что бы сделал иначе':v.b,'Что подтянуть':v.c})};
   }
-  api.onLang(draw);draw();
+  api.persist(()=>({v,sent}),s=>{if(s.v)Object.assign(v,s.v);sent=!!s.sent});api.onLang(draw);draw();
 }});
 
 
