@@ -371,6 +371,15 @@ details summary{cursor:pointer;font-weight:600}
 .pc.open{background:var(--bg);color:inherit;transform:rotateY(0)}
 .pc.en.open{border-color:var(--blue)}
 .pc.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.agrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:6px}
+.slot{padding:12px 14px;border-radius:16px;border:2px dashed var(--line);background:var(--bg);display:grid;gap:6px;align-content:start}
+.slot.tgt{border-color:var(--blue);cursor:pointer}
+.slot b{display:block}.slot small{color:var(--muted);font-size:.84rem}
+.stepper{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.stepper .btn{padding:6px 16px;font-size:1.2rem}.stepper>b{min-width:2ch;text-align:center;font-size:1.2rem}
+.ladder{list-style:none;padding:0;display:grid;gap:6px;margin:10px 0}
+.ladder li{padding:8px 12px;border-radius:10px;border:2px solid var(--line);color:var(--muted)}
+.ladder li.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
 /* ═════ Сауыт Арена: тёмная неоновая тема ═════ */
 :root.arcade,:root.arcade[data-theme]{
   --bg:#0a0620;--card:#150d38;--ink:#f1ecff;--muted:#a79bd6;--line:#2f2370;
@@ -630,7 +639,7 @@ function appChrome(){
   drawDoors();
   $$('.pfoot').forEach((f,i)=>footDraw(i));
 }
-const ICONS={swipe:'👆',accept:'✅',bags:'🧳',orders:'🎧',rush:'⚡',allergy:'🥜',gesture:'🙏',change:'💵',pairs:'🔤',banq:'🍽️',mystery:'🕵️',detect:'🔎',cult:'🌍',conflict:'💬',guest:'🧐',rev:'📈',audit:'🧮'};
+const ICONS={swipe:'👆',accept:'✅',bags:'🧳',orders:'🎧',rush:'⚡',rooming:'🛏️',floor:'🪑',haccp:'🌡️',evac:'🚨',supply:'📦',allergy:'🥜',gesture:'🙏',change:'💵',pairs:'🔤',banq:'🍽️',mystery:'🕵️',detect:'🔎',cult:'🌍',conflict:'💬',guest:'🧐',rev:'📈',audit:'🧮'};
 function starsOf(r){if(!r||!r.m)return '';const p=r.s/r.m,n=p>=.9?3:p>=.7?2:p>=.4?1:0;return '★'.repeat(n)+'☆'.repeat(3-n)}
 function drawDoors(){
   $('#doors').innerHTML=MODS.map((m,i)=>{if(!on(m))return '';const r=S.res[m.id];
@@ -825,7 +834,7 @@ function tRender(){
   const cd=$('#tdetClose');if(cd)cd.onclick=()=>{tSel=null;tRender()};
 }
 
-const SKMAP={guest:'comm',conflict:'comm',reply:'comm',rev:'sales',sales:'sales',tour:'sales',rating:'sales',audit:'calc',menu:'calc',book:'calc',hk:'plan',sched:'plan',conf:'plan',ready:'plan',swipe:'std',accept:'calc',bags:'crisis',orders:'std',over:'crisis',crisis:'crisis',rush:'crisis',allergy:'std',gesture:'comm',change:'calc',pairs:'std',mystery:'std',banq:'calc',detect:'crisis',cult:'comm'};
+const SKMAP={guest:'comm',conflict:'comm',reply:'comm',rev:'sales',sales:'sales',tour:'sales',rating:'sales',audit:'calc',menu:'calc',book:'calc',hk:'plan',sched:'plan',conf:'plan',ready:'plan',swipe:'std',accept:'calc',bags:'crisis',orders:'std',over:'crisis',crisis:'crisis',rush:'crisis',rooming:'plan',floor:'plan',haccp:'std',evac:'crisis',supply:'calc',allergy:'std',gesture:'comm',change:'calc',pairs:'std',mystery:'std',banq:'calc',detect:'crisis',cult:'comm'};
 const TOPIC={
  guest:{ru:'Выявление потребностей: какие вопросы задать гостю, чтобы подобрать номер и услуги',kk:'Қажеттіліктерді анықтау: нөмір мен қызметті таңдау үшін қонаққа қандай сұрақ қою керек'},
  rev:{ru:'Ценообразование: как цена влияет на загрузку, учёт конкурентов и событий (RevPAR)',kk:'Баға белгілеу: бағаның толымдылыққа әсері, бәсекелестер мен іс-шараларды ескеру (RevPAR)'},
@@ -835,6 +844,11 @@ const TOPIC={
  hk:{ru:'График уборки: сроки заезда, «не беспокоить», нагрузка на горничных',kk:'Жинау кестесі: келу мерзімі, «мазаламаңыз», қызметкерлер жүктемесі'},
  crisis:{ru:'Кризис: порядок действий — безопасность, срок, информирование, компенсация',kk:'Дағдарыс: әрекет реті — қауіпсіздік, мерзім, хабарлау, өтемақы'},
  menu:{ru:'Меню-инжиниринг: маржа, популярность и фудкост блюда',kk:'Мәзір-инжиниринг: маржа, танымалдық және тағам фудкосты'}, 
+ rooming:{ru:'Расселение группы: учёт потребностей гостей и правил размещения',kk:'Топты орналастыру: қонақтардың қажеттіліктері мен орналастыру ережелерін ескеру'},
+ floor:{ru:'Рассадка в ресторане: пожелания гостей, доступность, шум и вместимость',kk:'Мейрамханада отырғызу: қонақ тілектері, қолжетімділік, шу және сыйымдылық'},
+ haccp:{ru:'Санитарные нормы кухни: температура, перекрёстное загрязнение, маркировка',kk:'Асүйдің санитарлық нормалары: температура, айқас ластану, таңбалау'},
+ evac:{ru:'Эвакуация при пожаре: порядок действий администратора',kk:'Өрттегі эвакуация: әкімшінің әрекет реті'},
+ supply:{ru:'Закупки: расчёт заказа с учётом годного запаса и упаковки',kk:'Сатып алу: жарамды қор мен қаптаманы ескере отырып тапсырыс есептеу'},
  allergy:{ru:'Аллергены и ограничения питания: читать состав блюда',kk:'Аллергендер мен тамақтану шектеулері: тағам құрамын оқу'},
  gesture:{ru:'Культурные табу и жесты в работе с гостями из разных стран',kk:'Әртүрлі елдерден келген қонақтармен жұмыстағы мәдени тыйымдар мен ым-ишаралар'},
  change:{ru:'Кассовые расчёты: быстрая и точная сдача',kk:'Касса есептері: жылдам әрі дәл қалдық'},

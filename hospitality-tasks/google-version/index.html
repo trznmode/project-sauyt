@@ -376,6 +376,15 @@ details summary{cursor:pointer;font-weight:600}
 .pc.open{background:var(--bg);color:inherit;transform:rotateY(0)}
 .pc.en.open{border-color:var(--blue)}
 .pc.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.agrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:6px}
+.slot{padding:12px 14px;border-radius:16px;border:2px dashed var(--line);background:var(--bg);display:grid;gap:6px;align-content:start}
+.slot.tgt{border-color:var(--blue);cursor:pointer}
+.slot b{display:block}.slot small{color:var(--muted);font-size:.84rem}
+.stepper{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.stepper .btn{padding:6px 16px;font-size:1.2rem}.stepper>b{min-width:2ch;text-align:center;font-size:1.2rem}
+.ladder{list-style:none;padding:0;display:grid;gap:6px;margin:10px 0}
+.ladder li{padding:8px 12px;border-radius:10px;border:2px solid var(--line);color:var(--muted)}
+.ladder li.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
 </style>
 </head>
 <body>
@@ -629,7 +638,7 @@ function appChrome(){
   drawDoors();
   $$('.pfoot').forEach((f,i)=>footDraw(i));
 }
-const ICONS={swipe:'👆',accept:'✅',bags:'🧳',orders:'🎧',rush:'⚡',allergy:'🥜',gesture:'🙏',change:'💵',pairs:'🔤',banq:'🍽️',mystery:'🕵️',detect:'🔎',cult:'🌍',conflict:'💬',guest:'🧐',rev:'📈',audit:'🧮'};
+const ICONS={swipe:'👆',accept:'✅',bags:'🧳',orders:'🎧',rush:'⚡',rooming:'🛏️',floor:'🪑',haccp:'🌡️',evac:'🚨',supply:'📦',allergy:'🥜',gesture:'🙏',change:'💵',pairs:'🔤',banq:'🍽️',mystery:'🕵️',detect:'🔎',cult:'🌍',conflict:'💬',guest:'🧐',rev:'📈',audit:'🧮'};
 function starsOf(r){if(!r||!r.m)return '';const p=r.s/r.m,n=p>=.9?3:p>=.7?2:p>=.4?1:0;return '★'.repeat(n)+'☆'.repeat(3-n)}
 function drawDoors(){
   $('#doors').innerHTML=MODS.map((m,i)=>{if(!on(m))return '';const r=S.res[m.id];
@@ -824,7 +833,7 @@ function tRender(){
   const cd=$('#tdetClose');if(cd)cd.onclick=()=>{tSel=null;tRender()};
 }
 
-const SKMAP={guest:'comm',conflict:'comm',reply:'comm',rev:'sales',sales:'sales',tour:'sales',rating:'sales',audit:'calc',menu:'calc',book:'calc',hk:'plan',sched:'plan',conf:'plan',ready:'plan',swipe:'std',accept:'calc',bags:'crisis',orders:'std',over:'crisis',crisis:'crisis',rush:'crisis',allergy:'std',gesture:'comm',change:'calc',pairs:'std',mystery:'std',banq:'calc',detect:'crisis',cult:'comm'};
+const SKMAP={guest:'comm',conflict:'comm',reply:'comm',rev:'sales',sales:'sales',tour:'sales',rating:'sales',audit:'calc',menu:'calc',book:'calc',hk:'plan',sched:'plan',conf:'plan',ready:'plan',swipe:'std',accept:'calc',bags:'crisis',orders:'std',over:'crisis',crisis:'crisis',rush:'crisis',rooming:'plan',floor:'plan',haccp:'std',evac:'crisis',supply:'calc',allergy:'std',gesture:'comm',change:'calc',pairs:'std',mystery:'std',banq:'calc',detect:'crisis',cult:'comm'};
 const TOPIC={
  guest:{ru:'Выявление потребностей: какие вопросы задать гостю, чтобы подобрать номер и услуги',kk:'Қажеттіліктерді анықтау: нөмір мен қызметті таңдау үшін қонаққа қандай сұрақ қою керек'},
  rev:{ru:'Ценообразование: как цена влияет на загрузку, учёт конкурентов и событий (RevPAR)',kk:'Баға белгілеу: бағаның толымдылыққа әсері, бәсекелестер мен іс-шараларды ескеру (RevPAR)'},
@@ -834,6 +843,11 @@ const TOPIC={
  hk:{ru:'График уборки: сроки заезда, «не беспокоить», нагрузка на горничных',kk:'Жинау кестесі: келу мерзімі, «мазаламаңыз», қызметкерлер жүктемесі'},
  crisis:{ru:'Кризис: порядок действий — безопасность, срок, информирование, компенсация',kk:'Дағдарыс: әрекет реті — қауіпсіздік, мерзім, хабарлау, өтемақы'},
  menu:{ru:'Меню-инжиниринг: маржа, популярность и фудкост блюда',kk:'Мәзір-инжиниринг: маржа, танымалдық және тағам фудкосты'}, 
+ rooming:{ru:'Расселение группы: учёт потребностей гостей и правил размещения',kk:'Топты орналастыру: қонақтардың қажеттіліктері мен орналастыру ережелерін ескеру'},
+ floor:{ru:'Рассадка в ресторане: пожелания гостей, доступность, шум и вместимость',kk:'Мейрамханада отырғызу: қонақ тілектері, қолжетімділік, шу және сыйымдылық'},
+ haccp:{ru:'Санитарные нормы кухни: температура, перекрёстное загрязнение, маркировка',kk:'Асүйдің санитарлық нормалары: температура, айқас ластану, таңбалау'},
+ evac:{ru:'Эвакуация при пожаре: порядок действий администратора',kk:'Өрттегі эвакуация: әкімшінің әрекет реті'},
+ supply:{ru:'Закупки: расчёт заказа с учётом годного запаса и упаковки',kk:'Сатып алу: жарамды қор мен қаптаманы ескере отырып тапсырыс есептеу'},
  allergy:{ru:'Аллергены и ограничения питания: читать состав блюда',kk:'Аллергендер мен тамақтану шектеулері: тағам құрамын оқу'},
  gesture:{ru:'Культурные табу и жесты в работе с гостями из разных стран',kk:'Әртүрлі елдерден келген қонақтармен жұмыстағы мәдени тыйымдар мен ым-ишаралар'},
  change:{ru:'Кассовые расчёты: быстрая и точная сдача',kk:'Касса есептері: жылдам әрі дәл қалдық'},
@@ -3007,6 +3021,260 @@ mount(root,api){
     <p><button class="btn" id="again">${x.again}</button></p></div>`;
   }
   api.persist(()=>({pick,done,res}),s=>{if(s.pick)s.pick.forEach((p,i)=>pick[i]&&Object.assign(pick[i],p));done=!!s.done;res=s.res||null});
+  api.onLang(draw);draw();
+}});
+
+/* ═════════ РАЗМЕЩЕНИЕ: рум-лист группы (272) и рассадка в ресторане (282) ═════════ */
+function assignGame(root,api,cfg){
+  const A={};let sel=null,done=false,res=null,msg='';
+  const L=()=>api.lang();
+  const T=()=>cfg.T[L()];
+  const itemOf=id=>cfg.items.find(i=>i.id===id);
+  const used=sid=>cfg.items.filter(i=>A[i.id]===sid).reduce((a,i)=>a+i.size,0);
+  function draw(){
+    const x=T(),lg=L();
+    const free=cfg.items.filter(i=>!A[i.id]);
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <div class="mini">${x.items}</div>
+    <div class="agrid">${free.map(i=>`<button class="tile ${sel===i.id?'sel':''}" data-i="${i.id}" ${done?'disabled':''}><b>${esc(i.n[lg])}</b><small>${esc(i.tag[lg])}</small></button>`).join('')||`<p class="det">${x.allSet}</p>`}</div>
+    ${msg?`<div class="note bad" style="margin-top:8px">${esc(msg)}</div>`:''}
+    <div class="mini" style="margin-top:12px">${x.slots}</div>
+    <div class="agrid">${cfg.slots.map(s=>{const occ=cfg.items.filter(i=>A[i.id]===s.id);
+      return `<div class="slot ${sel&&!done?'tgt':''}" data-s="${s.id}"><b>${esc(s.n[lg])}</b><small>${esc(s.info[lg])} · ${x.cap}: ${used(s.id)} / ${s.cap}</small>
+      <div class="chips">${occ.map(i=>`<button class="chip" data-r="${i.id}" ${done?'disabled':''}>${esc(i.n[lg])} ✕</button>`).join('')}</div></div>`}).join('')}</div>
+    ${done?resHtml():`<p style="margin-top:14px"><button class="btn" id="sub" ${free.length?'disabled':''}>${x.submit}</button></p>`}`;
+    root.querySelectorAll('button.tile').forEach(b=>b.onclick=()=>{if(done)return;sel=sel===b.dataset.i?null:b.dataset.i;msg='';draw()});
+    root.querySelectorAll('.slot').forEach(d=>d.onclick=e=>{
+      if(done||e.target.closest('[data-r]'))return;if(!sel)return;
+      const s=cfg.slots.find(z=>z.id===d.dataset.s),it=itemOf(sel);
+      if(cfg.exclusive&&used(s.id)>0){msg=x.busy;draw();return}
+      if(used(s.id)+it.size>s.cap){msg=x.full;draw();return}
+      A[sel]=s.id;sel=null;msg='';draw();
+    });
+    root.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{if(done)return;delete A[b.dataset.r];msg='';draw()});
+    const sb=$('#sub',root);if(sb)sb.onclick=submit;
+    const ag=$('#again',root);if(ag)ag.onclick=()=>{Object.keys(A).forEach(k=>delete A[k]);done=false;res=null;sel=null;draw()};
+  }
+  function submit(){
+    const rs=cfg.rules.map(r=>({r,ok:!!r.fn(A)}));
+    const n=rs.filter(z=>z.ok).length,sc=Math.round(10*n/rs.length);
+    res={sc,rs:rs.map(z=>z.ok)};done=true;draw();
+    api.finish(sc,{'Правил выполнено':n+' / '+rs.length,'Раскладка':cfg.items.map(i=>i.n.ru+'→'+(A[i.id]||'-')).join(', ')});
+  }
+  function resHtml(){
+    const x=T(),lg=L();
+    return `<div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}" style="margin-top:14px"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b>
+    <ul class="crit">${cfg.rules.map((r,i)=>`<li class="${res.rs[i]?'ok':'no'}"><span>${esc(r[lg])}</span><b>${res.rs[i]?'✓':'✗'}</b></li>`).join('')}</ul>
+    <p><button class="btn" id="again">${x.again}</button></p></div>`;
+  }
+  api.persist(()=>({A,done,res}),s=>{Object.keys(A).forEach(k=>delete A[k]);Object.assign(A,s.A||{});done=!!s.done;res=s.res||null});
+  api.onLang(draw);draw();
+}
+
+/* ── 272 · РУМ-ЛИСТ ГРУППЫ ── */
+MODS.push({id:'rooming',no:'272',min:9,max:10,title:{ru:'Рум-лист группы',kk:'Топтың рум-листі'},sub:{ru:'Кого куда поселить',kk:'Кімді қайда орналастыру'},
+mount(root,api){
+  const R=api.rng();
+  const nm=shufR(['Айдос','Мадина','Тимур','Алина','Нурлан','Камила','Данияр','Сауле'],R);
+  const [g1,g2,g3,g4,g5,g6,g7,g8]=nm;
+  const T={ru:{eb:'Номер 272 · служба размещения',h:'Рум-лист группы: 8 гостей, 6 номеров',
+    intro:'Группа приехала одним автобусом. Выберите гостя, затем номер, куда его поселить. По описанию гостей и номеров поймите, кого куда. Правила проверки откроются после сдачи.',
+    items:'Гости',slots:'Номера',cap:'занято',allSet:'Все гости размещены.',submit:'Сдать рум-лист',res:'Итог',again:'Расселить заново',full:'В этом номере не хватает мест.',busy:'Занято'},
+   kk:{eb:'272 нөмір · орналастыру қызметі',h:'Топтың рум-листі: 8 қонақ, 6 нөмір',
+    intro:'Топ бір автобуспен келді. Қонақты, содан кейін оны қай нөмірге орналастыру керегін таңдаңыз. Қонақтар мен нөмірлердің сипаттамасынан кімді қайда орналастыру керегін түсініңіз. Тексеру ережелері тапсырғаннан кейін ашылады.',
+    items:'Қонақтар',slots:'Нөмірлер',cap:'бос емес',allSet:'Барлық қонақ орналастырылды.',submit:'Рум-листті тапсыру',res:'Қорытынды',again:'Қайта орналастыру',full:'Бұл нөмірде орын жеткіліксіз.',busy:'Бос емес'}};
+  const items=[
+   {id:'a',n:{ru:g1,kk:g1},size:1,tag:{ru:'передвигается на инвалидной коляске',kk:'мүгедектер арбасымен жүреді'}},
+   {id:'b',n:{ru:g2,kk:g2},size:1,tag:{ru:'молодожёны, приехали вместе с гостем '+g3,kk:'жаңа үйленгендер, '+g3+' қонағымен бірге келген'}},
+   {id:'c',n:{ru:g3,kk:g3},size:1,tag:{ru:'молодожёны, приехали вместе с гостем '+g2,kk:'жаңа үйленгендер, '+g2+' қонағымен бірге келген'}},
+   {id:'d',n:{ru:g4,kk:g4},size:1,tag:{ru:'курит, просит номер, где можно курить',kk:'темекі шегеді, шылым шегуге болатын нөмір сұрайды'}},
+   {id:'e',n:{ru:g5,kk:g5},size:1,tag:{ru:'очень чутко спит, жалуется на шум',kk:'өте сергек ұйықтайды, шуға шағымданады'}},
+   {id:'f',n:{ru:g6,kk:g6},size:1,tag:{ru:'директор компании, ожидает лучший номер',kk:'компания директоры, ең жақсы нөмірді күтеді'}},
+   {id:'g',n:{ru:g7,kk:g7},size:1,tag:{ru:'коллега '+g8+', командировка, бюджет ограничен',kk:g8+' әріптесі, іссапар, бюджет шектеулі'}},
+   {id:'h',n:{ru:g8,kk:g8},size:1,tag:{ru:'коллега '+g7+', командировка, бюджет ограничен',kk:g7+' әріптесі, іссапар, бюджет шектеулі'}}];
+  const slots=[
+   {id:'r1',cap:2,n:{ru:'№ 101 · Twin',kk:'№ 101 · Twin'},info:{ru:'1-й этаж, без порога, широкая ванная, две кровати',kk:'1-қабат, табалдырықсыз, кең ванна, екі кереует'}},
+   {id:'r2',cap:2,n:{ru:'№ 214 · Twin',kk:'№ 214 · Twin'},info:{ru:'2-й этаж, у лифта, шумно, две кровати',kk:'2-қабат, лифт жанында, шулы, екі кереует'}},
+   {id:'r3',cap:1,n:{ru:'№ 305 · Single',kk:'№ 305 · Single'},info:{ru:'3-й этаж, курящий этаж, одна кровать',kk:'3-қабат, темекі шегетін қабат, бір кереует'}},
+   {id:'r4',cap:2,n:{ru:'№ 401 · Люкс',kk:'№ 401 · Люкс'},info:{ru:'4-й этаж, гостиная и спальня, лучший вид',kk:'4-қабат, қонақ бөлме және жатын бөлме, ең жақсы көрініс'}},
+   {id:'r5',cap:2,n:{ru:'№ 312 · Double',kk:'№ 312 · Double'},info:{ru:'3-й этаж, одна большая кровать, тихий',kk:'3-қабат, бір үлкен кереует, тыныш'}},
+   {id:'r6',cap:1,n:{ru:'№ 318 · Single',kk:'№ 318 · Single'},info:{ru:'3-й этаж, торец, тихий, одна кровать',kk:'3-қабат, шеткі, тыныш, бір кереует'}}];
+  const same=(A,x,y)=>A[x]&&A[x]===A[y];
+  const rules=[
+   {ru:'Гость на коляске живёт в № 101: первый этаж и доступная ванная.',kk:'Арбадағы қонақ № 101-де тұрады: бірінші қабат және қолжетімді ванна.',fn:A=>A.a==='r1'},
+   {ru:'Молодожёны поселены вместе в номер с одной большой кроватью (Double или Люкс).',kk:'Жаңа үйленгендер бір үлкен кереуетті нөмірге (Double немесе Люкс) бірге орналастырылған.',fn:A=>same(A,'b','c')&&(A.b==='r5'||A.b==='r4')},
+   {ru:'Курящий гость живёт в курящем номере № 305.',kk:'Темекі шегетін қонақ темекі шегетін № 305 нөмірінде тұрады.',fn:A=>A.d==='r3'},
+   {ru:'Чутко спящий гость не рядом с лифтом (не № 214).',kk:'Сергек ұйықтайтын қонақ лифт жанында емес (№ 214 емес).',fn:A=>A.e&&A.e!=='r2'},
+   {ru:'Директор живёт в люксе № 401.',kk:'Директор № 401 люксінде тұрады.',fn:A=>A.f==='r4'},
+   {ru:'Коллеги поселены вместе в Twin по бюджету (№ 101 или № 214).',kk:'Әріптестер бюджетке байланысты Twin-ге бірге орналастырылған (№ 101 немесе № 214).',fn:A=>same(A,'g','h')&&(A.g==='r1'||A.g==='r2')},
+   {ru:'Незнакомые гости не поселены вместе.',kk:'Бір-бірін танымайтын қонақтар бірге орналастырылмаған.',fn:A=>{const grp={b:1,c:1,g:2,h:2};const by={};Object.keys(A).forEach(k=>{(by[A[k]]=by[A[k]]||[]).push(k)});return Object.keys(by).every(s=>by[s].length<2||by[s].every(k=>grp[k]&&grp[k]===grp[by[s][0]]))}}];
+  assignGame(root,api,{T,items,slots,rules});
+}});
+
+/* ── 282 · РАССАДКА В РЕСТОРАНЕ ── */
+MODS.push({id:'floor',no:'282',min:8,max:10,title:{ru:'Рассадка в ресторане',kk:'Мейрамханада отырғызу'},sub:{ru:'Шесть броней, семь столов',kk:'Алты брондау, жеті үстел'},
+mount(root,api){
+  const T={ru:{eb:'Номер 282 · менеджер зала',h:'Вечерняя рассадка: 6 броней',
+    intro:'Вечером пришли шесть компаний. Посадите каждую за свой стол. Читайте пометки: что просят гости и где какие столы. За один стол сажаем только одну компанию. Правила проверки откроются после сдачи.',
+    items:'Брони',slots:'Столы',cap:'занято',allSet:'Все гости сидят.',submit:'Сдать рассадку',res:'Итог',again:'Пересадить',full:'За этим столом не хватает мест.',busy:'Стол уже занят'},
+   kk:{eb:'282 нөмір · зал менеджері',h:'Кешкі отырғызу: 6 брондау',
+    intro:'Кешке алты компания келді. Әрқайсысын өз үстеліне отырғызыңыз. Белгілерді оқыңыз: қонақтар не сұрайды және қай үстел қандай. Бір үстелге тек бір компания отырады. Тексеру ережелері тапсырғаннан кейін ашылады.',
+    items:'Брондаулар',slots:'Үстелдер',cap:'бос емес',allSet:'Барлық қонақ отырды.',submit:'Отырғызуды тапсыру',res:'Қорытынды',again:'Қайта отырғызу',full:'Бұл үстелде орын жеткіліксіз.',busy:'Үстел бос емес'}};
+  const items=[
+   {id:'p1',size:2,n:{ru:'Двое · годовщина',kk:'Екеу · мерейтой'},tag:{ru:'годовщина свадьбы, хотят романтики и тишины',kk:'үйлену тойының мерейтойы, романтика мен тыныштық қалайды'}},
+   {id:'p2',size:3,n:{ru:'Семья с коляской',kk:'Арбалы отбасы'},tag:{ru:'3 человека, детская коляска, малыш может плакать',kk:'3 адам, бала арбасы, нәресте жылауы мүмкін'}},
+   {id:'p3',size:8,n:{ru:'День рождения',kk:'Туған күн'},tag:{ru:'8 человек, будут тосты и поздравления',kk:'8 адам, тосттар мен құттықтаулар болады'}},
+   {id:'p4',size:2,n:{ru:'Двое · коляска',kk:'Екеу · арба'},tag:{ru:'2 человека, гостья на инвалидной коляске',kk:'2 адам, қонақ мүгедектер арбасымен'}},
+   {id:'p5',size:2,n:{ru:'Деловой ужин',kk:'Іскерлік кешкі ас'},tag:{ru:'2 человека, обсуждают договор, нужна тишина',kk:'2 адам, шартты талқылайды, тыныштық керек'}},
+   {id:'p6',size:4,n:{ru:'Шумная компания',kk:'Шулы компания'},tag:{ru:'4 друга, смеются, играет музыка',kk:'4 дос, күледі, музыка ойнап тұр'}}];
+  const slots=[
+   {id:'t1',cap:2,n:{ru:'Стол 1',kk:'1-үстел'},info:{ru:'2 места, у окна, тихо, свечи',kk:'2 орын, терезе жанында, тыныш, шам'}},
+   {id:'t2',cap:4,n:{ru:'Стол 2',kk:'2-үстел'},info:{ru:'4 места, у окна, место для коляски',kk:'4 орын, терезе жанында, арбаға орын бар'}},
+   {id:'t3',cap:4,n:{ru:'Стол 3',kk:'3-үстел'},info:{ru:'4 места, центр зала, рядом сцена',kk:'4 орын, зал ортасы, жанында сахна'}},
+   {id:'t4',cap:2,n:{ru:'Стол 4',kk:'4-үстел'},info:{ru:'2 места, дальний угол, тихо',kk:'2 орын, алыс бұрыш, тыныш'}},
+   {id:'t5',cap:8,n:{ru:'Стол 5',kk:'5-үстел'},info:{ru:'8 мест, длинный стол, отдельная зона',kk:'8 орын, ұзын үстел, бөлек аймақ'}},
+   {id:'t6',cap:4,n:{ru:'Стол 6',kk:'6-үстел'},info:{ru:'4 места, рядом с кухней, шумно',kk:'4 орын, асхана жанында, шулы'}},
+   {id:'t7',cap:4,n:{ru:'Стол 7',kk:'7-үстел'},info:{ru:'4 места, у входа, широкий проход без порога',kk:'4 орын, кіреберісте, табалдырықсыз кең өтпе'}}];
+  const rules=[
+   {ru:'Годовщина: тихий романтичный стол 1 или 4.',kk:'Мерейтой: тыныш романтикалық 1 немесе 4-үстел.',fn:A=>A.p1==='t1'||A.p1==='t4'},
+   {ru:'Семья с коляской: у окна, где есть место (стол 2). Не рядом с кухней и не в центре.',kk:'Арбалы отбасы: терезе жанында, орын бар үстел (2-үстел). Асхана жанында да, ортада да емес.',fn:A=>A.p2==='t2'},
+   {ru:'День рождения: длинный стол 5 в отдельной зоне.',kk:'Туған күн: бөлек аймақтағы ұзын 5-үстел.',fn:A=>A.p3==='t5'},
+   {ru:'Гостья на коляске: стол 7 у входа, широкий проход без порога.',kk:'Арбадағы қонақ: кіреберістегі 7-үстел, табалдырықсыз кең өтпе.',fn:A=>A.p4==='t7'},
+   {ru:'Деловой ужин: тихий стол 1 или 4, не мешать другой паре.',kk:'Іскерлік кешкі ас: тыныш 1 немесе 4-үстел, басқа жұпқа кедергі келтірмеу.',fn:A=>(A.p5==='t1'||A.p5==='t4')&&A.p5!==A.p1},
+   {ru:'Шумная компания: стол 3 или 6, подальше от тихих зон.',kk:'Шулы компания: тыныш аймақтардан алыс 3 немесе 6-үстел.',fn:A=>A.p6==='t3'||A.p6==='t6'}];
+  assignGame(root,api,{T,items:shufR(items,api.rng()),slots,rules,exclusive:true});
+}});
+
+/* ═════════ ОПЕРАЦИИ: кухня (292), эвакуация (302), закупка (312) ═════════ */
+
+/* ── 292 · КУХНЯ: ПРОВЕРКА ── */
+MODS.push({id:'haccp',no:'292',min:8,max:10,title:{ru:'Проверка кухни',kk:'Асүйді тексеру'},sub:{ru:'Найдите нарушения санитарии',kk:'Санитарлық бұзушылықтарды табыңыз'},
+mount(root,api){
+  const T={ru:{eb:'Номер 292 · санитарный контроль',h:'Проверка кухни перед открытием',
+    intro:'Вы проверяете кухню. Перед вами 12 наблюдений. Отметьте те, где нарушены санитарные нормы. Нормы: холод +2…+6 °C, заморозка −18 °C и ниже, горячее на раздаче от +63 °C, готовность курицы от +75 °C в центре.',
+    submit:'Сдать акт',res:'Акт проверки',hit:'Нарушений найдено',miss:'Пропущено',fp:'Ложных',again:'Проверить заново',ok:'Верно',no:'Нарушение',tip:'Подсказка: цифры сравнивайте с нормой, а пары «сырое и готовое» разделяйте.'},
+   kk:{eb:'292 нөмір · санитарлық бақылау',h:'Ашар алдында асүйді тексеру',
+    intro:'Сіз асүйді тексересіз. Алдыңызда 12 бақылау бар. Санитарлық нормалар бұзылғандарын белгілеңіз. Нормалар: суық +2…+6 °C, мұздату −18 °C және төмен, таратудағы ыстық +63 °C-тан, тауық орталығында дайындық +75 °C-тан.',
+    submit:'Актіні тапсыру',res:'Тексеру акті',hit:'Табылған бұзушылық',miss:'Өткізіп алған',fp:'Жалған',again:'Қайта тексеру',ok:'Дұрыс',no:'Бұзушылық',tip:'Кеңес: сандарды нормамен салыстырыңыз, «шикі және дайын» жұптарды бөліңіз.'}};
+  const D=[
+   {b:1,ru:'Холодильник с молочкой показывает +9 °C.',kk:'Сүт өнімдері тұрған тоңазытқыш +9 °C көрсетеді.',wr:'Норма +2…+6 °C: при +9 °C бактерии размножаются быстро.',wk:'Норма +2…+6 °C: +9 °C кезінде бактериялар тез көбейеді.'},
+   {b:1,ru:'Морозильник показывает −10 °C.',kk:'Мұздатқыш −10 °C көрсетеді.',wr:'Для заморозки нужно −18 °C и ниже.',wk:'Мұздату үшін −18 °C және төмен керек.'},
+   {b:1,ru:'Жареная курица: в центре +62 °C, подают гостям.',kk:'Қуырылған тауық: орталығында +62 °C, қонақтарға беріледі.',wr:'Курица готова от +75 °C в центре, ниже есть риск сальмонеллы.',wk:'Тауық орталығында +75 °C-тан дайын, төмен болса сальмонелла қаупі бар.'},
+   {b:1,ru:'Сырая рыба лежит на верхней полке над готовым салатом.',kk:'Шикі балық дайын салаттың үстіндегі жоғарғы сөреде жатыр.',wr:'Сырое хранят ниже готового: сок может капать на готовую еду.',wk:'Шикіні дайыннан төмен сақтайды: шырын дайын тамаққа тамуы мүмкін.'},
+   {b:1,ru:'Повар после сырого мяса сразу режет хлеб в тех же перчатках.',kk:'Аспаз шикі еттен кейін дәл сол қолғаппен нанды кесіп жатыр.',wr:'Перекрёстное загрязнение: перчатки и руки меняют и моют.',wk:'Айқас ластану: қолғап пен қолды ауыстырып, жуады.'},
+   {b:1,ru:'Салат без крышки стоит на раздаче при комнатной температуре уже 3 часа.',kk:'Қақпақсыз салат таратуда бөлме температурасында 3 сағаттан бері тұр.',wr:'Холодные блюда держат при холоде, не больше 2 часов вне него.',wk:'Суық тағамдар суықта сақталады, одан тыс 2 сағаттан артық емес.'},
+   {b:1,ru:'Банка с открытым соусом без даты вскрытия.',kk:'Ашылған тұздығы бар банкада ашылған күні жоқ.',wr:'Вскрытые продукты маркируют датой и сроком.',wk:'Ашылған өнімдерге күні мен мерзімі жазылады.'},
+   {b:1,ru:'Одна тряпка для стола раздачи и для пола.',kk:'Тарату үстелі мен еден үшін бір шүберек.',wr:'Тряпки разделяют по зонам: стол и пол нельзя вытирать одной.',wk:'Шүберектер аймақтарға бөлінеді: үстел мен едендi бір шүберекпен сүртуге болмайды.'},
+   {b:1,ru:'Суп на подогреве держится при +45 °C.',kk:'Қыздырылып тұрған сорпа +45 °C-та тұр.',wr:'Горячее держат от +63 °C, иначе растут бактерии.',wk:'Ыстықты +63 °C-тан сақтайды, әйтпесе бактериялар көбейеді.'},
+   {b:1,ru:'Повар с температурой и кашлем вышел на раздачу.',kk:'Қызуы мен жөтелі бар аспаз таратуға шықты.',wr:'Больного сотрудника отстраняют от работы с едой.',wk:'Науқас қызметкерді тамақпен жұмыстан шеттетеді.'},
+   {b:0,ru:'Холодильник показывает +4 °C, сырое мясо внизу в закрытом контейнере.',kk:'Тоңазытқыш +4 °C көрсетеді, шикі ет төменде жабық контейнерде.',wr:'Всё в норме: холод и правильное хранение.',wk:'Бәрі қалыпты: суық және дұрыс сақтау.'},
+   {b:0,ru:'Морозильник показывает −20 °C.',kk:'Мұздатқыш −20 °C көрсетеді.',wr:'Это ниже −18 °C — норма.',wk:'Бұл −18 °C-тан төмен — норма.'},
+   {b:0,ru:'Курица: в центре +78 °C.',kk:'Тауық: орталығында +78 °C.',wr:'Выше +75 °C — готово.',wk:'+75 °C-тан жоғары — дайын.'},
+   {b:0,ru:'Суп на подогреве держится при +70 °C.',kk:'Қыздырылып тұрған сорпа +70 °C-та тұр.',wr:'Выше +63 °C — норма.',wk:'+63 °C-тан жоғары — норма.'},
+   {b:0,ru:'После сырого мяса повар вымыл руки и надел чистые перчатки.',kk:'Шикі еттен кейін аспаз қолын жуып, таза қолғап киді.',wr:'Правильно: предотвращает перекрёстное загрязнение.',wk:'Дұрыс: айқас ластанудың алдын алады.'},
+   {b:0,ru:'Доски цветные: красная для сырого мяса, зелёная для овощей.',kk:'Тақтайлар түрлі-түсті: қызыл — шикі етке, жасыл — көкөніске.',wr:'Цветовая маркировка — стандарт.',wk:'Түспен таңбалау — стандарт.'},
+   {b:0,ru:'Готовое блюдо быстро охладили в ёмкости со льдом и убрали в холодильник с датой.',kk:'Дайын тағамды мұзды ыдыста тез салқындатып, күнін жазып тоңазытқышқа қойды.',wr:'Быстрое охлаждение и маркировка — правильно.',wk:'Жылдам салқындату және таңбалау — дұрыс.'},
+   {b:0,ru:'Банка соуса подписана датой вскрытия и сроком 3 дня, сегодня второй день.',kk:'Тұздық банкасында ашылған күні мен 3 күн мерзімі жазылған, бүгін екінші күн.',wr:'Срок не вышел, маркировка есть.',wk:'Мерзімі өтпеген, таңбасы бар.'},
+   {b:0,ru:'Сотрудника с насморком отстранили от раздачи и отправили к врачу.',kk:'Тұмауы бар қызметкерді таратудан шеттетіп, дәрігерге жіберді.',wr:'Отстранение больного — правильное решение.',wk:'Науқасты шеттету — дұрыс шешім.'}
+  ];
+  const R=api.rng();
+  let ev=[];
+  for(let tries=0;tries<300;tries++){const bad=shufR(D.filter(d=>d.b),R).slice(0,6),ok=shufR(D.filter(d=>!d.b),R).slice(0,6),nb=5+Math.floor(R()*3);ev=shufR(bad.slice(0,nb).concat(ok.slice(0,12-nb)),R);if(ev.length===12)break}
+  const marks=ev.map(()=>0);let done=false,res=null;
+  const L=()=>api.lang();
+  function draw(){
+    const x=T[L()],lg=L();
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <div class="agrid">${ev.map((e,i)=>{let cls=marks[i]?'sel':'';if(done)cls=e.b?(marks[i]?'good':'bad'):(marks[i]?'bad':'');
+      return `<button class="tile ${cls}" data-i="${i}" ${done?'disabled':''}><b>${marks[i]?'⚑ ':''}${esc(e[lg])}</b>${done?`<small>${esc(lg==='kk'?e.wk:e.wr)}</small>`:''}</button>`}).join('')}</div>
+    ${done?resHtml():`<p style="margin-top:14px"><button class="btn" id="sub">${x.submit}</button></p>`}`;
+    root.querySelectorAll('button.tile').forEach(b=>b.onclick=()=>{if(done)return;marks[+b.dataset.i]^=1;draw()});
+    const sb=$('#sub',root);if(sb)sb.onclick=submit;const ag=$('#again',root);if(ag)ag.onclick=()=>{marks.fill(0);done=false;res=null;draw()};
+  }
+  function submit(){
+    const B=ev.filter(e=>e.b).length,hit=ev.filter((e,i)=>e.b&&marks[i]).length,fp=ev.filter((e,i)=>!e.b&&marks[i]).length;
+    const sc=Math.max(0,Math.min(10,Math.round(10*(hit-0.7*fp)/B)));res={sc,B,hit,fp};done=true;draw();
+    api.finish(sc,{'Найдено':hit+' из '+B,'Ложных':fp});
+  }
+  function resHtml(){const x=T[L()],r=res;return `<div class="note ${r.sc>=8?'ok':r.sc>=5?'':'bad'}" style="margin-top:14px"><div class="mini">${x.res}</div><b class="verdict">${r.sc} / 10</b><p>${x.hit}: ${r.hit} / ${r.B} · ${x.miss}: ${r.B-r.hit} · ${x.fp}: ${r.fp}</p><p class="det">${x.tip}</p><p><button class="btn" id="again">${x.again}</button></p></div>`}
+  api.persist(()=>({marks,done,res}),s=>{(s.marks||[]).forEach((v,i)=>{marks[i]=v});done=!!s.done;res=s.res||null});
+  api.onLang(draw);draw();
+}});
+
+/* ── 302 · ЭВАКУАЦИЯ ── */
+MODS.push({id:'evac',no:'302',min:6,max:10,title:{ru:'Пожарная тревога',kk:'Өрт дабылы'},sub:{ru:'Порядок действий по шагам',kk:'Қадамдар бойынша әрекет реті'},
+mount(root,api){
+  const T={ru:{eb:'Номер 302 · безопасность гостей',h:'Пожарная тревога: что делаем по порядку',
+    intro:'Ночью на 5-м этаже сработал датчик дыма. Вы на ресепшн. Нажимайте действия в правильной очерёдности. Ошибка снижает результат, но шаг не засчитывается, пока вы не нажмёте верный.',
+    steps:['Включить пожарную тревогу и позвонить 101 или 112','Назвать диспетчеру адрес отеля и место возгорания','Включить оповещение и открыть эвакуационные выходы','Остановить лифты и вывести гостей по лестницам, обходя номера','Собрать людей на сборном пункте','Провести перекличку по списку проживающих и персонала','Передать пожарным данные о тех, кого не нашли'],
+    why:['Сначала сигнал и вызов помощи: каждая минута важна.','Диспетчеру нужны точные адрес и место.','Гости должны услышать сигнал и увидеть открытые выходы.','Лифты в пожар не используют, гостей ведут по лестнице.','Все выходят в безопасное место.','Нужно понять, кто не вышел.','Пожарные ищут именно этих людей.'],
+    step:'Шаг',res:'Итог',mist:'Ошибок',again:'Ещё раз',next:'Что дальше?'},
+   kk:{eb:'302 нөмір · қонақтардың қауіпсіздігі',h:'Өрт дабылы: не істейміз, ретімен',
+    intro:'Түнде 5-қабатта түтін датчигі іске қосылды. Сіз ресепшндесіз. Әрекеттерді дұрыс ретпен басыңыз. Қате нәтижені төмендетеді, бірақ дұрысын баспайынша қадам есептелмейді.',
+    steps:['Өрт дабылын қосып, 101 немесе 112-ге қоңырау шалу','Диспетчерге қонақ үйдің мекенжайы мен өрт орнын айту','Хабарлауды қосып, эвакуациялық шығуларды ашу','Лифттерді тоқтатып, қонақтарды нөмірлерді аралап, баспалдақпен шығару','Адамдарды жиналу орнына жинау','Тұрушылар мен қызметкерлердің тізімі бойынша санау','Табылмағандар туралы деректерді өрт сөндірушілерге беру'],
+    why:['Алдымен дабыл мен көмек шақыру: әр минут маңызды.','Диспетчерге нақты мекенжай мен орын керек.','Қонақтар дабылды естіп, ашық шығуларды көруі керек.','Өртте лифт қолданылмайды, қонақтар баспалдақпен шығады.','Бәрі қауіпсіз жерге шығады.','Кім шықпағанын түсіну керек.','Өрт сөндірушілер дәл осы адамдарды іздейді.'],
+    step:'Қадам',res:'Қорытынды',mist:'Қате',again:'Тағы бір рет',next:'Әрі қарай не?'}};
+  const R=api.rng();const order=shufR([0,1,2,3,4,5,6],R);
+  let cur=0,wrong=0,done=false,res=null,fb='';
+  const L=()=>api.lang();
+  function draw(){
+    const x=T[L()];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <div class="sticky-stat"><span>${x.step}: <span class="tok">${Math.min(cur+1,7)} / 7</span></span><span>${x.mist}: <span class="tok">${wrong}</span></span></div>
+    <ol class="ladder">${[0,1,2,3,4,5,6].map(i=>`<li class="${i<cur?'ok':''}"><span>${i<cur?esc(x.steps[i]):'—'}</span></li>`).join('')}</ol>
+    ${done?'':`<div class="mini">${x.next}</div><div class="chips">${order.filter(i=>i>=cur).map(i=>`<button class="chip" data-i="${i}">${esc(x.steps[i])}</button>`).join('')}</div>`}
+    ${fb?`<div class="note ${fb[0]}" style="margin-top:8px">${esc(fb[1])}</div>`:''}
+    ${done?resHtml():''}`;
+    root.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.i;
+      if(i===cur){fb=['ok',x.why[i]];cur++;if(cur===7){finish()}else draw()}
+      else{wrong++;fb=['bad',L()==='kk'?'Әзірге ерте':'Пока рано'];draw()}
+    });
+    const ag=$('#again',root);if(ag)ag.onclick=()=>{cur=0;wrong=0;done=false;res=null;fb='';draw()};
+  }
+  function finish(){const sc=Math.max(0,Math.round(10-wrong*1.2));res={sc};done=true;draw();api.finish(sc,{'Ошибок':wrong})}
+  function resHtml(){const x=T[L()];return `<div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}" style="margin-top:14px"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b><p>${x.mist}: ${wrong}</p><p><button class="btn" id="again">${x.again}</button></p></div>`}
+  api.persist(()=>({cur,wrong,done,res}),s=>{cur=s.cur||0;wrong=s.wrong||0;done=!!s.done;res=s.res||null});
+  api.onLang(draw);draw();
+}});
+
+/* ── 312 · ЗАКУПКА ── */
+MODS.push({id:'supply',no:'312',min:8,max:10,title:{ru:'Заказ поставщику',kk:'Жеткізушіге тапсырыс'},sub:{ru:'Сколько упаковок на выходные',kk:'Демалысқа неше қаптама'},
+mount(root,api){
+  const T={ru:{eb:'Номер 312 · кухня и склад',h:'Заказ поставщику на выходные',
+    intro:'Следующая поставка только в понедельник. На выходные известен запас блюд. По каждому продукту посчитайте, сколько упаковок заказать. Учитывайте только годный запас: то, что испортится до конца воскресенья, не считается.',
+    need:'Нужно на выходные',stock:'На складе',good:'годно до воскресенья',pack:'в упаковке',packs:'Упаковок',submit:'Сдать заказ',res:'Итог заказа',again:'Заново',
+    exact:'Точно',over:'Больше нужного (лишнее спишут)',short:'Не хватит',tip:'Формула: (нужно − годный запас) ÷ упаковка, округляем вверх.'},
+   kk:{eb:'312 нөмір · асхана және қойма',h:'Демалысқа жеткізушіге тапсырыс',
+    intro:'Келесі жеткізу тек дүйсенбіде. Демалысқа тағам қоры белгілі. Әр өнім бойынша неше қаптама тапсырыс беру керегін есептеңіз. Тек жарамды қорды ескеріңіз: жексенбі аяғына дейін бұзылатыны есептелмейді.',
+    need:'Демалысқа керек',stock:'Қоймада',good:'жексенбіге дейін жарамды',pack:'қаптамада',packs:'Қаптама',submit:'Тапсырысты тапсыру',res:'Тапсырыс қорытындысы',again:'Қайтадан',
+    exact:'Дәл',over:'Артық (артығы есептен шығарылады)',short:'Жетпейді',tip:'Формула: (керек − жарамды қор) ÷ қаптама, жоғары дөңгелектейміз.'}};
+  const PR=[
+   {n:{ru:'Куриное филе, кг',kk:'Тауық филесі, кг'},pack:5},{n:{ru:'Молоко, л',kk:'Сүт, л'},pack:6},{n:{ru:'Яйца, шт',kk:'Жұмыртқа, дана'},pack:30},
+   {n:{ru:'Помидоры, кг',kk:'Қызанақ, кг'},pack:6},{n:{ru:'Хлеб, шт',kk:'Нан, дана'},pack:10},{n:{ru:'Сливки, л',kk:'Кілегей, л'},pack:2}];
+  const R=api.rng();
+  const rows=PR.map(p=>{const need=p.pack*(2+Math.floor(R()*5))+Math.floor(R()*p.pack);const stock=Math.floor(R()*need*0.7);const good=Math.floor(stock*(R()<.5?1:.4));const ideal=Math.ceil(Math.max(0,need-good)/p.pack);return{...p,need,stock,good,ideal}});
+  const vals=rows.map(()=>0);let done=false,res=null;
+  const L=()=>api.lang();
+  function draw(){
+    const x=T[L()],lg=L();
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    ${rows.map((r,i)=>{const d=r.ideal;let cls='';if(done)cls=vals[i]===d?'good':vals[i]>d?'':'bad';
+      return `<div class="tile ${cls}" style="cursor:default;margin-top:8px"><b>${esc(r.n[lg])} · ${x.pack}: ${r.pack}</b>
+      <small>${x.need}: ${r.need} · ${x.stock}: ${r.stock}, ${x.good}: ${r.good}</small>
+      <div class="stepper"><button class="btn" data-m="${i}" ${done?'disabled':''}>−</button><b>${vals[i]}</b><button class="btn" data-p="${i}" ${done?'disabled':''}>+</button><span>${x.packs}</span>${done?`<span class="det">${vals[i]===d?x.exact:vals[i]>d?x.over:x.short}: ${d}</span>`:''}</div></div>`}).join('')}
+    ${done?resHtml():`<p style="margin-top:14px"><button class="btn" id="sub">${x.submit}</button></p>`}`;
+    root.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{vals[+b.dataset.m]=Math.max(0,vals[+b.dataset.m]-1);draw()});
+    root.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{vals[+b.dataset.p]=Math.min(20,vals[+b.dataset.p]+1);draw()});
+    const sb=$('#sub',root);if(sb)sb.onclick=submit;const ag=$('#again',root);if(ag)ag.onclick=()=>{vals.fill(0);done=false;res=null;draw()};
+  }
+  function submit(){
+    let p=0;rows.forEach((r,i)=>{if(vals[i]===r.ideal)p+=1;else if(vals[i]===r.ideal+1)p+=.5});
+    const sc=Math.round(10*p/rows.length);res={sc};done=true;draw();
+    api.finish(sc,{'Заказ':rows.map((r,i)=>r.n.ru+': '+vals[i]+' (нужно '+r.ideal+')').join('; ')});
+  }
+  function resHtml(){const x=T[L()];return `<div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}" style="margin-top:14px"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b><p class="det">${x.tip}</p><p><button class="btn" id="again">${x.again}</button></p></div>`}
+  api.persist(()=>({vals,done,res}),s=>{(s.vals||[]).forEach((v,i)=>{vals[i]=v});done=!!s.done;res=s.res||null});
   api.onLang(draw);draw();
 }});
 
