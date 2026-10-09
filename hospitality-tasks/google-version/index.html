@@ -367,6 +367,15 @@ details summary{cursor:pointer;font-weight:600}
 .cflag{font-size:2rem}
 .creact{margin-left:auto;font-size:2rem;animation:mIn .5s ease}
 .ccard .mini{margin-top:10px}
+.cashc{margin:12px 0;padding:16px;border-radius:16px;background:var(--blue-soft);font-size:1.15rem;display:grid;gap:4px}
+.cashopts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cashopts .btn{font-size:1.1rem;padding:16px 8px}
+.cashopts .btn.good{background:var(--ok);color:#fff}.cashopts .btn.bad{background:var(--bad);color:#fff}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.pc{min-height:84px;padding:6px;border-radius:14px;border:2px solid var(--line);background:var(--blue);color:var(--on-blue);font-size:.88rem;font-weight:600;cursor:pointer;transition:transform .25s,background .25s}
+.pc.open{background:var(--bg);color:inherit;transform:rotateY(0)}
+.pc.en.open{border-color:var(--blue)}
+.pc.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
 </style>
 </head>
 <body>
@@ -620,7 +629,7 @@ function appChrome(){
   drawDoors();
   $$('.pfoot').forEach((f,i)=>footDraw(i));
 }
-const ICONS={swipe:'👆',accept:'✅',bags:'🧳',orders:'🎧',rush:'⚡',banq:'🍽️',mystery:'🕵️',detect:'🔎',cult:'🌍',conflict:'💬',guest:'🧐',rev:'📈',audit:'🧮'};
+const ICONS={swipe:'👆',accept:'✅',bags:'🧳',orders:'🎧',rush:'⚡',allergy:'🥜',gesture:'🙏',change:'💵',pairs:'🔤',banq:'🍽️',mystery:'🕵️',detect:'🔎',cult:'🌍',conflict:'💬',guest:'🧐',rev:'📈',audit:'🧮'};
 function starsOf(r){if(!r||!r.m)return '';const p=r.s/r.m,n=p>=.9?3:p>=.7?2:p>=.4?1:0;return '★'.repeat(n)+'☆'.repeat(3-n)}
 function drawDoors(){
   $('#doors').innerHTML=MODS.map((m,i)=>{if(!on(m))return '';const r=S.res[m.id];
@@ -815,7 +824,7 @@ function tRender(){
   const cd=$('#tdetClose');if(cd)cd.onclick=()=>{tSel=null;tRender()};
 }
 
-const SKMAP={guest:'comm',conflict:'comm',reply:'comm',rev:'sales',sales:'sales',tour:'sales',rating:'sales',audit:'calc',menu:'calc',book:'calc',hk:'plan',sched:'plan',conf:'plan',ready:'plan',swipe:'std',accept:'calc',bags:'crisis',orders:'std',over:'crisis',crisis:'crisis',rush:'crisis',mystery:'std',banq:'calc',detect:'crisis',cult:'comm'};
+const SKMAP={guest:'comm',conflict:'comm',reply:'comm',rev:'sales',sales:'sales',tour:'sales',rating:'sales',audit:'calc',menu:'calc',book:'calc',hk:'plan',sched:'plan',conf:'plan',ready:'plan',swipe:'std',accept:'calc',bags:'crisis',orders:'std',over:'crisis',crisis:'crisis',rush:'crisis',allergy:'std',gesture:'comm',change:'calc',pairs:'std',mystery:'std',banq:'calc',detect:'crisis',cult:'comm'};
 const TOPIC={
  guest:{ru:'Выявление потребностей: какие вопросы задать гостю, чтобы подобрать номер и услуги',kk:'Қажеттіліктерді анықтау: нөмір мен қызметті таңдау үшін қонаққа қандай сұрақ қою керек'},
  rev:{ru:'Ценообразование: как цена влияет на загрузку, учёт конкурентов и событий (RevPAR)',kk:'Баға белгілеу: бағаның толымдылыққа әсері, бәсекелестер мен іс-шараларды ескеру (RevPAR)'},
@@ -825,6 +834,10 @@ const TOPIC={
  hk:{ru:'График уборки: сроки заезда, «не беспокоить», нагрузка на горничных',kk:'Жинау кестесі: келу мерзімі, «мазаламаңыз», қызметкерлер жүктемесі'},
  crisis:{ru:'Кризис: порядок действий — безопасность, срок, информирование, компенсация',kk:'Дағдарыс: әрекет реті — қауіпсіздік, мерзім, хабарлау, өтемақы'},
  menu:{ru:'Меню-инжиниринг: маржа, популярность и фудкост блюда',kk:'Мәзір-инжиниринг: маржа, танымалдық және тағам фудкосты'}, 
+ allergy:{ru:'Аллергены и ограничения питания: читать состав блюда',kk:'Аллергендер мен тамақтану шектеулері: тағам құрамын оқу'},
+ gesture:{ru:'Культурные табу и жесты в работе с гостями из разных стран',kk:'Әртүрлі елдерден келген қонақтармен жұмыстағы мәдени тыйымдар мен ым-ишаралар'},
+ change:{ru:'Кассовые расчёты: быстрая и точная сдача',kk:'Касса есептері: жылдам әрі дәл қалдық'},
+ pairs:{ru:'Профессиональная лексика: английские термины отеля',kk:'Кәсіби лексика: қонақ үйдің ағылшын терминдері'},
  mystery:{ru:'Стандарты обслуживания на всех этапах визита: что нарушение, а что норма',kk:'Визиттің барлық кезеңіндегі қызмет стандарттары: нені бұзушылық, нені норма деп санайды'},
  banq:{ru:'Банкет: аллергены и религиозные ограничения, фудкост и маржа',kk:'Банкет: аллергендер мен діни шектеулер, тағам өзіндік құны және маржа'},
  detect:{ru:'Расследование инцидента: факты до выводов, процедура выдачи ключей, ценности в номере',kk:'Оқиғаны тергеу: қорытындыдан бұрын фактілер, кілт беру рәсімі, нөмірдегі құндылықтар'},
@@ -893,6 +906,56 @@ function boot(){
   if(S.name&&STORE.get('sauyt_active')==='1')resumeStudent();
   initCaps();
 }
+
+/* ═════════ МОБИЛЬНЫЕ ИГРЫ: свайп, багаж, заказ на слух ═════════ */
+function swipeDeck(root,api,cfg){
+  const R=api.rng();
+  const cards=cfg.build(R);
+  const N=cards.length,PER=cfg.per||10;
+  let i=0,correct=0,streak=0,best=0,log=[],done=false,res=null,started=false,tmr=null,t0=0,locked=false;
+  const t=k=>cfg.T[api.lang()][k];
+  function draw(){
+    clearInterval(tmr);
+    const lg=api.lang(),x=cfg.T[lg];
+    if(done){
+      root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b><p>${x.right}: ${correct} / ${N} · ${x.streak}: ${best}</p></div>
+      ${log.filter(l=>!l.ok).length?`<div class="mini" style="margin-top:14px">${x.mist}</div><ul class="crit">${log.filter(l=>!l.ok).map(l=>`<li class="no"><span>${esc(cards[l.i].tx[lg])}<br><span class="det">${l.to?x.timeout+'. ':''}${esc(cards[l.i].why[lg])}</span></span><b>${cards[l.i].ans?x.yes:x.no}</b></li>`).join('')}</ul>`:''}`;
+      return;
+    }
+    if(!started){
+      root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p><p style="margin-top:14px"><button class="btn sun" id="go">${x.start}</button></p>`;
+      $('#go',root).onclick=()=>{started=true;draw()};return;
+    }
+    const c=cards[i];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2>
+    <div class="dots">${cards.map((_,k)=>`<i class="${k<i?'d':k===i?'c':''}" style="width:${Math.max(6,Math.floor(260/N))}px"></i>`).join('')}</div>
+    <div class="sticky-stat"><span>${x.right}: <span class="tok">${correct}</span></span><span>${x.streak}: <span class="tok">${streak}</span>${streak>=3?' 🔥':''}</span></div>
+    <div class="timebar"><i id="tb" style="width:100%"></i></div>
+    ${c.rule?`<p class="det" style="margin-bottom:8px">${esc(c.rule[lg])}</p>`:''}
+    <div class="swarea"><div class="swlab l" id="ll">← ${x.no}</div><div class="swlab r" id="rl">${x.yes} →</div><div class="swc" id="swc">${esc(c.tx[lg])}</div></div>
+    <div class="swbtn"><button class="btn bad" id="bn">✕ ${x.no}</button><button class="btn good" id="by">✓ ${x.yes}</button></div><div class="swfb" id="fb"></div>`;
+    t0=performance.now();locked=false;
+    tmr=setInterval(()=>{const r=1-(performance.now()-t0)/(PER*1000);const tb=$('#tb',root);if(tb)tb.style.width=Math.max(0,r*100)+'%';if(r<=0)decide(null,true)},100);
+    const el=$('#swc',root);let sx=0,dx=0,drag=false;
+    el.onpointerdown=e=>{drag=true;sx=e.clientX;el.setPointerCapture(e.pointerId);el.style.transition='none'};
+    el.onpointermove=e=>{if(!drag)return;dx=e.clientX-sx;el.style.transform=`translateX(${dx}px) rotate(${dx/18}deg)`;$('#ll',root).style.opacity=Math.min(1,Math.max(0,-dx/90));$('#rl',root).style.opacity=Math.min(1,Math.max(0,dx/90))};
+    el.onpointerup=e=>{if(!drag)return;drag=false;el.style.transition='transform .25s';if(dx>90)decide(true);else if(dx<-90)decide(false);else{el.style.transform='';$('#ll',root).style.opacity=0;$('#rl',root).style.opacity=0}dx=0};
+    $('#bn',root).onclick=()=>decide(false);$('#by',root).onclick=()=>decide(true);
+  }
+  function decide(v,to){
+    if(locked)return;locked=true;clearInterval(tmr);
+    const lg=api.lang(),x=cfg.T[lg],c=cards[i],ok=!to&&v===c.ans;
+    const el=$('#swc',root),fb=$('#fb',root);
+    if(el){el.style.transition='transform .35s,opacity .35s';el.style.transform=`translateX(${v===false?-420:v===true?420:0}px) rotate(${v===false?-25:25}deg)`;el.style.opacity='0'}
+    if(ok){correct++;streak++;best=Math.max(best,streak)}else streak=0;
+    log.push({i,ok,to:!!to});
+    fb.className='swfb show '+(ok?'ok':'bad');fb.textContent=(ok?'✓ ':'✗ ')+(ok?'':(to?x.timeout+'. ':'')+c.why[lg]);
+    setTimeout(()=>{i++;if(i>=N){done=true;const sc=Math.max(0,Math.round(10*correct/N));res={sc};draw();api.finish(sc,{'Верных':correct+' / '+N,'Серия':best,'Ошибки':log.filter(l=>!l.ok).map(l=>cards[l.i].tx.ru.slice(0,60)).join(' | ')})}else draw()},ok?650:1700);
+  }
+  api.persist(()=>({i,correct,streak,best,log,done,res,started:started&&!done?false:started}),s=>{i=s.i||0;correct=s.correct||0;streak=s.streak||0;best=s.best||0;log=s.log||[];done=!!s.done;res=s.res||null;started=!!s.started});
+  api.onLang(draw);draw();
+}
+
 
 /* ═════════ 101 · СКРЫТЫЕ ПОТРЕБНОСТИ ═════════ */
 MODS.push({id:'guest',no:'101',min:8,max:10,
@@ -1831,6 +1894,97 @@ mount(root,api){
   api.onLang(()=>{if(st==='idle'||st==='end')draw()});
   api.persist(()=>({st:st==='end'?'end':'idle',marks,res}),s=>{if(s.st==='end'&&s.res){st='end';marks=s.marks||[];res=s.res}});
   draw();
+}});
+
+/* ═════════ 333 · ЧАС ПИК ═════════ */
+MODS.push({id:'rush',no:'333',min:4,max:10,
+title:{ru:'Час пик',kk:'Қарбалас сәт'},sub:{ru:'Очередь у стойки',kk:'Ресепшндегі кезек'},
+mount(root,api){
+  const DUR=60;
+  const T={ru:{
+   eb:'Номер 333 · стойка ресепшн',h:'Час пик: 60 секунд у стойки',
+   intro:'Утренний наплыв гостей. У вас две стойки. Нажмите на гостя, чтобы начать обслуживание: у каждого свой запрос, своё терпение и своя ценность. Гость, который ждал слишком долго, уйдёт. Успеть всех нельзя: решайте, кого брать первым.',
+   desk:'Стойка',free:'свободна',serving:'обслуживание',start:'Начать час пик',again:'Сыграть ещё раз',
+   t:{q:'Вопрос',out:'Выезд',inn:'Заселение',cmp:'Жалоба',vip:'VIP-заселение'},
+   res:'Итог',served:'Обслужено',lost:'Ушли недовольными',value:'Набрано очков ценности',
+   tip:'Совет: сначала берите тех, у кого терпение скоро кончится и кто обслуживается быстро.',
+   gname:['Айбек','Лена','Тимур','Дана','Олег','Марат','Сауле','Игорь','Зарина','Антон','Алия','Рустам','Нина','Бауыржан','Камила','Эдуард']
+  },kk:{
+   eb:'333 нөмір · ресепшн үстелі',h:'Қарбалас сәт: үстел басындағы 60 секунд',
+   intro:'Таңертеңгі қонақтар легі. Сізде екі үстел бар. Қызмет көрсетуді бастау үшін қонақты басыңыз: әрқайсысының өз сұрауы, шыдамы және құндылығы бар. Тым ұзақ күткен қонақ кетіп қалады. Бәріне үлгеру мүмкін емес: кімнен бастау керегін өзіңіз шешіңіз.',
+   desk:'Үстел',free:'бос',serving:'қызмет көрсету',start:'Қарбаласты бастау',again:'Тағы ойнау',
+   t:{q:'Сұрақ',out:'Шығу',inn:'Орналасу',cmp:'Шағым',vip:'VIP орналасу'},
+   res:'Қорытынды',served:'Қызмет көрсетілді',lost:'Наразы болып кетті',value:'Жиналған құндылық ұпайы',
+   tip:'Кеңес: шыдамы тез таусылатын және тез қызмет көрсетілетін қонақтардан бастаңыз.',
+   gname:['Айбек','Лена','Тимур','Дана','Олег','Марат','Сауле','Игорь','Зарина','Антон','Алия','Рустам','Нина','Бауыржан','Камила','Эдуард']
+  }};
+  const TY={q:{svc:3,pat:9,val:1,col:'#2e9bd6'},out:{svc:4,pat:11,val:2,col:'#6b5bd6'},inn:{svc:7,pat:15,val:3,col:'#2347ff'},cmp:{svc:9,pat:14,val:4,col:'#d6402e'},vip:{svc:6,pat:9,val:5,col:'#d6a42e'}};
+  const R=api.rng();
+  const plan=[];let tt=1;const types=['q','out','inn','inn','cmp','q','out','vip','inn','q','cmp','out','inn','q','vip','inn'];
+  const names=shufR(T.ru.gname,R);
+  for(let i=0;i<26;i++){plan.push({id:i,at:tt,type:types[Math.floor(R()*types.length)],name:names[i%names.length]});tt+=1.2+R()*1.4}
+  let st='idle',timer=null,t0=0,G=[],desks=[null,null],score=0,lostVal=0,served=0,lost=0,total=0,res=null;
+  const t=k=>T[api.lang()][k];
+  function start(){
+    st='run';G=plan.map(p=>({...p,pat:TY[p.type].pat,max:TY[p.type].pat,state:'wait',spawned:false}));desks=[null,null];score=0;lostVal=0;served=0;lost=0;total=plan.reduce((a,p)=>a+TY[p.type].val,0);t0=performance.now();last=t0;
+    buildRun();timer=setInterval(step,100);
+  }
+  let last=0;
+  function el(id){return $('#g'+id,root)}
+  function gHtml(g){const x=T[api.lang()],y=TY[g.type];return `<b>${esc(g.name)}</b><small style="color:${y.col};font-weight:700">${x.t[g.type]} · ★${y.val}</small><small>⏱ ${y.svc} c</small><div class="pbar"><i></i></div>`}
+  function buildRun(){
+    const x=T[api.lang()];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2>
+    <div class="timebar"><i id="tb"></i></div>
+    <div class="desks">${[0,1].map(i=>`<div class="desk" id="dk${i}"><small>${x.desk} ${i+1}</small><b>${x.free}</b><div class="pbar"><i></i></div></div>`).join('')}</div>
+    <div class="queue" id="q"></div>`;
+  }
+  function step(){
+    const now=performance.now(),dt=(now-last)/1000;last=now;const el0=(now-t0)/1000;
+    const q=$('#q',root);if(!q)return;
+    $('#tb',root).style.width=Math.max(0,(1-el0/DUR)*100)+'%';
+    G.forEach(g=>{
+      if(!g.spawned&&el0>=g.at&&g.state==='wait'){g.spawned=true;const b=document.createElement('button');b.className='gq'+(g.type==='vip'?' vip':'');b.id='g'+g.id;b.innerHTML=gHtml(g);b.onclick=()=>take(g);q.appendChild(b)}
+      if(g.spawned&&g.state==='wait'){g.pat-=dt;const e=el(g.id);if(e){const r=Math.max(0,g.pat/g.max);const bar=$('.pbar i',e);bar.style.width=r*100+'%';bar.style.background=r>.5?'var(--ok)':r>.25?'var(--sun)':'var(--bad)'}
+        if(g.pat<=0){g.state='lost';lost++;lostVal+=TY[g.type].val;const e2=el(g.id);if(e2){e2.classList.add('lost');setTimeout(()=>e2.remove(),600)}}}
+    });
+    desks.forEach((d,i)=>{if(!d)return;d.left-=dt;const dk=$('#dk'+i,root);$('.pbar i',dk).style.width=(1-d.left/d.svc)*100+'%';
+      if(d.left<=0){const g=d.g;g.state='done';served++;score+=TY[g.type].val;const e=el(g.id);if(e)e.remove();desks[i]=null;dk.classList.remove('busy');$('b',dk).textContent=t('free');$('.pbar i',dk).style.width='0'}});
+    if(el0>=DUR||(G.every(g=>g.spawned&&g.state!=='wait'&&g.state!=='serving')&&!desks.some(Boolean)))end();
+  }
+  function take(g){
+    if(g.state!=='wait')return;const i=desks.findIndex(d=>!d);if(i<0)return;
+    g.state='serving';desks[i]={g,left:TY[g.type].svc,svc:TY[g.type].svc};
+    const e=el(g.id);if(e)e.classList.add('out');setTimeout(()=>e&&e.remove(),500);
+    const dk=$('#dk'+i,root);dk.classList.add('busy');$('b',dk).textContent=g.name+' · '+t('t')[g.type];
+  }
+  function end(){
+    clearInterval(timer);st='end';
+    const missed=G.filter(g=>g.state==='wait'||g.state==='serving'||!g.spawned).length;
+    const spawnedVal=G.filter(g=>g.spawned).reduce((a,g)=>a+TY[g.type].val,0);
+    const raw=(score-0.5*lostVal)/Math.max(1,spawnedVal*0.85);
+    const sc=Math.max(0,Math.min(10,Math.round(10*raw)));
+    res={sc,served,lost,score,lostVal};
+    drawEnd();
+    api.finish(sc,{'Обслужено':served,'Ушли':lost,'Очки':score+' (потеряно '+lostVal+')'});
+  }
+  function drawEnd(){
+    const x=T[api.lang()];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2>
+    <div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b>
+    <p>${x.served}: ${res.served} · ${x.lost}: ${res.lost} · ${x.value}: ${res.score}</p><p class="det">${x.tip}</p></div>
+    <p style="margin-top:14px"><button class="btn" id="go">${x.again}</button></p>`;
+    $('#go',root).onclick=start;
+  }
+  function drawIdle(){
+    const x=T[api.lang()];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+    <div class="row2">${Object.keys(TY).map(k=>`<div class="tile"><b style="color:${TY[k].col}">${x.t[k]}</b><small>⏱ ${TY[k].svc} c · ★${TY[k].val}</small></div>`).join('')}</div>
+    <p style="margin-top:16px"><button class="btn sun" id="go">${x.start}</button></p>`;
+    $('#go',root).onclick=start;
+  }
+  api.onLang(()=>{if(st==='idle')drawIdle();else if(st==='end')drawEnd()});
+  drawIdle();
 }});
 
 /* ═════════ 242 · БАНКЕТ БЕЗ СЮРПРИЗОВ ═════════ */
@@ -2853,6 +3007,158 @@ mount(root,api){
     <p><button class="btn" id="again">${x.again}</button></p></div>`;
   }
   api.persist(()=>({pick,done,res}),s=>{if(s.pick)s.pick.forEach((p,i)=>pick[i]&&Object.assign(pick[i],p));done=!!s.done;res=s.res||null});
+  api.onLang(draw);draw();
+}});
+
+/* ── 161 · СВАЙП: стандарты сервиса ── */
+(function(){
+const P=[
+ [true,'Гость жалуется на шум. Вы выслушали, извинились и предложили решение.','Гость шу туралы шағымданады. Сіз тыңдап, кешірім сұрап, шешім ұсындыңыз.','Это стандарт: эмпатия плюс решение.','Бұл стандарт: жанашырлық және шешім.'],
+ [false,'Администратор ответил на звонок с набитым ртом и не представился.','Әкімші қоңырауға аузы толы күйде жауап беріп, өзін таныстырмады.','Нужно назвать отель и своё имя, говорить чётко.','Қонақ үйдің атын және өз атыңызды айтып, анық сөйлеу керек.'],
+ [true,'Горничная постучала, подождала ответа и громко сказала «Housekeeping».','Бөлме қызметкері қағып, жауап күтіп, дауыстап «Housekeeping» деді.','Стандарт входа в занятый номер.','Бос емес нөмірге кіру стандарты.'],
+ [false,'Официант принёс блюдо гостю с аллергией, не уточнив состав.','Даяшы аллергиясы бар қонаққа құрамын нақтыламай тағам әкелді.','Аллергены всегда уточняют: это здоровье гостя.','Аллергендерді әрдайым нақтылайды: бұл қонақтың денсаулығы.'],
+ [true,'Вы обратились к гостю по фамилии и поблагодарили за ожидание.','Сіз қонаққа тегі бойынша жүгініп, күткені үшін алғыс айттыңыз.','Личное обращение и благодарность — стандарт.','Жеке жүгіну және алғыс — стандарт.'],
+ [false,'Вы сказали гостю: «Это не наша проблема».','Сіз қонаққа «Бұл біздің мәселе емес» дедіңіз.','Гость остаётся без помощи. Нужно предложить решение.','Қонақ көмексіз қалады. Шешім ұсыну керек.'],
+ [false,'Номер сдан с чужим волосом в ванной: «гость не заметит».','Нөмір ваннада бөтен шашпен тапсырылды: «қонақ байқамайды».','Чистота — базовый стандарт. Заметят.','Тазалық — негізгі стандарт. Байқайды.'],
+ [true,'Вы предупредили, что номер задерживается, и предложили кофе в лаунже.','Сіз нөмірдің кешігетінін ескертіп, лаунжда кофе ұсындыңыз.','Честно предупредили и компенсировали ожидание.','Адал ескертіп, күтуді өтедіңіз.'],
+ [false,'Вы громко назвали номер комнаты гостя на весь холл.','Сіз қонақтың бөлме нөмірін бүкіл холлға естіртіп айттыңыз.','Номер комнаты — приватные данные. Показывают на карточке.','Бөлме нөмірі — жеке деректер. Карточкада көрсетіледі.'],
+ [true,'Вы тихо назвали номер комнаты и показали его на карточке.','Сіз бөлме нөмірін ақырын айтып, карточкада көрсеттіңіз.','Безопасность гостя на первом месте.','Қонақ қауіпсіздігі бірінші орында.'],
+ [false,'Вы обсуждаете гостя с коллегой в его присутствии.','Сіз қонақты оның көзінше әріптесіңізбен талқылайсыз.','Это неуважение. Обсуждения — вне поля зрения гостя.','Бұл құрметсіздік. Талқылау қонақтың көзінен тыс жүргізіледі.'],
+ [true,'Вы записали пожелание гостя о подушке в его карточку.','Сіз қонақтың жастық туралы тілегін оның карточкасына жаздыңыз.','Запоминаем предпочтения гостей: так растёт лояльность.','Қонақ қалауларын есте сақтаймыз: адалдық осылай артады.'],
+ [false,'Вы пообещали гостю скидку за счёт отеля без согласования и взяли чаевые.','Сіз келісусіз қонаққа қонақ үй есебінен жеңілдік уәде етіп, шайлық алдыңыз.','Скидки согласуются с менеджером. Это нарушение полномочий.','Жеңілдіктер менеджермен келісіледі. Бұл өкілеттікті бұзу.'],
+ [true,'Вы проверили документы гостя и вернули их без лишних вопросов.','Сіз қонақтың құжаттарын тексеріп, артық сұрақсыз қайтардыңыз.','Проверка по регламенту без давления на гостя.','Қонаққа қысымсыз, регламент бойынша тексеру.'],
+ [true,'Вы улыбнулись и поприветствовали гостя в течение 10 секунд.','Сіз күлімсіреп, қонақпен 10 секунд ішінде сәлемдестіңіз.','Быстрое приветствие — часть стандарта.','Жылдам сәлемдесу — стандарттың бөлігі.'],
+ [false,'Вы приняли оплату наличными и не выдали чек.','Сіз төлемді қолма-қол қабылдап, чек бермедіңіз.','Чек обязателен: учёт и права гостя.','Чек міндетті: есеп және қонақ құқығы.'],
+ [false,'Горничная оставила тележку в коридоре, перекрыв проход.','Бөлме қызметкері арбасын дәлізде қалдырып, жолды жапты.','Проход и эвакуационные пути должны быть свободны.','Өтетін жол мен эвакуациялық жолдар бос болуы керек.'],
+ [true,'Повар проверил сроки годности и убрал просроченные продукты.','Аспаз жарамдылық мерзімін тексеріп, мерзімі өткен өнімдерді алып тастады.','Безопасность питания.','Тамақ қауіпсіздігі.'],
+ [false,'Вы назвали номер гостя незнакомцу, который представился другом.','Сіз өзін дос деп таныстырған бейтаныс адамға қонақтың нөмірін айттыңыз.','Данные гостей никому не раскрываем. Предложите оставить сообщение.','Қонақ деректерін ешкімге айтпаймыз. Хабарлама қалдыруды ұсыныңыз.'],
+ [true,'Гостю стало плохо: вы вызвали врача и сообщили менеджеру.','Қонаққа жағдайы нашарлады: сіз дәрігер шақырып, менеджерге хабарладыңыз.','Здоровье важнее всего, затем эскалация.','Денсаулық бәрінен маңызды, содан кейін эскалация.']
+];
+const T={ru:{eb:'Номер 161 · стандарты сервиса',h:'Свайп: можно или нельзя',intro:'Появляется ситуация из работы отеля. Смахните карточку вправо, если так делать МОЖНО (соответствует стандарту), и влево, если НЕЛЬЗЯ. На каждую карточку 10 секунд. Ошибки разберём в конце.',start:'Начать',yes:'Можно',no:'Нельзя',right:'Верно',streak:'Серия',res:'Итог',mist:'Разбор ошибок',timeout:'Время вышло'},
+ kk:{eb:'161 нөмір · қызмет көрсету стандарттары',h:'Свайп: болады немесе болмайды',intro:'Қонақ үй жұмысынан жағдай шығады. Олай істеуге БОЛАДЫ (стандартқа сай) болса, карточканы оңға, БОЛМАЙДЫ болса, солға сырғытыңыз. Әр карточкаға 10 секунд. Қателер соңында талданады.',start:'Бастау',yes:'Болады',no:'Болмайды',right:'Дұрыс',streak:'Қатар',res:'Қорытынды',mist:'Қателер талдауы',timeout:'Уақыт бітті'}};
+MODS.push({id:'swipe',no:'161',min:4,max:10,title:{ru:'Свайп-стандарты',kk:'Свайп-стандарттар'},sub:{ru:'Можно или нельзя',kk:'Болады немесе жоқ'},
+ mount(root,api){swipeDeck(root,api,{T,per:10,build:R=>shufR(P,R).slice(0,12).map(p=>({ans:p[0],tx:{ru:p[1],kk:p[2]},why:{ru:p[3],kk:p[4]}}))})}});
+})();
+
+/* ── 171 · СВАЙП: принять или отказать ── */
+(function(){
+const T={ru:{eb:'Номер 171 · служба бронирования',h:'Принять или отказать',intro:'Заявки приходят одна за другой. Правила под каждой карточкой. Смахните вправо, если заявку можно принять, и влево, если нет. На карточку 10 секунд.',start:'Начать',yes:'Принять',no:'Отказать',right:'Верно',streak:'Серия',res:'Итог',mist:'Разбор ошибок',timeout:'Время вышло'},
+ kk:{eb:'171 нөмір · брондау қызметі',h:'Қабылдау немесе бас тарту',intro:'Өтінімдер бірінен соң бірі келеді. Ережелер әр карточканың астында. Өтінімді қабылдауға болса, оңға, болмаса, солға сырғытыңыз. Әр карточкаға 10 секунд.',start:'Бастау',yes:'Қабылдау',no:'Бас тарту',right:'Дұрыс',streak:'Қатар',res:'Қорытынды',mist:'Қателер талдауы',timeout:'Уақыт бітті'}};
+const RULE={ru:'Правила: хватит ли свободных номеров на КАЖДУЮ ночь; в Стандарт — не больше 2 гостей (дети до 6 лет не считаются).',kk:'Ережелер: ӘР түнге бос нөмір жете ме; Стандартқа — 2 қонақтан көп емес (6 жасқа дейінгі балалар есептелмейді).'};
+MODS.push({id:'accept',no:'171',min:4,max:10,title:{ru:'Принять или отказать',kk:'Қабылдау немесе бас тарту'},sub:{ru:'Быстрые решения по брони',kk:'Брондау бойынша жылдам шешімдер'},
+ mount(root,api){swipeDeck(root,api,{T,per:10,build:R=>{
+  const out=[];
+  for(let k=0;k<12;k++){
+    if(R()<.55){
+      const n=1+Math.floor(R()*3),nights=2+Math.floor(R()*2);const free=Array.from({length:nights},()=>Math.floor(R()*4));
+      const ans=free.every(v=>v>=n),f=free.join(' / ');
+      out.push({ans,rule:RULE,tx:{ru:`Запрос: ${n} номер(а) на ${nights} ночи. Свободно по ночам: ${f}.`,kk:`Өтінім: ${nights} түнге ${n} нөмір. Түндер бойынша бос: ${f}.`},why:{ru:ans?'Свободных номеров хватает на каждую ночь.':`Есть ночь, где свободно меньше ${n}: заявку принять нельзя.`,kk:ans?'Әр түнге бос нөмір жеткілікті.':`Бос нөмір ${n}-ден аз түн бар: өтінімді қабылдауға болмайды.`}});
+    }else{
+      const a=1+Math.floor(R()*2),kid=[2,4,5,7,9][Math.floor(R()*5)],counted=a+(kid>=6?1:0),ans=counted<=2;
+      out.push({ans,rule:RULE,tx:{ru:`Стандарт: ${a} взр. и ребёнок ${kid} лет.`,kk:`Стандарт: ${a} ер. және ${kid} жастағы бала.`},why:{ru:ans?`Считаем ${counted}: помещаются.`:`Считаем ${counted} гостя(ей): больше 2, нужен другой номер.`,kk:ans?`${counted} қонақ есептеледі: сыяды.`:`${counted} қонақ есептеледі: 2-ден көп, басқа нөмір керек.`}});
+    }
+  }
+  return out}})}});
+})();
+
+/* ── 181 · БАГАЖ В ЛИФТ ── */
+MODS.push({id:'bags',no:'181',min:4,max:10,title:{ru:'Багаж в лифт',kk:'Жүкті лифтке'},sub:{ru:'Играй на скорость',kk:'Жылдамдыққа ойна'},
+mount(root,api){
+  const T={ru:{eb:'Номер 181 · служба приёма и размещения',h:'Багаж в лифт',intro:'Чемоданы падают сверху. На бирке номер комнаты. Нажмите нужный этаж, пока чемодан не упал. Первая цифра — этаж. Метка VIP везёт чемодан в отдельный лифт. У вас 3 жизни и 45 секунд.',start:'Играть',floor:'эт.',vip:'VIP',res:'Итог',hit:'Доставлено',miss:'Ошибки',again:'Ещё раз',lives:'Жизни'},
+   kk:{eb:'181 нөмір · қабылдау және орналастыру қызметі',h:'Жүкті лифтке',intro:'Чемодандар жоғарыдан түседі. Биркада бөлме нөмірі тұр. Чемодан құламай тұрып, қажет қабатты басыңыз. Бірінші сан — қабат. VIP белгісі чемоданды бөлек лифтке жібереді. Сізде 3 өмір және 45 секунд бар.',start:'Ойнау',floor:'қаб.',vip:'VIP',res:'Қорытынды',hit:'Жеткізілді',miss:'Қателер',again:'Тағы',lives:'Өмір'}};
+  const DUR=45,H=300;
+  let st='idle',items=[],hit=0,miss=0,lives=3,t0=0,last=0,spawnT=0,raf=0,seq=0,res=null;
+  const R=api.rng();
+  const t=k=>T[api.lang()][k];
+  function lane(it){return it.vip?3:it.room<200?0:it.room<300?1:2}
+  function start(){st='run';items=[];hit=0;miss=0;lives=3;seq=0;t0=performance.now();last=t0;spawnT=0;buildRun();raf=requestAnimationFrame(loop)}
+  function buildRun(){
+    const x=T[api.lang()];
+    root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2>
+    <div class="sticky-stat"><span>${x.hit}: <span class="tok" id="bh">0</span></span><span>${x.lives}: <span class="tok" id="bl">❤❤❤</span></span></div>
+    <div class="timebar"><i id="tb" style="width:100%"></i></div>
+    <div class="bagarea" id="ba" style="height:${H}px"></div>
+    <div class="baglanes">${[1,2,3].map(n=>`<button class="btn" data-l="${n-1}">${n} ${x.floor}</button>`).join('')}<button class="btn sun" data-l="3">${x.vip}</button></div>`;
+    $$('[data-l]',root).forEach(b=>b.onpointerdown=e=>{e.preventDefault();tap(+b.dataset.l)});
+  }
+  function spawn(){
+    const vip=R()<.18,floor=1+Math.floor(R()*3),room=floor*100+Math.floor(R()*30)+1;
+    const it={id:++seq,room,vip,y:-40,x:10+Math.floor(R()*70),el:null};
+    const el=document.createElement('div');el.className='bag'+(vip?' vip':'');el.innerHTML=`<span>🧳</span><b>${vip?'VIP ':''}${room}</b>`;el.style.left=it.x+'%';$('#ba',root).appendChild(el);it.el=el;items.push(it);
+  }
+  function loop(now){
+    if(st!=='run')return;
+    const dt=(now-last)/1000;last=now;const el0=(now-t0)/1000;
+    const speed=70+el0*2.6;
+    spawnT-=dt;if(spawnT<=0){spawn();spawnT=Math.max(.7,1.8-el0*.02)}
+    items.forEach(it=>{it.y+=speed*dt;it.el.style.transform=`translateY(${it.y}px)`});
+    const tb=$('#tb',root);if(tb)tb.style.width=Math.max(0,(1-el0/DUR)*100)+'%';
+    const low=items.filter(it=>it.y>=H-44);
+    low.forEach(it=>{lose(it,true)});
+    if(el0>=DUR||lives<=0)return end();
+    raf=requestAnimationFrame(loop);
+  }
+  function lose(it,fell){
+    items=items.filter(z=>z!==it);miss++;lives--;it.el.classList.add('boom');setTimeout(()=>it.el.remove(),350);
+    const bl=$('#bl',root);if(bl)bl.textContent='❤'.repeat(Math.max(0,lives))+'🖤'.repeat(3-Math.max(0,lives));
+  }
+  function tap(l){
+    if(st!=='run')return;
+    const it=[...items].sort((a,b)=>b.y-a.y)[0];if(!it)return;
+    if(lane(it)===l){items=items.filter(z=>z!==it);hit++;it.el.classList.add('ok');it.el.style.transition='transform .3s,opacity .3s';it.el.style.transform+=' translateX(60px) scale(.4)';it.el.style.opacity='0';setTimeout(()=>it.el.remove(),320);const bh=$('#bh',root);if(bh)bh.textContent=hit}
+    else{lose(it,false)}
+  }
+  function end(){
+    st='end';cancelAnimationFrame(raf);
+    const sc=Math.max(0,Math.min(10,Math.round(10*hit/(hit+miss+2)*Math.min(1,(hit/16)+.35))));
+    const s2=Math.min(10,Math.round(hit/2.4)-Math.floor(miss/2));res={sc:Math.max(0,s2)};drawEnd();
+    api.finish(res.sc,{'Доставлено':hit,'Ошибки':miss});
+  }
+  function drawEnd(){const x=T[api.lang()];root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b><p>${x.hit}: ${hit} · ${x.miss}: ${miss}</p></div><p style="margin-top:12px"><button class="btn" id="go">${x.again}</button></p>`;$('#go',root).onclick=start}
+  function drawIdle(){const x=T[api.lang()];root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p><p><button class="btn sun" id="go">${x.start}</button></p>`;$('#go',root).onclick=start}
+  api.onLang(()=>{if(st==='idle')drawIdle();else if(st==='end')drawEnd()});drawIdle();
+}});
+
+/* ── 191 · ЗАКАЗ НА СЛУХ ── */
+MODS.push({id:'orders',no:'191',min:5,max:10,title:{ru:'Заказ на слух',kk:'Тапсырыс құлақпен'},sub:{ru:'Запомни и собери',kk:'Есте сақта да жина'},
+mount(root,api){
+  const T={ru:{eb:'Номер 191 · ресторан',h:'Заказ на слух',intro:'Гость диктует заказ, текст появляется и исчезает. Запомните и соберите заказ из карточек: блюдо, особенность и количество в каждой строке. Три раунда, каждый длиннее и быстрее предыдущего. Повторный показ стоит балла.',start:'Начать',round:'Раунд',of:'из',again:'Показать ещё раз (−1 балл)',check:'Сдать заказ',next:'Дальше',res:'Итог',guest:'Гость говорит',pick:'—',dish:'Блюдо',mod:'Особенность',qty:'Кол-во',ok:'верно',total:'Верно полей',
+   dishes:['Стейк','Салат','Суп','Паста','Рыба','Плов'],mods:['без изменений','средней прожарки','без лука','без орехов, аллергия','без глютена','острое'],
+   say:(l)=>l.map(o=>`${o.q} ${['стейк','салат','суп','пасту','рыбу','плов'][o.d]}${[' ',' средней прожарки',' без лука',' без орехов, у меня аллергия',' без глютена',' поострее'][o.m]}`).join('; ')+'.'},
+   kk:{eb:'191 нөмір · мейрамхана',h:'Тапсырыс құлақпен',intro:'Қонақ тапсырысты айтады, мәтін пайда болып, жоғалады. Есте сақтап, тапсырысты карточкалардан жинаңыз: әр жолда тағам, ерекшелік және саны. Үш раунд, әрқайсысы алдыңғысынан ұзағырақ және жылдамырақ. Қайта көрсету бір ұпайға тұрады.',start:'Бастау',round:'Раунд',of:'/',again:'Тағы көрсету (−1 ұпай)',check:'Тапсырысты тапсыру',next:'Әрі қарай',res:'Қорытынды',guest:'Қонақ айтады',pick:'—',dish:'Тағам',mod:'Ерекшелік',qty:'Саны',ok:'дұрыс',total:'Дұрыс өріс',
+   dishes:['Стейк','Салат','Көже','Паста','Балық','Палау'],mods:['өзгеріссіз','орташа қуырылған','пиязсыз','жаңғақсыз, аллергия','глютенсіз','ащылау'],
+   say:(l)=>l.map(o=>`${o.q} ${['стейк','салат','көже','паста','балық','палау'][o.d]}${[' ',' орташа қуырылған',' пиязсыз',' жаңғақсыз, менде аллергия бар',' глютенсіз',' ащылау'][o.m]}`).join('; ')+'.'}};
+  const R=api.rng();
+  const rounds=[2,3,4].map(n=>{const ds=shufR([0,1,2,3,4,5],R).slice(0,n);return ds.map(d=>({d,m:Math.floor(R()*6),q:1+Math.floor(R()*3)}))});
+  const SHOW=[9000,8000,7000];
+  let r=0,phase='intro',ans=[],replays=0,tot=0,fields=0,done=false,res=null,tm=null;
+  const t=k=>T[api.lang()][k];
+  function blank(n){return Array.from({length:n},()=>({d:'',m:'',q:''}))}
+  function startRound(){phase='show';ans=blank(rounds[r].length);draw();clearTimeout(tm);tm=setTimeout(()=>{phase='form';draw()},SHOW[r])}
+  function draw(){
+    const lg=api.lang(),x=T[lg];
+    if(phase==='intro'){root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p><p><button class="btn sun" id="go">${x.start}</button></p>`;$('#go',root).onclick=startRound;return}
+    if(done){root.innerHTML=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><div class="note ${res.sc>=8?'ok':res.sc>=5?'':'bad'}"><div class="mini">${x.res}</div><b class="verdict">${res.sc} / 10</b><p>${x.total}: ${tot} / ${fields}</p></div>`;return}
+    const head=`<div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><div class="dots">${rounds.map((_,k)=>`<i class="${k<r?'d':k===r?'c':''}" style="width:60px"></i>`).join('')}</div><div class="mini">${x.round} ${r+1} ${x.of} 3</div>`;
+    if(phase==='show'){
+      const txt=x.say(rounds[r]);
+      root.innerHTML=head+`<div class="timebar"><i id="tb" style="width:100%;transition:width ${SHOW[r]}ms linear"></i></div><div class="msg gu" style="max-width:100%"><b>${x.guest}:</b> <span id="ty"></span></div>`;
+      requestAnimationFrame(()=>{const tb=$('#tb',root);if(tb)tb.style.width='0%'});
+      const ty=$('#ty',root);let k=0;const ti=setInterval(()=>{if(!ty||!ty.isConnected){clearInterval(ti);return}k+=2;ty.textContent=txt.slice(0,k);if(k>=txt.length)clearInterval(ti)},30);
+      return;
+    }
+    root.innerHTML=head+rounds[r].map((o,i)=>`<div class="day" style="margin-top:10px"><div class="row2"><div><div class="mini">${x.dish}</div><select data-f="${i}|d"><option value="">${x.pick}</option>${x.dishes.map((s,k)=>`<option value="${k}" ${String(ans[i].d)===String(k)?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div><div class="mini">${x.mod}</div><select data-f="${i}|m"><option value="">${x.pick}</option>${x.mods.map((s,k)=>`<option value="${k}" ${String(ans[i].m)===String(k)?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div><div class="mini">${x.qty}</div><select data-f="${i}|q"><option value="">${x.pick}</option>${[1,2,3].map(k=>`<option value="${k}" ${String(ans[i].q)===String(k)?'selected':''}>${k}</option>`).join('')}</select></div></div></div>`).join('')+
+      `<p style="margin-top:14px"><button class="btn" id="ck">${r<2?x.next:x.check}</button> <button class="btn ghost sm" id="rp">${x.again}</button></p>`;
+    $$('[data-f]',root).forEach(s=>s.onchange=()=>{const[i,f]=s.dataset.f.split('|');ans[+i][f]=s.value});
+    $('#rp',root).onclick=()=>{replays++;phase='show';draw();clearTimeout(tm);tm=setTimeout(()=>{phase='form';draw()},SHOW[r])};
+    $('#ck',root).onclick=()=>{
+      rounds[r].forEach((o,i)=>{fields+=3;if(String(ans[i].d)===String(o.d))tot++;if(String(ans[i].m)===String(o.m))tot++;if(String(ans[i].q)===String(o.q))tot++});
+      if(r<2){r++;startRound()}else{done=true;const sc=Math.max(0,Math.round(10*tot/fields)-replays);res={sc};draw();api.finish(sc,{'Верных полей':tot+' / '+fields,'Повторов':replays})}
+    };
+  }
+  api.persist(()=>({r,phase:phase==='show'?'form':phase,ans,replays,tot,fields,done,res}),s=>{r=s.r||0;phase=s.phase||'intro';ans=s.ans||[];replays=s.replays||0;tot=s.tot||0;fields=s.fields||0;done=!!s.done;res=s.res||null;if(phase==='form'&&!ans.length)ans=blank(rounds[r].length)});
   api.onLang(draw);draw();
 }});
 
