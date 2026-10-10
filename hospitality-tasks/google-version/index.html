@@ -638,7 +638,7 @@ function appChrome(){
   drawDoors();
   $$('.pfoot').forEach((f,i)=>footDraw(i));
 }
-const ICONS={swipe:'👆',accept:'✅',bags:'🧳',orders:'🎧',rush:'⚡',rooming:'🛏️',floor:'🪑',haccp:'🌡️',evac:'🚨',supply:'📦',allergy:'🥜',gesture:'🙏',change:'💵',pairs:'🔤',banq:'🍽️',mystery:'🕵️',detect:'🔎',cult:'🌍',conflict:'💬',guest:'🧐',rev:'📈',audit:'🧮'};
+const ICONS={swipe:'👆',accept:'✅',bags:'🧳',orders:'🎧',rush:'⚡',lift:'🛗',clean:'🧹',tray:'🍽️',mood:'🎭',rooming:'🛏️',floor:'🪑',haccp:'🌡️',evac:'🚨',supply:'📦',allergy:'🥜',gesture:'🙏',change:'💵',pairs:'🔤',banq:'🍽️',mystery:'🕵️',detect:'🔎',cult:'🌍',conflict:'💬',guest:'🧐',rev:'📈',audit:'🧮'};
 function starsOf(r){if(!r||!r.m)return '';const p=r.s/r.m,n=p>=.9?3:p>=.7?2:p>=.4?1:0;return '★'.repeat(n)+'☆'.repeat(3-n)}
 function drawDoors(){
   $('#doors').innerHTML=MODS.map((m,i)=>{if(!on(m))return '';const r=S.res[m.id];
@@ -833,7 +833,7 @@ function tRender(){
   const cd=$('#tdetClose');if(cd)cd.onclick=()=>{tSel=null;tRender()};
 }
 
-const SKMAP={guest:'comm',conflict:'comm',reply:'comm',rev:'sales',sales:'sales',tour:'sales',rating:'sales',audit:'calc',menu:'calc',book:'calc',hk:'plan',sched:'plan',conf:'plan',ready:'plan',swipe:'std',accept:'calc',bags:'crisis',orders:'std',over:'crisis',crisis:'crisis',rush:'crisis',rooming:'plan',floor:'plan',haccp:'std',evac:'crisis',supply:'calc',allergy:'std',gesture:'comm',change:'calc',pairs:'std',mystery:'std',banq:'calc',detect:'crisis',cult:'comm'};
+const SKMAP={guest:'comm',conflict:'comm',reply:'comm',rev:'sales',sales:'sales',tour:'sales',rating:'sales',audit:'calc',menu:'calc',book:'calc',hk:'plan',sched:'plan',conf:'plan',ready:'plan',swipe:'std',accept:'calc',bags:'crisis',orders:'std',over:'crisis',crisis:'crisis',rush:'crisis',rooming:'plan',floor:'plan',haccp:'std',evac:'crisis',supply:'calc',allergy:'std',gesture:'comm',change:'calc',pairs:'std',lift:'plan',clean:'std',tray:'crisis',mood:'comm',mystery:'std',banq:'calc',detect:'crisis',cult:'comm'};
 const TOPIC={
  guest:{ru:'Выявление потребностей: какие вопросы задать гостю, чтобы подобрать номер и услуги',kk:'Қажеттіліктерді анықтау: нөмір мен қызметті таңдау үшін қонаққа қандай сұрақ қою керек'},
  rev:{ru:'Ценообразование: как цена влияет на загрузку, учёт конкурентов и событий (RevPAR)',kk:'Баға белгілеу: бағаның толымдылыққа әсері, бәсекелестер мен іс-шараларды ескеру (RevPAR)'},
@@ -848,6 +848,10 @@ const TOPIC={
  haccp:{ru:'Санитарные нормы кухни: температура, перекрёстное загрязнение, маркировка',kk:'Асүйдің санитарлық нормалары: температура, айқас ластану, таңбалау'},
  evac:{ru:'Эвакуация при пожаре: порядок действий администратора',kk:'Өрттегі эвакуация: әкімшінің әрекет реті'},
  supply:{ru:'Закупки: расчёт заказа с учётом годного запаса и упаковки',kk:'Сатып алу: жарамды қор мен қаптаманы ескере отырып тапсырыс есептеу'},
+ lift:{ru:'Диспетчеризация лифтов: приоритеты VIP и маломобильных гостей, служебный лифт',kk:'Лифтілерді диспетчерлеу: VIP және қозғалысы шектеулі қонақтардың басымдығы, қызметтік лифт'},
+ clean:{ru:'Стандарты уборки: порядок, вещи гостя, «Не беспокоить»',kk:'Жинау стандарттары: рет, қонақ заттары, «Мазаламаңыз»'},
+ tray:{ru:'Подача и аллергены: читать заказ, доставка на нужный стол',kk:'Тағам беру және аллергендер: тапсырысты оқу, дұрыс үстелге жеткізу'},
+ mood:{ru:'Эмоциональный интеллект: реакция на настроение и язык тела гостя',kk:'Эмоциялық интеллект: қонақтың көңіл-күйі мен дене тіліне жауап'},
  allergy:{ru:'Аллергены и ограничения питания: читать состав блюда',kk:'Аллергендер мен тамақтану шектеулері: тағам құрамын оқу'},
  gesture:{ru:'Культурные табу и жесты в работе с гостями из разных стран',kk:'Әртүрлі елдерден келген қонақтармен жұмыстағы мәдени тыйымдар мен ым-ишаралар'},
  change:{ru:'Кассовые расчёты: быстрая и точная сдача',kk:'Касса есептері: жылдам әрі дәл қалдық'},
