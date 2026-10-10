@@ -639,7 +639,7 @@ function appChrome(){
   drawDoors();
   $$('.pfoot').forEach((f,i)=>footDraw(i));
 }
-const ICONS={swipe:'👆',accept:'✅',bags:'🧳',orders:'🎧',rush:'⚡',lift:'🛗',clean:'🧹',tray:'🍽️',mood:'🎭',rooming:'🛏️',floor:'🪑',haccp:'🌡️',evac:'🚨',supply:'📦',allergy:'🥜',gesture:'🙏',change:'💵',pairs:'🔤',banq:'🍽️',mystery:'🕵️',detect:'🔎',cult:'🌍',conflict:'💬',guest:'🧐',rev:'📈',audit:'🧮'};
+const ICONS={swipe:'👆',accept:'✅',bags:'🧳',orders:'🎧',rush:'⚡',breath:'🌬️',tea:'🍵',ornament:'🪭',bubbles:'🫧',lift:'🛗',clean:'🧹',tray:'🍽️',mood:'🎭',rooming:'🛏️',floor:'🪑',haccp:'🌡️',evac:'🚨',supply:'📦',allergy:'🥜',gesture:'🙏',change:'💵',pairs:'🔤',banq:'🍽️',mystery:'🕵️',detect:'🔎',cult:'🌍',conflict:'💬',guest:'🧐',rev:'📈',audit:'🧮'};
 function starsOf(r){if(!r||!r.m)return '';const p=r.s/r.m,n=p>=.9?3:p>=.7?2:p>=.4?1:0;return '★'.repeat(n)+'☆'.repeat(3-n)}
 function drawDoors(){
   $('#doors').innerHTML=MODS.map((m,i)=>{if(!on(m))return '';const r=S.res[m.id];
@@ -3083,6 +3083,195 @@ mount(root,api){
   }
   api.persist(()=>({st:st==='end'?'end':'idle',moves,res,matched,cards}),s=>{if(s.st==='end'&&s.res){st='end';moves=s.moves||0;res=s.res;matched=s.matched||{};if(s.cards)cards=s.cards}});
   api.onLang(draw);draw();
+}});
+
+/* ═════════ РАЗГРУЗКА: дыхание, чай, орнамент, пузырьки (баллов нет) ═════════ */
+(function(){
+if(!document.getElementById('css-relax')){const s=document.createElement('style');s.id='css-relax';s.textContent=`
+.g-rx .rxbox{position:relative;border-radius:22px;border:2px solid var(--line);background:radial-gradient(circle at 50% 30%,#2b1d78 0%,#150d38 70%);overflow:hidden}
+.g-rx .rxrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.g-rx .rxdone{margin-top:14px}
+.g-rx .rxsoft{color:var(--muted);font-size:.92rem}
+.g-br .orb{position:relative;width:240px;height:240px;margin:20px auto;display:grid;place-items:center}
+.g-br .orb i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#8ff3d0,#4b7bff 60%,#2d1a9a);box-shadow:0 0 60px #4b7bff88,0 0 120px #3dffb044;transform:scale(.45);transition:transform 4s ease-in-out}
+.g-br .orb i.in{transform:scale(1);transition-duration:4s}.g-br .orb i.hold{transform:scale(1);transition-duration:.2s}.g-br .orb i.out{transform:scale(.45);transition-duration:6s}
+.g-br .orb b{position:relative;font-size:1.3rem;color:#fff;text-shadow:0 2px 12px #0008;text-align:center;padding:0 20px}
+.g-br .cyc{display:flex;gap:8px;justify-content:center}.g-br .cyc u{width:14px;height:14px;border-radius:50%;background:#2f2370;text-decoration:none}.g-br .cyc u.d{background:var(--ok)}
+.g-tea svg{display:block;width:100%;height:auto;max-height:44vh;margin:0 auto;touch-action:none;user-select:none}
+.g-tea .pour{width:100%;font-size:1.2rem;padding:18px;margin-top:10px;touch-action:none;user-select:none}
+.g-or svg{display:block;width:100%;max-width:420px;margin:0 auto;touch-action:manipulation}
+.g-or .sh{cursor:pointer;stroke:#7c5cff;stroke-width:1.2;fill:#1a1148;transition:fill .25s}
+.g-or .sh:active{stroke:#c6ff3d}
+.g-or .pal{display:flex;gap:10px;justify-content:center;margin:10px 0;flex-wrap:wrap}.g-or .pal button{width:42px;height:42px;border-radius:50%;border:3px solid transparent;cursor:pointer}.g-or .pal button.on{border-color:#fff;transform:scale(1.15)}
+.g-bb .sky{height:420px;position:relative;touch-action:none;user-select:none}
+.g-bb .bub{position:absolute;bottom:-90px;border-radius:50%;cursor:pointer;background:radial-gradient(circle at 30% 28%,#fffc,#fff3 18%,var(--c) 70%);box-shadow:inset 0 0 18px #fff6,0 0 22px var(--c);animation:bbRise linear forwards}
+@keyframes bbRise{to{transform:translate(var(--dx),-540px)}}
+.g-bb .bub.pop{animation:bbPop .28s ease-out forwards;pointer-events:none}
+@keyframes bbPop{to{transform:scale(1.5);opacity:0}}
+.g-bb .dot{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none}
+.g-bb .cnt{position:absolute;top:10px;right:14px;font-family:var(--f-display);font-size:1.8rem;color:var(--sun);z-index:2}
+@media (prefers-reduced-motion:reduce){.g-br .orb i{transition-duration:.5s!important}}
+`;document.head.appendChild(s)}
+})();
+const rxActive=root=>{const p=root.closest('.panel');return !document.hidden&&(!p||p.classList.contains('on'))};
+
+/* ── 411 · ДЫХАНИЕ ── */
+MODS.push({id:'breath',no:'411',min:2,max:0,title:{ru:'Дыхание',kk:'Тыныс алу'},sub:{ru:'Минутка спокойствия',kk:'Тыныштық минуты'},
+mount(root,api){
+  const T={ru:{eb:'Номер 411 · разгрузка',h:'Дыхание: 4 вдох, 4 пауза, 6 выдох',intro:'Перед сложным гостем или после жаркой смены помогает медленный выдох. Следите за шаром: он растёт на вдохе и уменьшается на выдохе. Баллов нет.',start:'Начать',in:'Вдох',hold:'Пауза',out:'Выдох',done:'Готово. Плечи опущены, дыхание ровное.',cyc:'Циклов',stop:'Завершить',again:'Ещё раз',ready:'Приготовьтесь'},
+   kk:{eb:'411 нөмір · демалыс',h:'Тыныс алу: 4 дем алу, 4 кідіріс, 6 дем шығару',intro:'Қиын қонақтың алдында немесе қызу ауысымнан кейін баяу дем шығару көмектеседі. Шарды бақылаңыз: ол дем алғанда үлкейіп, дем шығарғанда кішірейеді. Ұпай жоқ.',start:'Бастау',in:'Дем алу',hold:'Кідіріс',out:'Дем шығару',done:'Дайын. Иық босады, тыныс тегіс.',cyc:'Айналым',stop:'Аяқтау',again:'Тағы бір рет',ready:'Дайындалыңыз'}};
+  const N=5;let st='idle',cyc=0,tm=null,res=false;
+  const L=()=>api.lang();
+  function draw(){
+    const x=T[L()];
+    if(st==='idle'||st==='end'){
+      root.innerHTML=`<div class="g-rx g-br"><div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>
+      <div class="rxbox"><div class="orb"><i></i><b>${st==='end'?x.done:''}</b></div><div class="cyc">${Array.from({length:N},(_,i)=>`<u class="${st==='end'?'d':''}"></u>`).join('')}</div><div style="height:16px"></div></div>
+      <p class="rxdone"><button class="btn sun" id="go">${st==='end'?x.again:x.start}</button></p></div>`;
+      $('#go',root).onclick=run;return;
+    }
+    root.innerHTML=`<div class="g-rx g-br"><div class="eyebrow">${x.eb}</div><h2>${x.h}</h2>
+    <div class="rxbox"><div class="orb"><i id="orb"></i><b id="lab">${x.ready}</b></div><div class="cyc">${Array.from({length:N},(_,i)=>`<u class="${i<cyc?'d':''}"></u>`).join('')}</div><div style="height:16px"></div></div>
+    <p class="rxdone"><button class="btn ghost" id="stop">${x.stop}</button></p></div>`;
+    $('#stop',root).onclick=finish;
+  }
+  function step(phase){
+    if(st!=='run')return;
+    const o=$('#orb',root),lab=$('#lab',root);if(!o)return;
+    const x=T[L()];o.className=phase;lab.textContent=x[phase];
+    const next={in:['hold',4000],hold:['out',4000],out:['in',6000]}[phase];
+    tm=setTimeout(()=>{
+      if(phase==='out'){cyc++;draw();if(cyc>=N){finish();return}}
+      if(!rxActive(root)){const w=setInterval(()=>{if(rxActive(root)||st!=='run'){clearInterval(w);step(next[0])}},400);return}
+      step(next[0]);
+    },phase==='hold'?4000:phase==='in'?4000:6000);
+  }
+  function run(){st='run';cyc=0;draw();clearTimeout(tm);tm=setTimeout(()=>step('in'),800)}
+  function finish(){clearTimeout(tm);st=cyc>0?'end':'idle';draw();if(cyc>0)api.finish(0,{'Дыхание':cyc+' циклов'})}
+  api.persist(()=>({r:res}),s=>{});
+  api.onLang(()=>{if(st==='run'){const lab=$('#lab',root),o=$('#orb',root);if(lab&&o&&o.className)lab.textContent=T[L()][o.className]}else draw()});draw();
+}});
+
+/* ── 421 · НАЛЕЙ ЧАЙ ── */
+MODS.push({id:'tea',no:'421',min:3,max:0,title:{ru:'Налей чай',kk:'Шай құйыңыз'},sub:{ru:'Тихая точность',kk:'Тыныш дәлдік'},
+mount(root,api){
+  const T={ru:{eb:'Номер 421 · разгрузка',h:'Налей чай гостю',intro:'Удерживайте кнопку, чтобы лить, и отпустите у отметки. В казахской традиции гостю чай наливают на треть или наполовину пиалы: так можно часто подливать. Баллов нет, это пауза.',start:'Начать',pour:'Держите, чтобы лить',target:'Налить до отметки',round:'Пиала',next:'Следующая',res:'Итог',off:'в среднем промах',again:'Ещё раз',spill:'Пролили! Попробуйте мягче.',great:'Точно!',ok:'Хорошо',bit:'Чуть мимо'},
+   kk:{eb:'421 нөмір · демалыс',h:'Қонаққа шай құйыңыз',intro:'Құю үшін батырманы басып тұрыңыз, белгіге жеткенде жіберіңіз. Қазақ дәстүрінде қонаққа шайды тостағанның үштен бір не жартысына дейін құяды: оны жиі құйып отыруға болады. Ұпай жоқ, бұл үзіліс.',start:'Бастау',pour:'Құю үшін басып тұрыңыз',target:'Белгіге дейін құйыңыз',round:'Тостаған',next:'Келесі',res:'Қорытынды',off:'орташа қателік',again:'Тағы бір рет',spill:'Төгілді! Жұмсағырақ көріңіз.',great:'Дәл!',ok:'Жақсы',bit:'Сәл қате'}};
+  const R=api.rng();
+  const goals=[.5,.33,.5,.66,.4];
+  let st='idle',idx=0,lvl=0,res=[],pouring=false,raf=0,last=0,over=false,fin=false;
+  const L=()=>api.lang();
+  function cup(){
+    return `<svg viewBox="0 0 300 300" id="svg"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#c2561c"/></linearGradient></defs>
+    <g transform="translate(150,40)"><path d="M-60 0 Q-60 -34 0 -34 Q60 -34 60 0 L52 36 Q0 46 -52 36Z" fill="#7c5cff" stroke="#c6b8ff" stroke-width="3"/><path d="M52 6 Q92 -4 78 26 L56 30" fill="none" stroke="#c6b8ff" stroke-width="5"/><path d="M-60 6 Q-92 -6 -92 20" fill="none" stroke="#c6b8ff" stroke-width="5"/><ellipse cx="0" cy="-34" rx="14" ry="6" fill="#c6b8ff"/></g>
+    <rect id="strm" x="143" y="86" width="6" height="0" rx="3" fill="url(#tg)" opacity=".9"/>
+    <clipPath id="cc"><path d="M60 180 L240 180 L218 270 Q150 290 82 270Z"/></clipPath>
+    <rect id="liq" x="40" y="270" width="220" height="0" fill="url(#tg)" clip-path="url(#cc)"/>
+    <path d="M60 180 L240 180 L218 270 Q150 290 82 270Z" fill="none" stroke="#e9e4ff" stroke-width="5"/>
+    <line id="mark" x1="52" x2="248" y1="0" y2="0" stroke="#c6ff3d" stroke-width="3" stroke-dasharray="8 6"/>
+    <ellipse id="spill" cx="150" cy="292" rx="0" ry="5" fill="#c2561c" opacity=".7"/></svg>`;
+  }
+  const Y0=270,Y1=180;
+  const yOf=l=>Y0-(Y0-Y1)*l;
+  function draw(){
+    const x=T[L()];
+    if(st==='idle'){root.innerHTML=`<div class="g-rx g-tea"><div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p><p><button class="btn sun" id="go">${x.start}</button></p></div>`;$('#go',root).onclick=()=>{st='run';idx=0;res=[];round()};return}
+    if(st==='end'){
+      const avg=Math.round(100*res.reduce((a,r)=>a+Math.abs(r.l-r.g),0)/res.length);
+      root.innerHTML=`<div class="g-rx g-tea"><div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><div class="note ok"><div class="mini">${x.res}</div><p>${x.off}: ${avg}%</p><ul class="crit">${res.map((r,i)=>`<li class="${Math.abs(r.l-r.g)<=.06?'ok':''}"><span>${x.round} ${i+1}: ${r.spill?x.spill:Math.round(r.l*100)+'% / '+Math.round(r.g*100)+'%'}</span></li>`).join('')}</ul></div><p class="rxdone"><button class="btn" id="go">${x.again}</button></p></div>`;
+      $('#go',root).onclick=()=>{st='run';idx=0;res=[];round()};return;
+    }
+    root.innerHTML=`<div class="g-rx g-tea"><div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><div class="rxbox">${cup()}</div><div class="rxsoft" style="margin-top:6px">${x.round} ${idx+1} / ${goals.length} · ${x.target}: ${Math.round(goals[idx]*100)}%</div><button class="btn sun pour" id="pr">${x.pour}</button><div id="msg" class="rxsoft" style="min-height:1.4em;margin-top:6px"></div></div>`;
+    const g=goals[idx];$('#mark',root).setAttribute('y1',yOf(g));$('#mark',root).setAttribute('y2',yOf(g));
+    upd();
+    const b=$('#pr',root);
+    const dn=e=>{e.preventDefault();if(fin)return;pouring=true;last=performance.now();loop()};
+    const up=()=>{if(!pouring)return;pouring=false;if(!fin)setTimeout(()=>judge(),120)};
+    b.addEventListener('pointerdown',dn);window.addEventListener('pointerup',up,{once:false,passive:true});b._up=up;
+    b.addEventListener('pointerleave',up);b.addEventListener('pointercancel',up);b.addEventListener('contextmenu',e=>e.preventDefault());
+  }
+  function upd(){
+    const liq=$('#liq',root),st2=$('#strm',root);if(!liq)return;
+    const y=yOf(Math.min(lvl,1.15)),h=Y0-y;liq.setAttribute('y',y);liq.setAttribute('height',Math.max(0,h+8));
+    st2.setAttribute('height',pouring?Math.max(0,y-86):0);
+    if(over){const s=$('#spill',root);s.setAttribute('rx',Math.min(120,(lvl-1)*700))}
+  }
+  function loop(){cancelAnimationFrame(raf);const f=t=>{if(!pouring)return;const dt=Math.min(.05,(t-last)/1000);last=t;lvl+=dt*(.28+lvl*.12);if(lvl>1.02){over=true}upd();if(lvl>1.1){pouring=false;judge(true);return}raf=requestAnimationFrame(f)};raf=requestAnimationFrame(f)}
+  function round(){lvl=0;over=false;fin=false;pouring=false;draw()}
+  function judge(spill){
+    if(fin)return;fin=true;pouring=false;cancelAnimationFrame(raf);upd();
+    const g=goals[idx],d=Math.abs(lvl-g);res.push({l:Math.min(lvl,1),g,spill:!!spill});
+    const x=T[L()];const m=$('#msg',root);if(m)m.textContent=spill?x.spill:d<=.04?x.great:d<=.1?x.ok:x.bit;
+    const pr=$('#pr',root);if(pr)pr.disabled=true;
+    setTimeout(()=>{idx++;if(idx>=goals.length){st='end';draw();const avg=Math.round(100*res.reduce((a,r)=>a+Math.abs(r.l-r.g),0)/res.length);api.finish(0,{'Налито':res.map(r=>Math.round(r.l*100)+'/'+Math.round(r.g*100)).join(', '),'Средний промах':avg+'%'})}else round()},1300);
+  }
+  api.onLang(()=>{if(st!=='run')draw();else{const x=T[L()],pr=$('#pr',root);if(pr)pr.textContent=x.pour}});draw();
+}});
+
+/* ── 431 · ОРНАМЕНТ ── */
+MODS.push({id:'ornament',no:'431',min:3,max:0,title:{ru:'Орнамент',kk:'Өрнек'},sub:{ru:'Раскрась узор',kk:'Өрнекті бояңыз'},
+mount(root,api){
+  const T={ru:{eb:'Номер 431 · разгрузка',h:'Казахский узор: раскрась',intro:'Выберите цвет и нажимайте на части узора. Режим «Симметрия» красит все 12 одинаковых частей сразу. Баллов нет, это пауза.',sym:'Симметрия',clear:'Очистить',rand:'Случайно',done:'Готово, отправить',sent:'Узор сохранён. Красиво!'},
+   kk:{eb:'431 нөмір · демалыс',h:'Қазақ өрнегі: бояңыз',intro:'Түсті таңдап, өрнектің бөліктерін басыңыз. «Симметрия» режимі 12 бірдей бөлікті бірден бояйды. Ұпай жоқ, бұл үзіліс.',sym:'Симметрия',clear:'Тазалау',rand:'Кездейсоқ',done:'Дайын, жіберу',sent:'Өрнек сақталды. Әдемі!'}};
+  const COL=['#ff7ab0','#ffcf3f','#3dffb0','#4b9bff','#c6ff3d','#ffffff','#ff8a3d'];
+  const SH=[ // ring, path (рисуется в секторе, смотрит вверх)
+   [1,'M0,-30 C14,-42 14,-64 0,-76 C-14,-64 -14,-42 0,-30Z'],
+   [2,'M0,-82 L11,-95 L0,-108 L-11,-95Z'],
+   [3,'M0,-112 C20,-112 28,-132 13,-139 C2,-143 -5,-133 3,-128 C8,-125 12,-130 8,-133 C6,-135 3,-133 4,-131 C-14,-126 -14,-112 0,-112Z'],
+   [4,'M-16,-146 L0,-134 L16,-146 L0,-156Z']];
+  const N=12;let pick=1,sym=true;const fill={};
+  const L=()=>api.lang();
+  function draw(){
+    const x=T[L()];
+    let svg=`<svg viewBox="-160 -160 320 320"><circle r="158" fill="#0f0830" stroke="#3b2a96"/><circle r="26" id="c0" class="sh" data-k="c"/>`;
+    for(let i=0;i<N;i++)SH.forEach(([r,d])=>{const k=r+'_'+i;svg+=`<path class="sh" data-r="${r}" data-i="${i}" d="${d}" transform="rotate(${i*30})" style="fill:${fill[k]||''}"/>`});
+    svg+='</svg>';
+    root.innerHTML=`<div class="g-rx g-or"><div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>${svg}
+    <div class="pal">${COL.map((c,i)=>`<button data-c="${i}" class="${pick===i?'on':''}" style="background:${c}"></button>`).join('')}</div>
+    <div class="rxrow" style="justify-content:center"><button class="chip ${sym?'sel':''}" id="sym">${x.sym}</button><button class="chip" id="clr">${x.clear}</button><button class="chip" id="rnd">${x.rand}</button><button class="btn sun" id="snd">${x.done}</button></div><div id="msg" class="rxsoft" style="text-align:center;margin-top:8px"></div></div>`;
+    const c0=$('#c0',root);if(fill.c)c0.style.fill=fill.c;
+    root.querySelectorAll('.sh').forEach(p=>p.onclick=()=>{
+      if(p.dataset.k==='c'){fill.c=COL[pick];p.style.fill=COL[pick];return}
+      const r=+p.dataset.r,i=+p.dataset.i;
+      const idx=sym?Array.from({length:N},(_,k)=>k):[i];
+      idx.forEach(k=>{fill[r+'_'+k]=COL[pick];const e=root.querySelector(`.sh[data-r="${r}"][data-i="${k}"]`);if(e)e.style.fill=COL[pick]});
+    });
+    root.querySelectorAll('.pal button').forEach(b=>b.onclick=()=>{pick=+b.dataset.c;root.querySelectorAll('.pal button').forEach(z=>z.classList.toggle('on',z===b))});
+    $('#sym',root).onclick=e=>{sym=!sym;e.currentTarget.classList.toggle('sel',sym)};
+    $('#clr',root).onclick=()=>{Object.keys(fill).forEach(k=>delete fill[k]);draw()};
+    $('#rnd',root).onclick=()=>{for(let r=1;r<=4;r++){const c=Math.floor(Math.random()*COL.length);for(let i=0;i<N;i++)fill[r+'_'+i]=COL[(c+(i%2?1:0))%COL.length]}fill.c=COL[Math.floor(Math.random()*COL.length)];draw()};
+    $('#snd',root).onclick=()=>{$('#msg',root).textContent=x.sent;api.finish(0,{'Узор':'раскрашено '+Object.keys(fill).length+' частей'})};
+  }
+  api.onLang(draw);draw();
+}});
+
+/* ── 441 · ПУЗЫРЬКИ ── */
+MODS.push({id:'bubbles',no:'441',min:2,max:0,title:{ru:'Пузырьки',kk:'Көпіршіктер'},sub:{ru:'Лопай и отдыхай',kk:'Жарып, демалыңыз'},
+mount(root,api){
+  const T={ru:{eb:'Номер 441 · разгрузка',h:'Пузырьки',intro:'Лопайте пузырьки пальцем. Без времени, без очков, просто выдохните. Когда захотите, нажмите «Закончить».',start:'Начать',end:'Закончить',again:'Ещё',res:'Лопнуло пузырьков'},
+   kk:{eb:'441 нөмір · демалыс',h:'Көпіршіктер',intro:'Көпіршіктерді саусағыңызбен жарыңыз. Уақытсыз, ұпайсыз, жай ғана демалыңыз. Қаласаңыз, «Аяқтау» батырмасын басыңыз.',start:'Бастау',end:'Аяқтау',again:'Тағы',res:'Жарылған көпіршіктер'}};
+  let st='idle',n=0,tm=null,ac=null;
+  const L=()=>api.lang();
+  function beep(size){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=900-size*6+Math.random()*120;g.gain.setValueAtTime(.08,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.18);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+.2)}catch(e){}}
+  function draw(){
+    const x=T[L()];
+    if(st==='idle'||st==='end'){root.innerHTML=`<div class="g-rx g-bb"><div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><p class="intro">${x.intro}</p>${st==='end'?`<div class="note ok"><div class="mini">${x.res}</div><b class="verdict">${n}</b></div>`:''}<p class="rxdone"><button class="btn sun" id="go">${st==='end'?x.again:x.start}</button></p></div>`;$('#go',root).onclick=run;return}
+    root.innerHTML=`<div class="g-rx g-bb"><div class="eyebrow">${x.eb}</div><h2>${x.h}</h2><div class="rxbox"><div class="cnt" id="cnt">${n}</div><div class="sky" id="sky"></div></div><p class="rxdone"><button class="btn ghost" id="stop">${x.end}</button></p></div>`;
+    $('#stop',root).onclick=finish;
+  }
+  function spawn(){
+    if(!rxActive(root))return;const sky=$('#sky',root);if(!sky)return;
+    const w=sky.clientWidth||320,size=34+Math.random()*58,left=Math.random()*(w-size),hue=Math.floor(Math.random()*360),dur=7+Math.random()*5;
+    const b=document.createElement('div');b.className='bub';b.style.cssText=`width:${size}px;height:${size}px;left:${left}px;--c:hsl(${hue} 90% 65%);--dx:${(Math.random()-.5)*80}px;animation-duration:${dur}s`;
+    const pop=e=>{e.preventDefault();if(b.classList.contains('pop'))return;b.classList.add('pop');n++;const c=$('#cnt',root);if(c)c.textContent=n;beep(size);
+      const r=b.getBoundingClientRect(),s=sky.getBoundingClientRect();
+      for(let k=0;k<7;k++){const d=document.createElement('i');d.className='dot';d.style.background=`hsl(${hue} 90% 70%)`;d.style.left=(r.left-s.left+r.width/2)+'px';d.style.top=(r.top-s.top+r.height/2)+'px';sky.appendChild(d);const a=Math.PI*2*k/7;d.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${Math.cos(a)*size*.8}px,${Math.sin(a)*size*.8}px)`,opacity:0}],{duration:420}).onfinish=()=>d.remove()}
+      setTimeout(()=>b.remove(),300)};
+    b.addEventListener('pointerdown',pop);b.addEventListener('animationend',e=>{if(e.animationName==='bbRise')b.remove()});sky.appendChild(b);
+  }
+  function run(){st='run';n=0;draw();clearInterval(tm);for(let i=0;i<4;i++)setTimeout(spawn,i*250);tm=setInterval(spawn,650)}
+  function finish(){clearInterval(tm);st='end';draw();api.finish(0,{'Лопнуло пузырьков':n})}
+  api.onLang(()=>{if(st!=='run')draw();else{const sb=$('#stop',root);if(sb)sb.textContent=T[L()].end}});draw();
 }});
 
 /* ═════════ 909 · РЕФЛЕКСИЯ ═════════ */
